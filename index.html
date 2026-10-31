@@ -272,7 +272,7 @@
         let currentSpecType = 'small';
         let currentOption = '';
         let isStoreOpen = true;
-        let orderMode = 'asap'; // 'asap' 尽快取餐, 'reserve' 预约单
+        let orderMode = 'asap';
 
         async function fetchCloudConfig() {
             try {
@@ -345,16 +345,15 @@
             }
         }
 
-        // 生成15分钟节点预约时间选项（最早下单后20分钟，四舍五入到15分钟节点，最晚不超过当日营业时间结束）
         function generateTimeOptions() {
             const select = document.getElementById('pickup-time-select');
             select.innerHTML = '';
 
             const now = new Date();
-            let targetTimeMs = now.getTime() + 20 * 60 * 1000; // 下单后至少20分钟
+            let targetTimeMs = now.getTime() + 20 * 60 * 1000;
             let targetDate = new Date(targetTimeMs);
             let mins = targetDate.getMinutes();
-            let roundedMins = Math.round(mins / 15) * 15; // 改为15分钟节点四舍五入
+            let roundedMins = Math.round(mins / 15) * 15;
             targetDate.setMinutes(roundedMins);
             targetDate.setSeconds(0);
 
@@ -372,7 +371,7 @@
                 let timeStr = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
                 optionsHtml += `<option value="${timeStr}">预约 ${timeStr} 取餐</option>`;
 
-                tempDate.setMinutes(tempDate.getMinutes() + 15); // 每次递增15分钟
+                tempDate.setMinutes(tempDate.getMinutes() + 15);
                 if (tempDate.getHours() > endH + 2) break;
             }
 
