@@ -10,6 +10,7 @@
         
         #app { width: 100%; max-width: 480px; background-color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; position: relative; padding-bottom: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
+        /* PC 端专业大屏三栏式布局适配 */
         @media (min-width: 1024px) {
             #app { max-width: 1440px; border-radius: 12px; margin: 16px auto; min-height: calc(100vh - 32px); }
             .pc-workspace { display: grid; grid-template-columns: 320px 1fr 340px; gap: 16px; padding: 16px; flex: 1; align-items: start; height: calc(100vh - 110px); overflow: hidden; }
@@ -67,7 +68,7 @@
 
         <header>
             <div class="header-brand">
-                <img src="https://i.imgs.ovh/2026/10/31/bb2fabef06a8d6f0c5870e2c7d0be375.png" alt="Logo" class="header-logo">
+                <img src="https://i.imgs.ovh/2026/10/31/3aa5068a33d19dddd0105e395ab88b74.png" alt="Logo" class="header-logo">
                 <span class="header-title-text">订单管理系统</span>
             </div>
             <div class="nav-buttons">
@@ -102,15 +103,15 @@
                     <h3>快捷操作面板</h3>
                     <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
                         <button onclick="openSettlementModal()" class="btn-primary" style="background: #059669; padding: 9px;">查看当日完整结算报表</button>
-                        <button id="refresh-btn" class="btn-primary" style="background: #4b5563; padding: 9px;">刷新全部订单</button>
+                        <button id="refresh-btn" class="btn-primary" style="background: #4b5563; padding: 9px;">立即刷新全部订单</button>
                     </div>
                 </div>
             </div>
 
             <div class="pc-col-middle content-box" style="padding: 16px; background: #fff; height: 100%;">
                 <div style="font-size: 14px; font-weight: bold; color: #111827; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">
-                    <span>全部订单流水与预约单大屏</span>
-                    <span style="font-size: 12px; color: #6b7280; font-weight: normal;">实时同步云端</span>
+                    <span>全部订单流水与预约单大屏 (每15秒自动刷新)</span>
+                    <span style="font-size: 12px; color: #059669; font-weight: bold;">自动同步中</span>
                 </div>
                 <div id="orders-list"></div>
             </div>
@@ -126,8 +127,8 @@
                 <div class="card" style="margin: 0; background: #f9fafb;">
                     <h3>系统使用提示</h3>
                     <p style="font-size: 12px; color: #4b5563; line-height: 1.5; margin-top: 6px;">
-                        1. 预约单卡片带有<strong>黄色醒目背景</strong>，实时单为普通白底卡片。<br>
-                        2. 确认接单后可打印小票。<br>
+                        1. 后台每隔 <strong>15 秒</strong>自动从云端拉取最新订单。<br>
+                        2. 预约单卡片带有<strong>黄色醒目背景</strong>。<br>
                         3. 点击一键休息后，顾客端将无法下单。
                     </p>
                 </div>
@@ -218,8 +219,6 @@
     <script>
         const BIN_ID = '6ae586c8ffd5d160539a6da4';
         const MASTER_KEY = '$2a$10$lwmZR3vIjsFdZlgG4.WReOJzFNBqHERsLquMbL42GY/BNEBveQ896';
-        
-        // 更新为指定的黑色字 Logo 图床链接
         const LOGO_URL = 'https://i.imgs.ovh/2026/10/31/3aa5068a33d19dddd0105e395ab88b74.png';
 
         let cloudData = {
@@ -285,7 +284,6 @@
                 updateStoreStatusUI();
             } catch (e) {
                 console.error(e);
-                alert('加载云端数据失败');
             }
         }
 
@@ -661,6 +659,9 @@
 
             document.getElementById('refresh-btn').onclick = loadCloudData;
             document.getElementById('save-time-btn').onclick = saveTimeControl;
+
+            // 核心：每隔15秒（15000毫秒）自动从云端静默刷新一次订单状态
+            setInterval(loadCloudData, 15000);
         };
     </script>
 </body>
