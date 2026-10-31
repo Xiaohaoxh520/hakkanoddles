@@ -27,7 +27,6 @@
         
         .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; }
 
-        /* 小票打印专用样式：平时隐藏，打印时只显示小票内容 */
         #print-ticket { display: none; }
         @media print {
             body * { visibility: hidden; }
@@ -44,35 +43,35 @@
                 <h2 style="font-size: 15px; font-weight: bold; text-align: center;">🔐 商家后台登录</h2>
                 <div>
                     <label style="font-size: 11px; font-weight: bold;">账号：</label>
-                    <input id="login-user" type="text" placeholder="admin" class="input-box">
+                    <input id="login-user" type="text" placeholder="admin" class="input-box" value="admin">
                 </div>
                 <div>
                     <label style="font-size: 11px; font-weight: bold;">密码：</label>
-                    <input id="login-pass" type="password" placeholder="123456" class="input-box">
+                    <input id="login-pass" type="password" placeholder="123456" class="input-box" value="123456">
                 </div>
-                <button onclick="handleLogin()" class="btn-primary" style="margin-top: 6px;">登录后台</button>
+                <button id="login-btn" class="btn-primary" style="margin-top: 6px;">登录后台</button>
             </div>
         </div>
 
         <header>
             <h1>📈 商家OA管理系统</h1>
             <div class="nav-buttons">
-                <button onclick="exportOrdersCSV()" class="nav-btn" style="background:#059669;">📊 导出</button>
-                <button onclick="syncToCloud()" class="nav-btn">💾 保存</button>
-                <button onclick="logout()" class="nav-btn" style="background:#dc2626;">退出</button>
+                <button id="export-btn" class="nav-btn" style="background:#059669;">📊 导出</button>
+                <button id="save-btn" class="nav-btn">💾 保存</button>
+                <button id="logout-btn" class="nav-btn" style="background:#dc2626;">退出</button>
             </div>
         </header>
 
         <div class="tab-bar">
-            <div id="tab-orders" onclick="switchTab('orders')" class="tab-item active">📋 实时订单 (流水)</div>
-            <div id="tab-control" onclick="switchTab('control')" class="tab-item">⚙️ 营业与库存</div>
+            <div id="tab-orders" class="tab-item active">📋 实时订单 (流水)</div>
+            <div id="tab-control" class="tab-item">⚙️ 营业与库存</div>
         </div>
 
         <!-- 1. 实时订单看板 -->
         <div id="panel-orders" class="content-box">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div style="font-size: 12px; color: #6b7280;" id="stats-text">加载中...</div>
-                <button onclick="loadCloudData()" class="nav-btn">🔄 实时刷新</button>
+                <button id="refresh-btn" class="nav-btn">🔄 实时刷新</button>
             </div>
             <div id="orders-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
         </div>
@@ -91,7 +90,7 @@
                         <input id="time-end" type="time" class="input-box" value="21:00">
                     </div>
                 </div>
-                <button onclick="saveTimeControl()" class="btn-primary" style="margin-top: 10px;">保存营业时间设置</button>
+                <button id="save-time-btn" class="btn-primary" style="margin-top: 10px;">保存营业时间设置</button>
             </div>
 
             <div class="card">
@@ -102,14 +101,11 @@
         </div>
     </div>
 
-    <!-- 隐藏的小票打印模板容器 -->
     <div id="print-ticket"></div>
 
     <script>
         const BIN_ID = '6ae586c8ffd5d160539a6da4';
         const MASTER_KEY = '$2a$10$lwmZR3vIjsFdZlgG4.WReOJzFNBqHERsLquMbL42GY/BNEBveQ896';
-        
-        // 你的最新 Logo 图片直链
         const LOGO_URL = 'https://i.imgs.ovh/2026/10/31/3aa5068a33d19dddd0105e395ab88b74.png';
 
         let cloudData = {
@@ -135,7 +131,7 @@
                 document.getElementById('login-modal').style.display = 'none';
                 loadCloudData();
             } else {
-                alert('账号或密码错误！');
+                alert('账号或密码错误！(默认: admin / 123456)');
             }
         }
 
@@ -259,7 +255,6 @@
             }
         }
 
-        // 小票打印功能（使用你提供的 Logo 图片）
         function printTicket(orderId) {
             const order = cloudData.orders.find(o => o.id === orderId);
             if (!order) return;
@@ -334,11 +329,31 @@
             `).join('');
         }
 
+        // 安全绑定所有交互事件
         window.onload = function() {
             if (localStorage.getItem('admin_logged') === 'true') {
                 document.getElementById('login-modal').style.display = 'none';
                 loadCloudData();
             }
+
+            // 绑定登录按钮
+            document.getElementById('login-btn').onclick = handleLogin;
+            document.getElementById('login-pass').onkeydown = function(e) {
+                if (e.key === 'Enter') handleLogin();
+            };
+
+            // 绑定顶部导航
+            document.getElementById('export-btn').onclick = exportOrdersCSV;
+            document.getElementById('save-btn').onclick = syncToCloud;
+            document.getElementById('logout-btn').onclick = logout;
+
+            // 绑定 Tab 切换
+            document.getElementById('tab-orders').onclick = () => switchTab('orders');
+            document.getElementById('tab-control').onclick = () => switchTab('control');
+
+            // 绑定其他按钮
+            document.getElementById('refresh-btn').onclick = loadCloudData;
+            document.getElementById('save-time-btn').onclick = saveTimeControl;
         };
     </script>
 </body>
