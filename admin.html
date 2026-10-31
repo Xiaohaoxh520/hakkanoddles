@@ -68,7 +68,8 @@
 
         <header>
             <div class="header-brand">
-                <img src="https://i.imgs.ovh/2026/10/31/3aa5068a33d19dddd0105e395ab88b74.png" alt="Logo" class="header-logo">
+                <!-- 恢复为带色彩和立体感的原版 Logo -->
+                <img src="https://i.imgs.ovh/2026/10/31/bb2fabef06a8d6f0c5870e2c7d0be375.png" alt="Logo" class="header-logo">
                 <span class="header-title-text">订单管理系统</span>
             </div>
             <div class="nav-buttons">
@@ -219,7 +220,9 @@
     <script>
         const BIN_ID = '6ae586c8ffd5d160539a6da4';
         const MASTER_KEY = '$2a$10$lwmZR3vIjsFdZlgG4.WReOJzFNBqHERsLquMbL42GY/BNEBveQ896';
-        const LOGO_URL = 'https://i.imgs.ovh/2026/10/31/3aa5068a33d19dddd0105e395ab88b74.png';
+        
+        // 彩色带质感的原版 Logo 链接
+        const LOGO_URL = 'https://i.imgs.ovh/2026/10/31/bb2fabef06a8d6f0c5870e2c7d0be375.png';
 
         let cloudData = {
             orders: [],
@@ -660,7 +663,7 @@
             document.getElementById('refresh-btn').onclick = loadCloudData;
             document.getElementById('save-time-btn').onclick = saveTimeControl;
 
-            // 核心：每隔15秒（15000毫秒）自动从云端静默刷新一次订单状态
+            // 每隔15秒自动从云端静默刷新一次
             setInterval(loadCloudData, 15000);
         };
     </script>
