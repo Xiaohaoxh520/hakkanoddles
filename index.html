@@ -71,7 +71,7 @@
         </header>
 
         <div id="status-notice" class="notice">
-            提示：线上点单暂时只支持到店自提，默认加收 <strong>1元打包费</strong>。<br>
+            提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>
             营业时间：加载中...
         </div>
 
@@ -175,7 +175,7 @@
                 <div style="color: #b45309; font-weight: bold; font-size: 13px;">客家腌面 · 微信收银台</div>
                 <div id="pay-amount" style="font-size: 24px; font-weight: black; color: #111827;">￥1.00</div>
 
-                <!-- 取餐方式双按钮选择：默认尽快取餐，或选择预约时间 -->
+                <!-- 取餐方式双按钮选择 -->
                 <div style="text-align: left; background: #fffbeb; padding: 10px; border-radius: 8px; border: 1px solid #fde68a;">
                     <label style="font-size: 11px; font-weight: bold; color: #78350f; display: block; margin-bottom: 6px;">选择取餐方式：</label>
                     <div style="display: flex; gap: 8px; margin-bottom: 8px;">
@@ -183,9 +183,9 @@
                         <button type="button" id="btn-reserve" onclick="setOrderMode('reserve')" style="flex: 1; padding: 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; border: 1px solid #d1d5db; background: #f3f4f6; color: #374151;">预约取餐时间</button>
                     </div>
 
-                    <!-- 预约时间下拉框（默认隐藏，点击预约按钮后展开） -->
+                    <!-- 预约时间下拉框（15分钟/节） -->
                     <div id="reserve-time-box" style="display: none; margin-top: 6px;">
-                        <label style="font-size: 10px; color: #78350f; display: block; margin-bottom: 2px;">请选择预约时间 (10分钟/节)：</label>
+                        <label style="font-size: 10px; color: #78350f; display: block; margin-bottom: 2px;">请选择预约时间 (15分钟/节)：</label>
                         <select id="pickup-time-select" class="input-box" style="background: #fff; font-weight: bold; color: #b45309;"></select>
                     </div>
                 </div>
@@ -304,18 +304,17 @@
 
             if (currentHourMin < startTime || currentHourMin > endTime) {
                 isStoreOpen = false;
-                noticeEl.innerHTML = `本店已打烊 (营业时间: ${startTime} ~ ${endTime})，当前无法下单！`;
+                noticeEl.innerHTML = `本店已打烊 (营业时间: ${startTime} ~${endTime})，当前无法下单！`;
                 noticeEl.style.backgroundColor = '#fee2e2';
                 noticeEl.style.color = '#991b1b';
             } else {
                 isStoreOpen = true;
-                noticeEl.innerHTML = `提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>营业时间：${startTime} ~ ${endTime}`;
+                noticeEl.innerHTML = `提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>营业时间：${startTime} ~${endTime}`;
                 noticeEl.style.backgroundColor = '#fef3c7';
                 noticeEl.style.color = '#78350f';
             }
         }
 
-        // 切换取餐模式按钮：尽快取餐 vs 预约取餐
         function setOrderMode(mode) {
             orderMode = mode;
             const btnAsap = document.getElementById('btn-asap');
@@ -346,7 +345,7 @@
             }
         }
 
-        // 生成10分钟节点预约时间选项
+        // 生成15分钟节点预约时间选项（最早下单后20分钟，四舍五入到15分钟节点，最晚不超过当日营业时间结束）
         function generateTimeOptions() {
             const select = document.getElementById('pickup-time-select');
             select.innerHTML = '';
@@ -355,7 +354,7 @@
             let targetTimeMs = now.getTime() + 20 * 60 * 1000; // 下单后至少20分钟
             let targetDate = new Date(targetTimeMs);
             let mins = targetDate.getMinutes();
-            let roundedMins = Math.round(mins / 10) * 10;
+            let roundedMins = Math.round(mins / 15) * 15; // 改为15分钟节点四舍五入
             targetDate.setMinutes(roundedMins);
             targetDate.setSeconds(0);
 
@@ -373,7 +372,7 @@
                 let timeStr = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
                 optionsHtml += `<option value="${timeStr}">预约 ${timeStr} 取餐</option>`;
 
-                tempDate.setMinutes(tempDate.getMinutes() + 10);
+                tempDate.setMinutes(tempDate.getMinutes() + 15); // 每次递增15分钟
                 if (tempDate.getHours() > endH + 2) break;
             }
 
@@ -480,103 +479,7 @@
             currentOption = opt;
             currentActiveItem.options.forEach(o => {
                 const el = document.getElementById(`opt-${o}`);
-                if (el) el.className = `option-btn ${o === opt ? 'active' : ''}`;
-            });
-            updateSpecModalDisplay();
-        }
-
-        function updateSpecModalDisplay() {
-            const price = currentSpecType === 'small' ? currentActiveItem.priceSmall : currentActiveItem.priceBig;
-            const sizeName = currentSpecType === 'small' ? '小份' : '大份';
-            const fullName = currentOption ? `${sizeName} (${currentOption})` : sizeName;
-            
-            document.getElementById('spec-selected-name').innerText = fullName;
-            document.getElementById('spec-selected-price').innerText = '￥' + price;
-        }
-
-        function closeSpecModal() {
-            document.getElementById('spec-modal').style.display = 'none';
-        }
-
-        function confirmAddToCart() {
-            const stock = cloudStocks[currentActiveItem.name] !== undefined ? cloudStocks[currentActiveItem.name] : 50;
-            const price = currentSpecType === 'small' ? currentActiveItem.priceSmall : currentActiveItem.priceBig;
-            const sizeName = currentSpecType === 'small' ? '小份' : '大份';
-            const fullName = currentOption ? `${sizeName} (${currentOption})` : sizeName;
-
-            const existing = cart.find(i => i.name === currentActiveItem.name && i.spec === fullName);
-            const currentCountInCart = existing ? existing.count : 0;
-
-            if (currentCountInCart + 1 > stock) {
-                alert('库存不足！');
-                return;
-            }
-
-            if (existing) {
-                existing.count++;
-            } else {
-                cart.push({
-                    name: currentActiveItem.name,
-                    spec: fullName,
-                    price: price,
-                    count: 1
-                });
-            }
-            closeSpecModal();
-            updateCartUI();
-        }
-
-        function addToCartDirect(index) {
-            if (!isStoreOpen) {
-                alert('当前不在营业时间内！');
-                return;
-            }
-            const item = menuData.soups[index];
-            const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 40;
-            if (stock <= 0) {
-                alert('已售罄！');
-                return;
-            }
-
-            const existing = cart.find(i => i.name === item.name && !i.spec);
-            const currentCountInCart = existing ? existing.count : 0;
-
-            if (currentCountInCart + 1 > stock) {
-                alert('库存不足！');
-                return;
-            }
-
-            if (existing) {
-                existing.count++;
-            } else {
-                cart.push({
-                    name: item.name,
-                    spec: '',
-                    price: item.price,
-                    count: 1
-                });
-            }
-            updateCartUI();
-        }
-
-        function updateCartUI() {
-            const totalCount = cart.reduce((s, i) => s + i.count, 0);
-            const goodsAmount = cart.reduce((s, i) => s + i.price * i.count, 0);
-            const finalAmount = goodsAmount > 0 ? goodsAmount + 1.0 : 0;
-
-            const badge = document.getElementById('cart-badge');
-            if (totalCount > 0) {
-                badge.innerText = totalCount;
-                badge.style.display = 'flex';
-            } else {
-                badge.style.display = 'none';
-            }
-
-            document.getElementById('cart-total').innerText = '￥' + goodsAmount;
-            const checkoutBtn = document.getElementById('checkout-btn');
-            if (goodsAmount > 0) {
-                checkoutBtn.disabled = false;
-                checkoutBtn.innerText = `去结算 (￥${finalAmount.toFixed(2)})`;
+                if (el) el.className = `option-btn ${o === opt ? 'active' : ''}`; }); updateSpecModalDisplay(); }  function updateSpecModalDisplay() { const price = currentSpecType === 'small' ? currentActiveItem.priceSmall : currentActiveItem.priceBig; const sizeName = currentSpecType === 'small' ? '小份' : '大份'; const fullName = currentOption ? `${sizeName} (${currentOption})` : sizeName;  document.getElementById('spec-selected-name').innerText = fullName; document.getElementById('spec-selected-price').innerText = '￥' + price; }  function closeSpecModal() { document.getElementById('spec-modal').style.display = 'none'; }  function confirmAddToCart() { const stock = cloudStocks[currentActiveItem.name] !== undefined ? cloudStocks[currentActiveItem.name] : 50; const price = currentSpecType === 'small' ? currentActiveItem.priceSmall : currentActiveItem.priceBig; const sizeName = currentSpecType === 'small' ? '小份' : '大份'; const fullName = currentOption ? `${sizeName} (${currentOption})` : sizeName;  const existing = cart.find(i => i.name === currentActiveItem.name && i.spec === fullName); const currentCountInCart = existing ? existing.count : 0;  if (currentCountInCart + 1 > stock) { alert('库存不足！'); return; }  if (existing) { existing.count++; } else { cart.push({ name: currentActiveItem.name, spec: fullName, price: price, count: 1 }); } closeSpecModal(); updateCartUI(); }  function addToCartDirect(index) { if (!isStoreOpen) { alert('当前不在营业时间内！'); return; } const item = menuData.soups[index]; const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 40; if (stock <= 0) { alert('已售罄！'); return; }  const existing = cart.find(i => i.name === item.name && !i.spec); const currentCountInCart = existing ? existing.count : 0;  if (currentCountInCart + 1 > stock) { alert('库存不足！'); return; }  if (existing) { existing.count++; } else { cart.push({ name: item.name, spec: '', price: item.price, count: 1 }); } updateCartUI(); }  function updateCartUI() { const totalCount = cart.reduce((s, i) => s + i.count, 0); const goodsAmount = cart.reduce((s, i) => s + i.price * i.count, 0); const finalAmount = goodsAmount > 0 ? goodsAmount + 1.0 : 0;  const badge = document.getElementById('cart-badge'); if (totalCount > 0) { badge.innerText = totalCount; badge.style.display = 'flex'; } else { badge.style.display = 'none'; }  document.getElementById('cart-total').innerText = '￥' + goodsAmount; const checkoutBtn = document.getElementById('checkout-btn'); if (goodsAmount > 0) { checkoutBtn.disabled = false; checkoutBtn.innerText = `去结算 (￥${finalAmount.toFixed(2)})`;
             } else {
                 checkoutBtn.disabled = true;
                 checkoutBtn.innerText = '去结算 (￥1.00)';
@@ -631,7 +534,6 @@
             document.getElementById('pay-amount').innerText = '￥' + finalAmount.toFixed(2);
             document.getElementById('pay-amount-tip').innerText = '￥' + finalAmount.toFixed(2);
             
-            // 默认选中尽快取餐模式
             setOrderMode('asap');
             document.getElementById('pay-modal').style.display = 'flex';
         }
@@ -647,25 +549,13 @@
                 return;
             }
 
-            // 如果选择了预约单，获取具体预约时间，否则为“尽快取餐”
             let pickupTime = '尽快取餐';
             if (orderMode === 'reserve') {
                 pickupTime = document.getElementById('pickup-time-select').value;
             }
 
             try {
-                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-                    headers: { 'X-Master-Key': MASTER_KEY }
-                });
-                const data = await res.json();
-                let remoteOrders = (data.record && data.record.orders) ? data.record.orders : [];
-                let remoteStocks = (data.record && data.record.stocks) ? data.record.stocks : {};
-                let remoteControl = (data.record && data.record.control) ? data.record.control : storeControl;
-
-                for (let item of cart) {
-                    let stock = remoteStocks[item.name] !== undefined ? remoteStocks[item.name] : 50;
-                    if (stock < item.count) {
-                        alert(`商品 [${item.name}] 库存不足，下单失败！`);
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { 'X-Master-Key': MASTER_KEY } }); const data = await res.json(); let remoteOrders = (data.record && data.record.orders) ? data.record.orders : []; let remoteStocks = (data.record && data.record.stocks) ? data.record.stocks : {}; let remoteControl = (data.record && data.record.control) ? data.record.control : storeControl;  for (let item of cart) { let stock = remoteStocks[item.name] !== undefined ? remoteStocks[item.name] : 50; if (stock < item.count) { alert(`商品 [${item.name}] 库存不足，下单失败！`);
                         return;
                     }
                     remoteStocks[item.name] = stock - item.count;
@@ -682,53 +572,12 @@
                     payType: 'wechat',
                     status: '待接单',
                     time: new Date().toLocaleTimeString(),
-                    pickupTime: pickupTime // 记录取餐方式与时间
+                    pickupTime: pickupTime
                 };
 
                 remoteOrders.unshift(newOrder);
 
-                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': MASTER_KEY
-                    },
-                    body: JSON.stringify({
-                        orders: remoteOrders,
-                        stocks: remoteStocks,
-                        control: remoteControl
-                    })
-                });
-
-                alert('订单已提交成功！请凭取餐电话到店自提。');
-                cart = [];
-                document.getElementById('customer-phone-input').value = '';
-                closePayModal();
-                updateCartUI();
-                fetchCloudConfig();
-            } catch (e) {
-                console.error(e);
-                alert('网络异常，请重试！');
-            }
-        }
-
-        function openQueryModal() {
-            document.getElementById('query-modal').style.display = 'flex';
-        }
-
-        function closeQueryModal() {
-            document.getElementById('query-modal').style.display = 'none';
-        }
-
-        async function searchOrders() {
-            const keyword = document.getElementById('search-phone-input').value.trim();
-            if (!keyword) {
-                alert('请输入手机号或尾号');
-                return;
-            }
-
-            try {
-                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY }, body: JSON.stringify({ orders: remoteOrders, stocks: remoteStocks, control: remoteControl }) });  alert('订单已提交成功！请凭取餐电话到店自提。'); cart = []; document.getElementById('customer-phone-input').value = ''; closePayModal(); updateCartUI(); fetchCloudConfig(); } catch (e) { console.error(e); alert('网络异常，请重试！'); } }  function openQueryModal() { document.getElementById('query-modal').style.display = 'flex'; }  function closeQueryModal() { document.getElementById('query-modal').style.display = 'none'; }  async function searchOrders() { const keyword = document.getElementById('search-phone-input').value.trim(); if (!keyword) { alert('请输入手机号或尾号'); return; }  try { const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
                     headers: { 'X-Master-Key': MASTER_KEY }
                 });
                 const data = await res.json();
@@ -770,46 +619,4 @@
                         <div class="step-container">
                             <div class="step-line"></div>
                             <div class="step-item ${step1Class}">
-                                <div class="step-circle">${step1Class === 'completed' ? '✓' : '1'}</div>
-                                <div class="step-text">已下单</div>
-                            </div>
-                            <div class="step-item ${step2Class}">
-                                <div class="step-circle">${step2Class === 'completed' ? '✓' : '2'}</div>
-                                <div class="step-text">已接单</div>
-                            </div>
-                            <div class="step-item ${step3Class}">
-                                <div class="step-circle">${step3Class === 'completed' ? '✓' : '3'}</div>
-                                <div class="step-text">已出餐</div>
-                            </div>
-                        </div>
-
-                        <div style="border-top: 1px solid #e5e7eb; padding-top: 6px;">
-                            ${order.items.map(i => `
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-                                    <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
-                                    <span>￥${i.price * i.count}</span>
-                                </div>
-                            `).join('')}
-                            <div style="display: flex; justify-content: space-between; color: #9ca3af;">
-                                <span>自提打包费</span><span>￥1.00</span>
-                            </div>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e5e7eb; padding-top: 6px; font-size: 12px;">
-                            <span style="color: #6b7280;">尾号: ${order.phone}</span>
-                            <span style="font-weight: bold; color: #b45309;">实付: ￥${order.total}</span>
-                        </div>
-                    </div>
-                `;}).join('');
-
-            } catch (e) {
-                console.error(e);
-                alert('查询失败，请检查网络');
-            }
-        }
-
-        window.onload = function() {
-            fetchCloudConfig();
-        };
-    </script>
-</body>
-</html>
+                                <div class="step-circle">${step1
