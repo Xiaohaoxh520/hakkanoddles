@@ -67,36 +67,36 @@
     <div id="app">
         <header>
             <img src="https://i.imgs.ovh/2026/10/31/bb2fabef06a8d6f0c5870e2c7d0be375.png" alt="客家腌面 Logo" class="header-logo">
-            <button onclick="openQueryModal()" class="query-btn">🔍 查询订单进度</button>
+            <button onclick="openQueryModal()" class="query-btn">查询订单进度</button>
         </header>
 
         <div id="status-notice" class="notice">
-            📢 提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>
-            ⏰ 营业时间：加载中...
+            提示：线上点单暂时只支持到店自提，默认加收 <strong>1元打包费</strong>。<br>
+            营业时间：加载中...
         </div>
 
         <div class="menu-container">
             <div>
                 <div class="section-title">
-                    <span>🌟 营养套餐系列</span>
+                    <span>营养套餐系列</span>
                     <span class="section-desc">(可选面/米粉/河粉/珍珠粉)</span>
                 </div>
                 <div id="combos-list"></div>
             </div>
 
             <div>
-                <div class="section-title"><span>🍜 主食系列</span></div>
+                <div class="section-title"><span>主食系列</span></div>
                 <div id="staples-list" class="item-grid-2"></div>
             </div>
 
             <div>
-                <div class="section-title"><span>🍲 靓汤系列</span></div>
+                <div class="section-title"><span>靓汤系列</span></div>
                 <div id="soups-list" class="item-grid-2"></div>
             </div>
 
             <div>
                 <div class="section-title">
-                    <span>🍜 汤粉汤面系列</span>
+                    <span>汤粉汤面系列</span>
                     <span class="section-desc">(面/米粉/河粉/珍珠粉)</span>
                 </div>
                 <div id="noodlessoups-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
@@ -167,7 +167,7 @@
             </div>
         </div>
 
-        <!-- 支付与预约弹窗 -->
+        <!-- 支付与取餐方式选择弹窗 -->
         <div id="pay-modal" class="modal-mask">
             <div class="modal-box" style="text-align: center;">
                 <button onclick="closePayModal()" class="close-x">✕</button>
@@ -175,10 +175,19 @@
                 <div style="color: #b45309; font-weight: bold; font-size: 13px;">客家腌面 · 微信收银台</div>
                 <div id="pay-amount" style="font-size: 24px; font-weight: black; color: #111827;">￥1.00</div>
 
-                <!-- 预约取餐时间选择 -->
+                <!-- 取餐方式双按钮选择：默认尽快取餐，或选择预约时间 -->
                 <div style="text-align: left; background: #fffbeb; padding: 10px; border-radius: 8px; border: 1px solid #fde68a;">
-                    <label style="font-size: 11px; font-weight: bold; color: #78350f; display: block; margin-bottom: 4px;">⏰ 选择预约取餐时间 (10分钟/节)：</label>
-                    <select id="pickup-time-select" class="input-box" style="background: #fff; font-weight: bold; color: #b45309;"></select>
+                    <label style="font-size: 11px; font-weight: bold; color: #78350f; display: block; margin-bottom: 6px;">选择取餐方式：</label>
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                        <button type="button" id="btn-asap" onclick="setOrderMode('asap')" style="flex: 1; padding: 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; border: 1px solid #b45309; background: #b45309; color: #fff;">默认尽快取餐</button>
+                        <button type="button" id="btn-reserve" onclick="setOrderMode('reserve')" style="flex: 1; padding: 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; border: 1px solid #d1d5db; background: #f3f4f6; color: #374151;">预约取餐时间</button>
+                    </div>
+
+                    <!-- 预约时间下拉框（默认隐藏，点击预约按钮后展开） -->
+                    <div id="reserve-time-box" style="display: none; margin-top: 6px;">
+                        <label style="font-size: 10px; color: #78350f; display: block; margin-bottom: 2px;">请选择预约时间 (10分钟/节)：</label>
+                        <select id="pickup-time-select" class="input-box" style="background: #fff; font-weight: bold; color: #b45309;"></select>
+                    </div>
                 </div>
 
                 <div style="background: #f9fafb; padding: 10px; border-radius: 12px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; align-items: center;">
@@ -195,7 +204,7 @@
                 </div>
 
                 <button onclick="submitOrder()" class="btn-primary" style="padding: 12px; font-size: 13px; border-radius: 10px; width: 100%;">
-                    我已付款，提交预约订单
+                    我已付款，提交订单
                 </button>
             </div>
         </div>
@@ -204,7 +213,7 @@
         <div id="query-modal" class="modal-mask">
             <div class="modal-box" style="max-height: 85vh;">
                 <button onclick="closeQueryModal()" class="close-x">✕</button>
-                <div style="color: #b45309; font-weight: bold; font-size: 13px; text-align: center;">🔍 自提订单进度查询</div>
+                <div style="color: #b45309; font-weight: bold; font-size: 13px; text-align: center;">自提订单进度查询</div>
                 
                 <div style="display: flex; gap: 8px;">
                     <input id="search-phone-input" type="text" placeholder="请输入手机尾号查询进度" class="input-box" style="flex: 1;">
@@ -263,6 +272,7 @@
         let currentSpecType = 'small';
         let currentOption = '';
         let isStoreOpen = true;
+        let orderMode = 'asap'; // 'asap' 尽快取餐, 'reserve' 预约单
 
         async function fetchCloudConfig() {
             try {
@@ -294,14 +304,45 @@
 
             if (currentHourMin < startTime || currentHourMin > endTime) {
                 isStoreOpen = false;
-                noticeEl.innerHTML = `🔴 <strong>本店已打烊</strong> (营业时间: ${startTime} ~ ${endTime})，当前无法下单！`;
+                noticeEl.innerHTML = `本店已打烊 (营业时间: ${startTime} ~ ${endTime})，当前无法下单！`;
                 noticeEl.style.backgroundColor = '#fee2e2';
                 noticeEl.style.color = '#991b1b';
             } else {
                 isStoreOpen = true;
-                noticeEl.innerHTML = `📢 提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>⏰ 营业时间：${startTime} ~ ${endTime}`;
+                noticeEl.innerHTML = `提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>营业时间：${startTime} ~ ${endTime}`;
                 noticeEl.style.backgroundColor = '#fef3c7';
                 noticeEl.style.color = '#78350f';
+            }
+        }
+
+        // 切换取餐模式按钮：尽快取餐 vs 预约取餐
+        function setOrderMode(mode) {
+            orderMode = mode;
+            const btnAsap = document.getElementById('btn-asap');
+            const btnReserve = document.getElementById('btn-reserve');
+            const reserveBox = document.getElementById('reserve-time-box');
+
+            if (mode === 'asap') {
+                btnAsap.style.background = '#b45309';
+                btnAsap.style.color = '#fff';
+                btnAsap.style.borderColor = '#b45309';
+
+                btnReserve.style.background = '#f3f4f6';
+                btnReserve.style.color = '#374151';
+                btnReserve.style.borderColor = '#d1d5db';
+
+                reserveBox.style.display = 'none';
+            } else {
+                btnReserve.style.background = '#b45309';
+                btnReserve.style.color = '#fff';
+                btnReserve.style.borderColor = '#b45309';
+
+                btnAsap.style.background = '#f3f4f6';
+                btnAsap.style.color = '#374151';
+                btnAsap.style.borderColor = '#d1d5db';
+
+                reserveBox.style.display = 'block';
+                generateTimeOptions();
             }
         }
 
@@ -311,43 +352,28 @@
             select.innerHTML = '';
 
             const now = new Date();
-            // 计算下单后20分钟，并进行10分钟节点四舍五入
-            let targetTimeMs = now.getTime() + 20 * 60 * 1000;
+            let targetTimeMs = now.getTime() + 20 * 60 * 1000; // 下单后至少20分钟
             let targetDate = new Date(targetTimeMs);
             let mins = targetDate.getMinutes();
             let roundedMins = Math.round(mins / 10) * 10;
             targetDate.setMinutes(roundedMins);
             targetDate.setSeconds(0);
 
-            let startHour = targetDate.getHours();
-            let startMin = targetDate.getMinutes();
-
             const endTimeStr = storeControl.end || '21:00';
             const [endH, endM] = endTimeStr.split(':').map(Number);
 
             let optionsHtml = '';
-            let curH = startHour;
-            let curM = startMin;
-
-            while (curH < endH || (curH === endH && curM <= endM)) {
-                let timeStr = String(curH).padStart(2, '0') + ':' + String(curM).padStart(2, '0');
-                optionsHtml += `<option value="${timeStr}">尽快取餐 (约 ${timeStr})</option>`;
-                break; // 默认提供第一个合理计算的时间作为首选，之后以10分钟递增
-            }
-
-            // 补充后续10分钟节点的预约时间段
             let tempDate = new Date(targetDate.getTime());
-            // 如果计算出来的时间已经过了当前10分钟，往后推
+
             while (true) {
                 let h = tempDate.getHours();
                 let m = tempDate.getMinutes();
                 if (h > endH || (h === endH && m > endM)) break;
 
                 let timeStr = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
-                optionsHtml += `<option value="${timeStr}">${timeStr} 左右取餐</option>`;
+                optionsHtml += `<option value="${timeStr}">预约 ${timeStr} 取餐</option>`;
 
                 tempDate.setMinutes(tempDate.getMinutes() + 10);
-                // 防止死循环限制最多生成24个时间段
                 if (tempDate.getHours() > endH + 2) break;
             }
 
@@ -605,8 +631,8 @@
             document.getElementById('pay-amount').innerText = '￥' + finalAmount.toFixed(2);
             document.getElementById('pay-amount-tip').innerText = '￥' + finalAmount.toFixed(2);
             
-            // 生成可选预约时间段
-            generateTimeOptions();
+            // 默认选中尽快取餐模式
+            setOrderMode('asap');
             document.getElementById('pay-modal').style.display = 'flex';
         }
 
@@ -621,7 +647,11 @@
                 return;
             }
 
-            const pickupTime = document.getElementById('pickup-time-select').value;
+            // 如果选择了预约单，获取具体预约时间，否则为“尽快取餐”
+            let pickupTime = '尽快取餐';
+            if (orderMode === 'reserve') {
+                pickupTime = document.getElementById('pickup-time-select').value;
+            }
 
             try {
                 const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
@@ -652,7 +682,7 @@
                     payType: 'wechat',
                     status: '待接单',
                     time: new Date().toLocaleTimeString(),
-                    pickupTime: pickupTime // 保存预约取餐时间
+                    pickupTime: pickupTime // 记录取餐方式与时间
                 };
 
                 remoteOrders.unshift(newOrder);
@@ -670,7 +700,7 @@
                     })
                 });
 
-                alert('预约订单已提交成功！请凭取餐电话到店自提。');
+                alert('订单已提交成功！请凭取餐电话到店自提。');
                 cart = [];
                 document.getElementById('customer-phone-input').value = '';
                 closePayModal();
@@ -734,7 +764,7 @@
                     <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #f9fafb; font-size: 11px; display: flex; flex-direction: column; gap: 8px;">
                         <div style="display: flex; justify-content: space-between; font-weight: bold; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px;">
                             <span>单号: ${order.id}</span>
-                            <span style="color: #b45309;">预约时间: ${order.pickupTime || '尽快取餐'}</span>
+                            <span style="color: #b45309;">取餐: ${order.pickupTime || '尽快取餐'}</span>
                         </div>
 
                         <div class="step-container">
