@@ -21,13 +21,14 @@
         
         .item-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 10px; }
         .item-info h3 { font-size: 14px; font-weight: bold; color: #111827; }
-        .item-info p { font-size: 11px; color: #4b5563; margin-top: 4px; }
+        .item-info p { font-size: 11px; color: #6b7280; margin-top: 4px; }
         
         .item-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .grid-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         
         .btn-primary { background-color: #b45309; color: #ffffff; border: none; padding: 7px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; }
         .btn-primary:active { background-color: #92400e; }
+        .btn-soldout { background-color: #9ca3af !important; color: #ffffff !important; cursor: not-allowed !important; }
         .btn-price { font-size: 13px; font-weight: bold; color: #b45309; }
         
         .footer-cart { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: #ffffff; border-top: 1px solid #e5e7eb; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 20; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
@@ -60,7 +61,7 @@
             <button onclick="openQueryModal()" class="query-btn">🔍 查询订单</button>
         </header>
 
-        <div class="notice">
+        <div id="status-notice" class="notice">
             📢 提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。
         </div>
 
@@ -169,7 +170,7 @@
                     <img src="https://i.imgs.ovh/2026/10/31/a6be456b2a8b66f025967f7d2004f9b4.png" alt="微信收款码" style="width: 130px; height: 130px; object-fit: contain; background: #fff; padding: 4px; border-radius: 6px; border: 1px solid #e5e7eb; margin-bottom: 8px;">
                     <span style="font-size: 11px; color: #4b5563; line-height: 1.4;">
                         请长按或扫描二维码转账 <strong id="pay-amount-tip" style="color: #b45309; font-size: 12px;">￥1.00</strong><br>
-                        <span style="color: #d97706; font-size: 10px;">若无法识别二维码，您可截图保存后付款。付款后商家后台将进行确认核销，届时您可在首页订单中输入尾号查询</span>
+                        <span style="color: #d97706; font-size: 10px;">若无法识别截图保存后付款。付款后商家后台将进行确认核销，届时您可在首页订单中输入尾号查询</span>
                     </span>
                 </div>
 
@@ -240,61 +241,130 @@
             ]
         };
 
+        let cloudStocks = {};
+        let storeControl = { start: '08:00', end: '21:00' };
         let cart = [];
         let currentActiveItem = null;
         let currentSpecType = 'small';
         let currentOption = '';
+        let isStoreOpen = true;
+
+        async function fetchCloudConfig() {
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': MASTER_KEY }
+                });
+                const data = await res.json();
+                if (data.record) {
+                    cloudStocks = data.record.stocks || {};
+                    storeControl = data.record.control || { start: '08:00', end: '21:00' };
+                }
+                checkStoreTime();
+                renderMenu();
+            } catch (e) {
+                console.error('加载云端配置失败', e);
+                renderMenu(); // 降级渲染
+            }
+        }
+
+        // 检查当前时间是否在营业时间段内
+        function checkStoreTime() {
+            const now = new Date();
+            const currentHourMin = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+            
+            if (storeControl.start && storeControl.end) {
+                if (currentHourMin < storeControl.start || currentHourMin > storeControl.end) {
+                    isStoreOpen = false;
+                    document.getElementById('status-notice').innerHTML = `🔴 <strong>本店已打烊</strong> (营业时间: ${storeControl.start} ~ ${storeControl.end})，当前无法下单！`;
+                    document.getElementById('status-notice').style.backgroundColor = '#fee2e2';
+                    document.getElementById('status-notice').style.color = '#991b1b';
+                } else {
+                    isStoreOpen = true;
+                }
+            }
+        }
 
         function renderMenu() {
-            document.getElementById('combos-list').innerHTML = menuData.combos.map((item, idx) => `
+            // 1. 套餐
+            document.getElementById('combos-list').innerHTML = menuData.combos.map((item, idx) => {
+                const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 50;
+                const isSoldOut = stock <= 0 || !isStoreOpen;
+                return `
                 <div class="item-card">
                     <div class="item-info">
                         <h3>${item.name}</h3>
-                        <p>粉面：${item.options.join('/')}</p>
+                        <p>粉面：${item.options.join('/')} | <span style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">库存: ${stock}</span></p>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 6px;">
-                        <button onclick="openSpecModal('combos', ${idx}, 'small')" class="btn-primary">小份 ￥${item.priceSmall}</button>
-                        <button onclick="openSpecModal('combos', ${idx}, 'big')" class="btn-primary">大份 ￥${item.priceBig}</button>
+                        <button onclick="openSpecModal('combos', ${idx}, 'small')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '小份 ￥' + item.priceSmall)}</button>
+                        <button onclick="openSpecModal('combos', ${idx}, 'big')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '大份 ￥' + item.priceBig)}</button>
                     </div>
                 </div>
-            `).join('');
+            `;}).join('');
 
-            document.getElementById('staples-list').innerHTML = menuData.staples.map((item, idx) => `
+            // 2. 主食
+            document.getElementById('staples-list').innerHTML = menuData.staples.map((item, idx) => {
+                const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 100;
+                const isSoldOut = stock <= 0 || !isStoreOpen;
+                return `
                 <div class="grid-card">
-                    <div class="item-info"><h3>${item.name}</h3></div>
+                    <div class="item-info">
+                        <h3>${item.name}</h3>
+                        <p style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">库存: ${stock}</p>
+                    </div>
                     <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between;">
                         <span style="font-size: 11px; color: #6b7280; font-weight: 600;">小${item.priceSmall}/大${item.priceBig}</span>
-                        <button onclick="openSpecModal('staples', ${idx}, 'small')" class="btn-primary" style="padding: 5px 10px;">选规格</button>
+                        <button onclick="openSpecModal('staples', ${idx}, 'small')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" style="padding: 5px 10px;" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '选规格')}</button>
                     </div>
                 </div>
-            `).join('');
+            `;}).join('');
 
-            document.getElementById('soups-list').innerHTML = menuData.soups.map((item, idx) => `
+            // 3. 靓汤
+            document.getElementById('soups-list').innerHTML = menuData.soups.map((item, idx) => {
+                const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 40;
+                const isSoldOut = stock <= 0 || !isStoreOpen;
+                return `
                 <div class="grid-card">
-                    <div class="item-info"><h3>${item.name}</h3></div>
+                    <div class="item-info">
+                        <h3>${item.name}</h3>
+                        <p style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">库存: ${stock}</p>
+                    </div>
                     <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between;">
                         <span class="btn-price">￥${item.price}</span>
-                        <button onclick="addToCartDirect(${idx})" class="btn-primary" style="padding: 5px 10px;">+ 选购</button>
+                        <button onclick="addToCartDirect(${idx})" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" style="padding: 5px 10px;" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '+ 选购')}</button>
                     </div>
                 </div>
-            `).join('');
+            `;}).join('');
 
-            document.getElementById('noodlessoups-list').innerHTML = menuData.noodlessoups.map((item, idx) => `
+            // 4. 汤粉汤面
+            document.getElementById('noodlessoups-list').innerHTML = menuData.noodlessoups.map((item, idx) => {
+                const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 40;
+                const isSoldOut = stock <= 0 || !isStoreOpen;
+                return `
                 <div class="item-card">
                     <div class="item-info">
                         <h3>${item.name}</h3>
-                        <p>可选：${item.options.join('/')}</p>
+                        <p>可选：${item.options.join('/')} | <span style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">库存: ${stock}</span></p>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 6px;">
-                        <button onclick="openSpecModal('noodlessoups', ${idx}, 'small')" class="btn-primary">小份 ￥${item.priceSmall}</button>
-                        <button onclick="openSpecModal('noodlessoups', ${idx}, 'big')" class="btn-primary">大份 ￥${item.priceBig}</button>
+                        <button onclick="openSpecModal('noodlessoups', ${idx}, 'small')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '小份 ￥' + item.priceSmall)}</button>
+                        <button onclick="openSpecModal('noodlessoups', ${idx}, 'big')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '大份 ￥' + item.priceBig)}</button>
                     </div>
                 </div>
-            `).join('');
+            `;}).join('');
         }
 
         function openSpecModal(category, index, specType) {
+            if (!isStoreOpen) {
+                alert('当前不在营业时间内，无法下单！');
+                return;
+            }
             currentActiveItem = menuData[category][index];
+            const stock = cloudStocks[currentActiveItem.name] !== undefined ? cloudStocks[currentActiveItem.name] : 50;
+            if (stock <= 0) {
+                alert('该商品已售罄！');
+                return;
+            }
             currentSpecType = specType;
             currentOption = currentActiveItem.options ? currentActiveItem.options[0] : '';
 
@@ -337,11 +407,19 @@
         }
 
         function confirmAddToCart() {
+            const stock = cloudStocks[currentActiveItem.name] !== undefined ? cloudStocks[currentActiveItem.name] : 50;
             const price = currentSpecType === 'small' ? currentActiveItem.priceSmall : currentActiveItem.priceBig;
             const sizeName = currentSpecType === 'small' ? '小份' : '大份';
             const fullName = currentOption ? `${sizeName} (${currentOption})` : sizeName;
 
             const existing = cart.find(i => i.name === currentActiveItem.name && i.spec === fullName);
+            const currentCountInCart = existing ? existing.count : 0;
+
+            if (currentCountInCart + 1 > stock) {
+                alert('库存不足！');
+                return;
+            }
+
             if (existing) {
                 existing.count++;
             } else {
@@ -357,8 +435,25 @@
         }
 
         function addToCartDirect(index) {
+            if (!isStoreOpen) {
+                alert('当前不在营业时间内！');
+                return;
+            }
             const item = menuData.soups[index];
+            const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 40;
+            if (stock <= 0) {
+                alert('已售罄！');
+                return;
+            }
+
             const existing = cart.find(i => i.name === item.name && !i.spec);
+            const currentCountInCart = existing ? existing.count : 0;
+
+            if (currentCountInCart + 1 > stock) {
+                alert('库存不足！');
+                return;
+            }
+
             if (existing) {
                 existing.count++;
             } else {
@@ -431,6 +526,10 @@
         }
 
         function checkout() {
+            if (!isStoreOpen) {
+                alert('当前不在营业时间内！');
+                return;
+            }
             if (cart.length === 0) return;
             document.getElementById('cart-modal').style.display = 'none';
             
@@ -453,35 +552,53 @@
                 return;
             }
 
-            const goodsAmount = cart.reduce((s, i) => s + i.price * i.count, 0);
-            const finalAmount = goodsAmount + 1.0;
-
-            const newOrder = {
-                id: 'HK' + Date.now().toString().slice(-6),
-                phone: phone,
-                items: [...cart],
-                total: finalAmount,
-                payType: 'wechat',
-                status: '待核销',
-                time: new Date().toLocaleTimeString()
-            };
-
             try {
+                // 1. 重新从云端获取最新数据，确保并发安全
                 const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
                     headers: { 'X-Master-Key': MASTER_KEY }
                 });
                 const data = await res.json();
                 let remoteOrders = (data.record && data.record.orders) ? data.record.orders : [];
+                let remoteStocks = (data.record && data.record.stocks) ? data.record.stocks : {};
+                let remoteControl = (data.record && data.record.control) ? data.record.control : storeControl;
+
+                // 2. 检查并扣减库存
+                for (let item of cart) {
+                    let stock = remoteStocks[item.name] !== undefined ? remoteStocks[item.name] : 50;
+                    if (stock < item.count) {
+                        alert(`商品 [${item.name}] 库存不足，下单失败！`);
+                        return;
+                    }
+                    remoteStocks[item.name] = stock - item.count;
+                }
+
+                const goodsAmount = cart.reduce((s, i) => s + i.price * i.count, 0);
+                const finalAmount = goodsAmount + 1.0;
+
+                const newOrder = {
+                    id: 'HK' + Date.now().toString().slice(-6),
+                    phone: phone,
+                    items: [...cart],
+                    total: finalAmount,
+                    payType: 'wechat',
+                    status: '待核销',
+                    time: new Date().toLocaleTimeString()
+                };
 
                 remoteOrders.unshift(newOrder);
 
+                // 3. 提交回云端
                 await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Master-Key': MASTER_KEY
                     },
-                    body: JSON.stringify({ orders: remoteOrders })
+                    body: JSON.stringify({
+                        orders: remoteOrders,
+                        stocks: remoteStocks,
+                        control: remoteControl
+                    })
                 });
 
                 alert('订单已提交成功！请凭取餐电话到店自提。');
@@ -489,6 +606,7 @@
                 document.getElementById('customer-phone-input').value = '';
                 closePayModal();
                 updateCartUI();
+                fetchCloudConfig(); // 刷新本地库存显示
             } catch (e) {
                 console.error(e);
                 alert('网络异常，请重试！');
@@ -516,9 +634,8 @@
                 });
                 const data = await res.json();
                 let allOrders = [];
-                if (data.record) {
-                    if (Array.isArray(data.record)) allOrders = data.record;
-                    else if (data.record.orders && Array.isArray(data.record.orders)) allOrders = data.record.orders;
+                if (data.record && data.record.orders) {
+                    allOrders = data.record.orders;
                 }
 
                 const matched = allOrders.filter(o => o.phone && o.phone.includes(keyword));
@@ -560,7 +677,7 @@
         }
 
         window.onload = function() {
-            renderMenu();
+            fetchCloudConfig();
         };
     </script>
 </body>
