@@ -69,10 +69,6 @@
         
         .input-box { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px; font-size: 12px; outline: none; color: #111827; background: #fff; }
         .input-box:focus { border-color: #b45309; box-shadow: 0 0 0 2px rgba(180,83,9,0.15); }
-        
-        .pay-type-box { display: flex; gap: 10px; }
-        .pay-tab { flex: 1; border: 2px solid #d1d5db; border-radius: 10px; padding: 10px; text-align: center; font-size: 12px; cursor: pointer; font-weight: 500; color: #4b5563; }
-        .pay-tab.active { border-color: #b45309; background: #fffbeb; color: #78350f; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -194,20 +190,17 @@
             <div class="modal-box" style="text-align: center;">
                 <button onclick="closePayModal()" class="close-x">✕</button>
                 
-                <div style="color: #b45309; font-weight: bold; font-size: 13px;">客家腌面 · 个人收银台</div>
+                <div style="color: #b45309; font-weight: bold; font-size: 13px;">客家腌面 · 微信收银台</div>
                 <div id="pay-amount" style="font-size: 26px; font-weight: black; color: #111827;">￥1.00</div>
                 <p style="font-size: 11px; color: #6b7280;">（含自提打包费 1.00元）</p>
 
-                <!-- 支付方式 -->
-                <div class="pay-type-box">
-                    <div id="pay-tab-wechat" onclick="setPayType('wechat')" class="pay-tab active">💚 微信支付</div>
-                    <div id="pay-tab-alipay" onclick="setPayType('alipay')" class="pay-tab">💙 支付宝</div>
-                </div>
-
-                <!-- 收款码 -->
+                <!-- 收款码 (使用你的真实微信收款码) -->
                 <div style="background: #f9fafb; padding: 12px; border-radius: 12px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; align-items: center;">
-                    <img id="pay-qrcode" src="https://i.imgs.ovh/2026/10/31/a6be456b2a8b66f025967f7d2004f9b4.png" alt="收款码" style="width: 120px; height: 120px; object-fit: contain; background: #fff; padding: 4px; border-radius: 6px; border: 1px solid #e5e7eb; margin-bottom: 8px;">
-                    <span style="font-size: 11px; color: #4b5563;">请长按或扫描二维码转账，若无法识别截图保存后付款。付款后商家后台将进行确认核销，届时您可在首页订单中输入尾号查询<br><strong id="pay-amount-tip" style="color: #b45309; font-size: 13px;">￥1.00</strong></span>
+                    <img src="https://i.imgs.ovh/2026/10/31/a6be456b2a8b66f025967f7d2004f9b4.png" alt="微信收款码" style="width: 130px; height: 130px; object-fit: contain; background: #fff; padding: 4px; border-radius: 6px; border: 1px solid #e5e7eb; margin-bottom: 8px;">
+                    <span style="font-size: 11px; color: #4b5563; line-height: 1.4;">
+                        请长按或扫描二维码转账 <strong id="pay-amount-tip" style="color: #b45309; font-size: 12px;">￥1.00</strong><br>
+                        <span style="color: #d97706; font-size: 10px;">若无法识别截图保存后付款。付款后商家后台将进行确认核销，届时您可在首页订单中输入尾号查询</span>
+                    </span>
                 </div>
 
                 <!-- 取餐电话 -->
@@ -285,11 +278,9 @@
         let currentActiveItem = null;
         let currentSpecType = 'small';
         let currentOption = '';
-        let currentPayType = 'wechat';
 
         // 初始化渲染菜单
         function renderMenu() {
-            // 1. 套餐
             document.getElementById('combos-list').innerHTML = menuData.combos.map((item, idx) => `
                 <div class="item-card">
                     <div class="item-info">
@@ -303,7 +294,6 @@
                 </div>
             `).join('');
 
-            // 2. 主食
             document.getElementById('staples-list').innerHTML = menuData.staples.map((item, idx) => `
                 <div class="grid-card">
                     <div class="item-info"><h3>${item.name}</h3></div>
@@ -314,7 +304,6 @@
                 </div>
             `).join('');
 
-            // 3. 靓汤
             document.getElementById('soups-list').innerHTML = menuData.soups.map((item, idx) => `
                 <div class="grid-card">
                     <div class="item-info"><h3>${item.name}</h3></div>
@@ -325,7 +314,6 @@
                 </div>
             `).join('');
 
-            // 4. 汤粉汤面
             document.getElementById('noodlessoups-list').innerHTML = menuData.noodlessoups.map((item, idx) => `
                 <div class="item-card">
                     <div class="item-info">
@@ -443,7 +431,6 @@
                 checkoutBtn.innerText = '去结算 (￥1.00)';
             }
 
-            // 更新购物车抽屉列表
             document.getElementById('cart-items-list').innerHTML = cart.map((item, idx) => `
                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; border-bottom: 1px solid #f3f4f6; padding-bottom: 8px;">
                     <div>
@@ -495,19 +482,6 @@
             document.getElementById('pay-modal').style.display = 'none';
         }
 
-        function setPayType(type) {
-            currentPayType = type;
-            document.getElementById('pay-tab-wechat').className = `pay-tab ${type === 'wechat' ? 'active' : ''}`;
-            document.getElementById('pay-tab-alipay').className = `pay-tab ${type === 'alipay' ? 'active' : ''}`;
-            
-            const qrcodeImg = document.getElementById('pay-qrcode');
-            if (type === 'wechat') {
-                qrcodeImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=WECHAT_PAY_QR';
-            } else {
-                qrcodeImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=ALIPAY_QR';
-            }
-        }
-
         async function submitOrder() {
             const phone = document.getElementById('customer-phone-input').value.trim();
             if (!phone) {
@@ -523,7 +497,7 @@
                 phone: phone,
                 items: [...cart],
                 total: finalAmount,
-                payType: currentPayType,
+                payType: 'wechat',
                 status: '待核销',
                 time: new Date().toLocaleTimeString()
             };
@@ -600,31 +574,4 @@
                         <div style="color: #6b7280;">时间：${order.time} | 尾号：${order.phone}</div>
                         <div style="border-top: 1px solid #e5e7eb; padding-top: 4px;">
                             ${order.items.map(i => `
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-                                    <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
-                                    <span>￥${i.price * i.count}</span>
-                                </div>
-                            `).join('')}
-                            <div style="display: flex; justify-content: space-between; color: #9ca3af;">
-                                <span>自提打包费</span><span>￥1.00</span>
-                            </div>
-                        </div>
-                        <div style="text-align: right; font-weight: bold; color: #b45309; border-top: 1px solid #e5e7eb; padding-top: 4px; font-size: 12px;">
-                            实付总额：￥${order.total}
-                        </div>
-                    </div>
-                `).join('');
-
-            } catch (e) {
-                console.error(e);
-                alert('查询失败，请检查网络');
-            }
-        }
-
-        // 初始化加载
-        window.onload = function() {
-            renderMenu();
-        };
-    </script>
-</body>
-</html>
+                                <div style="display: flex; justify-content: space
