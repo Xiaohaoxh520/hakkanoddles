@@ -14,9 +14,6 @@
         <header class="bg-amber-600 text-white p-4 sticky top-0 z-30 flex justify-between items-center shadow">
             <h1 class="text-base font-bold flex items-center">
                 🥣 客家腌面 (到店自提)
-            </h1>
-            <a href="admin.html" target="_blank" class="text-xs bg-amber-700 px-3 py-1.5 rounded-full hover:bg-amber-800 transition">
-                🔒 商家后台登录
             </a>
         </header>
 
@@ -326,7 +323,7 @@
 
                 const submitOrder = () => {
                     if (!customerPhone.value.trim()) {
-                        alert('请填写取餐手机尾号！');
+                        alert('请填写取餐手机尾号！切记不要乱写尾号！！这个是你的取餐码！！！');
                         return;
                     }
                     const newOrder = {
@@ -343,7 +340,7 @@
                     existingOrders.unshift(newOrder);
                     localStorage.setItem('hakka_orders', JSON.stringify(existingOrders));
 
-                    alert('订单已提交成功！请凭取餐电话到店自提。');
+                    alert('订单已提交成功！请凭取餐尾号到店自提。');
                     cart.value = [];
                     customerPhone.value = '';
                     showPayModal.value = false;
