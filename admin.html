@@ -27,7 +27,6 @@
         
         .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; }
 
-        /* 小票打印专用样式：平时隐藏，打印时只显示小票内容 */
         #print-ticket { display: none; }
         @media print {
             body * { visibility: hidden; }
@@ -38,7 +37,7 @@
 </head>
 <body>
     <div id="app">
-        <!-- 登录拦截层 -->
+        <!-- 登录弹窗 -->
         <div id="login-modal" class="modal-mask">
             <div style="background: #fff; width: 100%; max-width: 300px; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
                 <h2 style="font-size: 15px; font-weight: bold; text-align: center;">🔐 商家后台登录</h2>
@@ -132,7 +131,7 @@
                 document.getElementById('login-modal').style.display = 'none';
                 loadCloudData();
             } else {
-                alert('账号或密码错误！(默认: admin / 123456)');
+                alert('账号或密码错误！');
             }
         }
 
@@ -209,7 +208,7 @@
         function renderOrders() {
             const orders = cloudData.orders;
             const pendingCount = orders.filter(o => o.status === '待核销').length;
-            const revenue = orders.filter(o => o.status === '已核销完成').reduce((s, o) => s + o.total, 0);
+            const revenue = orders.filter(o => o.status === '已核销完成' || o.status === '已出餐').reduce((s, o) => s + o.total, 0);
 
             document.getElementById('stats-text').innerHTML = `待核销: <strong style="color:#b45309;">${pendingCount}单</strong> | 营业额: <strong>￥${revenue}</strong>`;
 
@@ -219,11 +218,16 @@
                 return;
             }
 
-            container.innerHTML = orders.map(order => `
+            container.innerHTML = orders.map(order => {
+                let statusColor = '#b45309';
+                if (order.status === '已核销完成') statusColor = '#2563eb';
+                if (order.status === '已出餐') statusColor = '#059669';
+
+                return `
                 <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px; background: #fff; font-size: 11px; display: flex; flex-direction: column; gap: 6px;">
                     <div style="display: flex; justify-content: space-between; font-weight: bold; border-bottom: 1px solid #f3f4f6; padding-bottom: 4px;">
                         <span>单号: ${order.id}</span>
-                        <span style="color: ${order.status === '待核销' ? '#b45309' : '#059669'};">${order.status}</span>
+                        <span style="color: ${statusColor};">${order.status || '待核销'}</span>
                     </div>
                     <div style="color: #6b7280;">时间: ${order.time} | 尾号: <strong style="font-size:13px; color:#111827;">${order.phone}</strong></div>
                     <div style="border-top: 1px solid #f3f4f6; padding-top: 4px;">
@@ -239,24 +243,24 @@
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f3f4f6; padding-top: 6px;">
                         <span style="font-weight: bold; color: #b45309; font-size: 12px;">实收: ￥${order.total}</span>
-                        <div style="display: flex; gap: 6px;">
-                            <button onclick="printTicket('${order.id}')" style="background:#4b5563; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-size:11px; font-weight:bold;">🖨️ 打印小票</button>
-                            ${order.status === '待核销' ? `<button onclick="verifyOrder('${order.id}')" style="background:#059669; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-size:11px; font-weight:bold;">✅ 确认核销</button>` : '<span style="color:#059669; font-size:11px; font-weight:bold; line-height:26px;">已完成</span>'}
+                        <div style="display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end;">
+                            <button onclick="printTicket('${order.id}')" style="background:#4b5563; color:#fff; border:none; padding:5px 8px; border-radius:6px; cursor:pointer; font-size:10px; font-weight:bold;">🖨️ 打印</button>
+                            ${order.status === '待核销' ? `<button onclick="updateOrderStatus('${order.id}', '已核销完成')" style="background:#2563eb; color:#fff; border:none; padding:5px 8px; border-radius:6px; cursor:pointer; font-size:10px; font-weight:bold;">✅ 核销</button>` : ''}
+                            ${order.status !== '已出餐' ? `<button onclick="updateOrderStatus('${order.id}', '已出餐')" style="background:#059669; color:#fff; border:none; padding:5px 8px; border-radius:6px; cursor:pointer; font-size:10px; font-weight:bold;">🍜 已出餐</button>` : '<span style="color:#059669; font-size:11px; font-weight:bold; line-height:22px;">已完成</span>'}
                         </div>
                     </div>
                 </div>
-            `).join('');
+            `;}).join('');
         }
 
-        async function verifyOrder(orderId) {
+        async function updateOrderStatus(orderId, newStatus) {
             const order = cloudData.orders.find(o => o.id === orderId);
             if (order) {
-                order.status = '已核销完成';
+                order.status = newStatus;
                 await syncToCloud();
             }
         }
 
-        // 小票打印功能（Logo 调小，手机尾号放大加粗）
         function printTicket(orderId) {
             const order = cloudData.orders.find(o => o.id === orderId);
             if (!order) return;
