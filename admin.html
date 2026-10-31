@@ -18,6 +18,7 @@
             .pc-col-left, .pc-col-middle, .pc-col-right { height: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-right: 4px; }
             .pc-col-middle { grid-column: 2; }
             #orders-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            #dinein-orders-list { display: grid; grid-template-columns: 1fr; gap: 8px; }
         }
 
         header { background-color: #b45309; color: #ffffff; padding: 12px 20px; position: sticky; top: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; border-top-left-radius: inherit; border-top-right-radius: inherit; }
@@ -135,9 +136,10 @@
             </div>
         </div>
 
-        <!-- 2. 堂食柜台点单页面 -->
+        <!-- 2. 堂食柜台点单页面 (右侧完美包含实时流水与出餐管理) -->
         <div id="panel-dinein" class="pc-dinein-workspace content-box" style="display: none; background: #f3f4f6; padding: 0;">
             
+            <!-- 左侧列：菜单点选 -->
             <div class="pc-col-left content-box" style="padding: 16px; background: #fff; height: 100%;">
                 <div class="card" style="margin: 0;">
                     <h3>堂食点单菜品选择</h3>
@@ -157,6 +159,7 @@
                 </div>
             </div>
 
+            <!-- 中间列：当前待提交清单 -->
             <div class="pc-col-middle content-box" style="padding: 16px; background: #fff; height: 100%; display: flex; flex-direction: column;">
                 <div class="card" style="margin: 0; flex: 1; display: flex; flex-direction: column;">
                     <h3>当前堂食订单明细 (免打包费 / 免手机号)</h3>
@@ -173,10 +176,11 @@
                 </div>
             </div>
 
+            <!-- 右侧列：今日堂食实时流水与出餐管理大屏 -->
             <div class="pc-col-right content-box" style="padding: 16px; background: #fff; height: 100%;">
                 <div class="card" style="margin: 0; height: 100%; display: flex; flex-direction: column;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <h3>今日堂食流水与出餐管理</h3>
+                        <h3>堂食实时流水与出餐管理</h3>
                         <span id="dinein-stats-text" style="font-size: 11px; color: #166534; font-weight: bold;">总额: ￥0</span>
                     </div>
                     <div id="dinein-orders-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
@@ -291,7 +295,7 @@
     <script>
         const BIN_ID = '6ae586c8ffd5d160539a6da4';
         const MASTER_KEY = '$2a$10$lwmZR3vIjsFdZlgG4.WReOJzFNBqHERsLquMbL42GY/BNEBveQ896';
-        const LOGO_URL = 'https://i.imgs.ovh/2026/10/31/aaba03f7954545ed22cbf0f81dd22561.png';
+        const LOGO_URL = 'https://i.imgs.ovh/2026/10/31/3aa5068a33d19dddd0105e395ab88b74.png';
 
         const menuData = {
             combos: [
@@ -662,7 +666,7 @@
                     mealNo: mealNoStr,
                     items: [...dineInCart],
                     total: totalAmount,
-                    status: '待出餐', // 堂食新下单默认为待出餐
+                    status: '待出餐',
                     time: new Date().toLocaleTimeString(),
                     type: '堂食柜台'
                 };
@@ -698,7 +702,6 @@
             }
         }
 
-        // 更新堂食订单出餐状态
         async function updateDineInStatus(orderId, newStatus) {
             try {
                 const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
@@ -802,7 +805,7 @@
                         <span style="font-weight: bold; color: #16a34a; font-size: 14px;">￥${order.total}</span>
                         <div style="display: flex; gap: 6px;">
                             ${!isFinished ? `<button onclick="updateDineInStatus('${order.id}', '已出餐')" style="background:#059669; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:11px; font-weight:bold;">标记已出餐</button>` : '<span style="color:#059669; font-weight:bold;">已完成</span>'}
-                            <button onclick="printDineInTicket({mealNo:'${order.mealNo}', id:'${order.id}', time:'${order.time}', items:${JSON.stringify(order.items).replace(/"/g, '&quot;')}, total:${order.total}})" style="background:#4b5563; color:#fff; border:none; padding:5px 8px; border-radius:4px; cursor:pointer; font-size:11px;">补打双联</button>
+                            <button onclick="printDineInTicket({mealNo:'${order.mealNo}', id:'${order.id}', time:'${order.time}', items:${JSON.stringify(order.items).replace(/"/g, '"')}, total:${order.total}})" style="background:#4b5563; color:#fff; border:none; padding:5px 8px; border-radius:4px; cursor:pointer; font-size:11px;">补打双联</button>
                         </div>
                     </div>
                 </div>
