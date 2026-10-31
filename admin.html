@@ -18,6 +18,11 @@
         .tab-item { flex: 1; text-align: center; padding: 10px; font-size: 12px; font-weight: bold; color: #78350f; cursor: pointer; border-bottom: 2px solid transparent; }
         .tab-item.active { border-bottom-color: #b45309; background: #fff; }
 
+        /* 订单二级子菜单（实时单 vs 预约单） */
+        .sub-tab-bar { display: flex; background: #f3f4f6; padding: 8px 12px; gap: 8px; border-bottom: 1px solid #e5e7eb; }
+        .sub-tab-btn { flex: 1; padding: 6px; text-align: center; font-size: 11px; font-weight: bold; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; color: #4b5563; cursor: pointer; }
+        .sub-tab-btn.active { background: #b45309; color: #fff; border-color: #b45309; }
+
         .content-box { padding: 14px; display: flex; flex-direction: column; gap: 14px; }
         .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .card h3 { font-size: 13px; font-weight: bold; color: #111827; margin-bottom: 8px; border-left: 3px solid #b45309; padding-left: 6px; }
@@ -40,7 +45,7 @@
         <!-- 登录弹窗 -->
         <div id="login-modal" class="modal-mask">
             <div style="background: #fff; width: 100%; max-width: 300px; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
-                <h2 style="font-size: 15px; font-weight: bold; text-align: center;">🔐 商家后台登录</h2>
+                <h2 style="font-size: 15px; font-weight: bold; text-align: center;">商家后台登录</h2>
                 <div>
                     <label style="font-size: 11px; font-weight: bold;">账号：</label>
                     <input id="login-user" type="text" placeholder="admin" class="input-box" value="admin">
@@ -54,24 +59,30 @@
         </div>
 
         <header>
-            <h1>📈 商家OA管理系统</h1>
+            <h1>商家OA管理系统</h1>
             <div class="nav-buttons">
-                <button id="export-btn" class="nav-btn" style="background:#059669;">📊 导出</button>
-                <button id="save-btn" class="nav-btn">💾 保存</button>
+                <button id="export-btn" class="nav-btn" style="background:#059669;">导出流水</button>
+                <button id="save-btn" class="nav-btn">保存云端</button>
                 <button id="logout-btn" class="nav-btn" style="background:#dc2626;">退出</button>
             </div>
         </header>
 
         <div class="tab-bar">
-            <div id="tab-orders" class="tab-item active">📋 实时订单 (流水)</div>
-            <div id="tab-control" class="tab-item">⚙️ 营业与库存</div>
+            <div id="tab-orders" class="tab-item active" onclick="switchTab('orders')">实时订单与预约单</div>
+            <div id="tab-control" class="tab-item" onclick="switchTab('control')">营业与库存控制</div>
         </div>
 
-        <!-- 1. 实时订单看板 -->
+        <!-- 1. 实时订单看板 (内含 实时单 / 预约单 分离切换) -->
         <div id="panel-orders" class="content-box">
+            <!-- 实时单与预约单分离切换按钮 -->
+            <div class="sub-tab-bar">
+                <button id="sub-tab-asap" class="sub-tab-btn active" onclick="switchSubTab('asap')">实时单 (尽快取餐)</button>
+                <button id="sub-tab-reserve" class="sub-tab-btn" onclick="switchSubTab('reserve')">预约单 (定时取餐)</button>
+            </div>
+
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div style="font-size: 12px; color: #6b7280;" id="stats-text">加载中...</div>
-                <button id="refresh-btn" class="nav-btn">🔄 实时刷新</button>
+                <button id="refresh-btn" class="nav-btn">实时刷新</button>
             </div>
             <div id="orders-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
         </div>
@@ -79,7 +90,7 @@
         <!-- 2. 营业与库存控制面板 -->
         <div id="panel-control" class="content-box" style="display: none;">
             <div class="card">
-                <h3>⏰ 下单时间段控制</h3>
+                <h3>下单时间段控制</h3>
                 <div style="display: flex; gap: 10px; margin-top: 6px; align-items: center;">
                     <div style="flex: 1;">
                         <label style="font-size: 11px; color: #6b7280;">开始时间：</label>
@@ -94,8 +105,8 @@
             </div>
 
             <div class="card">
-                <h3>📦 商品库存云端管理</h3>
-                <p style="font-size: 11px; color: #6b7280; margin-bottom: 8px;">修改后点击上方“保存”即可实时同步给顾客端</p>
+                <h3>商品库存云端管理</h3>
+                <p style="font-size: 11px; color: #6b7280; margin-bottom: 8px;">修改后点击上方“保存云端”即可实时同步给顾客端</p>
                 <div id="inventory-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 50vh; overflow-y: auto;"></div>
             </div>
         </div>
@@ -113,6 +124,8 @@
             control: { start: '08:00', end: '21:00' },
             stocks: {}
         };
+
+        let currentSubTab = 'asap'; // 'asap' 代表实时单, 'reserve' 代表预约单
 
         const defaultMenuStructure = [
             '紫菜蛋花汤套餐', '番茄蛋花汤套餐', '枸杞叶三及第汤套餐', '枸杞叶瘦肉汤套餐', 
@@ -145,6 +158,13 @@
             document.getElementById('tab-control').className = `tab-item ${tab === 'control' ? 'active' : ''}`;
             document.getElementById('panel-orders').style.display = tab === 'orders' ? 'flex' : 'none';
             document.getElementById('panel-control').style.display = tab === 'control' ? 'flex' : 'none';
+        }
+
+        function switchSubTab(subTab) {
+            currentSubTab = subTab;
+            document.getElementById('sub-tab-asap').className = `sub-tab-btn ${subTab === 'asap' ? 'active' : ''}`;
+            document.getElementById('sub-tab-reserve').className = `sub-tab-btn ${subTab === 'reserve' ? 'active' : ''}`;
+            renderOrders();
         }
 
         async function loadCloudData() {
@@ -194,7 +214,7 @@
                     },
                     body: JSON.stringify(cloudData)
                 });
-                alert('✅ 成功同步至云端！');
+                alert('成功同步至云端！');
                 loadCloudData();
             } catch (e) {
                 console.error(e);
@@ -207,22 +227,35 @@
         }
 
         function renderOrders() {
-            const orders = cloudData.orders;
-            const pendingCount = orders.filter(o => o.status === '待接单').length;
-            const revenue = orders.filter(o => o.status === '已接单' || o.status === '已出餐').reduce((s, o) => s + o.total, 0);
+            const allOrders = cloudData.orders;
+            
+            // 根据当前选中的子标签（实时单 vs 预约单）进行过滤
+            const filteredOrders = allOrders.filter(order => {
+                const isReserve = order.pickupTime && order.pickupTime !== '尽快取餐';
+                if (currentSubTab === 'asap') {
+                    return !isReserve; // 实时单
+                } else {
+                    return isReserve;  // 预约单
+                }
+            });
 
-            document.getElementById('stats-text').innerHTML = `待接单: <strong style="color:#b45309;">${pendingCount}单</strong> | 营业额: <strong>￥${revenue}</strong>`;
+            const pendingCount = filteredOrders.filter(o => o.status === '待接单').length;
+            const revenue = filteredOrders.filter(o => o.status === '已接单' || o.status === '已出餐').reduce((s, o) => s + o.total, 0);
+
+            document.getElementById('stats-text').innerHTML = `${currentSubTab === 'asap' ? '实时单' : '预约单'}待接单: <strong style="color:#b45309;">${pendingCount}单</strong> | 营业额: <strong>￥${revenue}</strong>`;
 
             const container = document.getElementById('orders-list');
-            if (orders.length === 0) {
-                container.innerHTML = `<div style="text-align: center; padding: 30px; color: #9ca3af; font-size: 12px;">暂无订单记录</div>`;
+            if (filteredOrders.length === 0) {
+                container.innerHTML = `<div style="text-align: center; padding: 30px; color: #9ca3af; font-size: 12px;">暂无${currentSubTab === 'asap' ? '实时单' : '预约单'}记录</div>`;
                 return;
             }
 
-            container.innerHTML = orders.map(order => {
+            container.innerHTML = filteredOrders.map(order => {
                 let statusColor = '#b45309';
                 if (order.status === '已接单') statusColor = '#2563eb';
                 if (order.status === '已出餐') statusColor = '#059669';
+
+                const isReserve = order.pickupTime && order.pickupTime !== '尽快取餐';
 
                 return `
                 <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px; background: #fff; font-size: 11px; display: flex; flex-direction: column; gap: 6px;">
@@ -230,8 +263,8 @@
                         <span>单号: ${order.id}</span>
                         <span style="color: ${statusColor};">${order.status || '待接单'}</span>
                     </div>
-                    <div style="background: #fffbeb; padding: 4px 8px; border-radius: 4px; color: #b45309; font-weight: bold;">
-                        ⏰ 预约取餐时间：${order.pickupTime || '尽快取餐'}
+                    <div style="background: ${isReserve ? '#fffbeb' : '#f3f4f6'}; padding: 4px 8px; border-radius: 4px; color: ${isReserve ? '#b45309' : '#374151'}; font-weight: bold;">
+                        ${isReserve ? '[预约单] 取餐时间：' + order.pickupTime : '取餐方式：尽快取餐'}
                     </div>
                     <div style="color: #6b7280;">下单时间: ${order.time} | 尾号: <strong style="font-size:13px; color:#111827;">${order.phone}</strong></div>
                     <div style="border-top: 1px solid #f3f4f6; padding-top: 4px;">
@@ -248,9 +281,9 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f3f4f6; padding-top: 6px;">
                         <span style="font-weight: bold; color: #b45309; font-size: 12px;">实收: ￥${order.total}</span>
                         <div style="display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end;">
-                            <button onclick="printTicket('${order.id}')" style="background:#4b5563; color:#fff; border:none; padding:5px 8px; border-radius:6px; cursor:pointer; font-size:10px; font-weight:bold;">🖨️ 打印</button>
-                            ${order.status === '待接单' ? `<button onclick="updateOrderStatus('${order.id}', '已接单')" style="background:#2563eb; color:#fff; border:none; padding:5px 8px; border-radius:6px; cursor:pointer; font-size:10px; font-weight:bold;">✅ 确认接单</button>` : ''}
-                            ${order.status !== '已出餐' ? `<button onclick="updateOrderStatus('${order.id}', '已出餐')" style="background:#059669; color:#fff; border:none; padding:5px 8px; border-radius:6px; cursor:pointer; font-size:10px; font-weight:bold;">🍜 已出餐</button>` : '<span style="color:#059669; font-size:11px; font-weight:bold; line-height:22px;">已完成</span>'}
+                            <button onclick="printTicket('${order.id}')" style="background:#4b5563; color:#fff; border:none; padding:5px 8px; border-radius:6px; cursor:pointer; font-size:10px; font-weight:bold;">打印小票</button>
+                            ${order.status === '待接单' ? `<button onclick="updateOrderStatus('${order.id}', '已接单')" style="background:#2563eb; color:#fff; border:none; padding:5px 8px; border-radius:6px; cursor:pointer; font-size:10px; font-weight:bold;">确认接单</button>` : ''}
+                            ${order.status !== '已出餐' ? `<button onclick="updateOrderStatus('${order.id}', '已出餐')" style="background:#059669; color:#fff; border:none; padding:5px 8px; border-radius:6px; cursor:pointer; font-size:10px; font-weight:bold;">已出餐</button>` : '<span style="color:#059669; font-size:11px; font-weight:bold; line-height:22px;">已完成</span>'}
                         </div>
                     </div>
                 </div>
@@ -265,20 +298,29 @@
             }
         }
 
-        // 小票打印功能（重点加粗突显预约单时间）
         function printTicket(orderId) {
             const order = cloudData.orders.find(o => o.id === orderId);
             if (!order) return;
+
+            const isReserve = order.pickupTime && order.pickupTime !== '尽快取餐';
 
             const ticketHtml = `
                 <div style="text-align:center; margin-bottom:4px;">
                     <img src="${LOGO_URL}" alt="Logo" style="width:28mm; height:auto; display:block; margin:0 auto 2px auto;" />
                 </div>
-                <div style="text-align:center; font-size:11px; font-weight:bold; margin-bottom:6px; border:1px solid #000; padding:2px 0;">【 到店自提凭证 】</div>
+                <div style="text-align:center; font-size:11px; font-weight:bold; margin-bottom:6px; border:1px solid #000; padding:2px 0;">[ 到店自提凭证 ]</div>
+                
+                ${isReserve ? `
                 <div style="border: 2px solid #000; padding: 4px; margin-bottom: 6px; text-align: center;">
-                    <div style="font-size: 10px; font-weight: bold;">【 ⏰ 预约取餐时间 】</div>
-                    <div style="font-size: 16px; font-weight: 900; margin-top: 2px;">${order.pickupTime || '尽快取餐'}</div>
+                    <div style="font-size: 11px; font-weight: bold;">[ 预约取餐时间 ]</div>
+                    <div style="font-size: 15px; font-weight: 900; margin-top: 2px;">${order.pickupTime}</div>
                 </div>
+                ` : `
+                <div style="text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 6px; border-bottom: 1px dashed #000; padding-bottom: 4px;">
+                    取餐方式：尽快取餐
+                </div>
+                `}
+
                 <div style="font-size:11px;">订单编号：${order.id}</div>
                 <div style="font-size:11px;">下单时间：${order.time}</div>
                 <div style="font-size:13px; margin-top:4px; font-weight:bold;">取餐电话：<span style="font-size:18px; text-decoration:underline;">尾号 ${order.phone}</span></div>
@@ -296,7 +338,7 @@
                 </div>
                 <div style="border-bottom:1px dashed #000; margin:6px 0; padding-bottom:2px;"></div>
                 <div style="text-align:right; font-weight:bold; font-size:14px;">实收总计：￥${order.total}</div>
-                <div style="text-align:center; font-size:10px; margin-top:12px; font-weight:bold;">*** 请按预约时间核对出餐 ***</div>
+                <div style="text-align:center; font-size:10px; margin-top:12px; font-weight:bold;">*** 请核对无误后出餐 ***</div>
             `;
 
             document.getElementById('print-ticket').innerHTML = ticketHtml;
@@ -311,7 +353,7 @@
             }
 
             let csvContent = "data:text/csv;charset=utf-8,\ufeff";
-            csvContent += "订单号,预约取餐时间,取餐手机尾号,下单时间,订单状态,商品明细,实付金额(含打包费)\r\n";
+            csvContent += "订单号,取餐类型,取餐手机尾号,下单时间,订单状态,商品明细,实付金额(含打包费)\r\n";
 
             orders.forEach(order => {
                 const itemsStr = order.items.map(i => `${i.name}(${i.spec || '标配'})x${i.count}`).join('; ');
