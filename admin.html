@@ -68,8 +68,8 @@
 
         <header>
             <div class="header-brand">
-                <!-- 恢复为带色彩和立体感的原版 Logo -->
-                <img src="https://i.imgs.ovh/2026/10/31/bb2fabef06a8d6f0c5870e2c7d0be375.png" alt="Logo" class="header-logo">
+                <!-- 更新后的最新 Logo 图床 -->
+                <img src="https://i.imgs.ovh/2026/10/31/aaba03f7954545ed22cbf0f81dd22561.png" alt="Logo" class="header-logo">
                 <span class="header-title-text">订单管理系统</span>
             </div>
             <div class="nav-buttons">
@@ -221,8 +221,8 @@
         const BIN_ID = '6ae586c8ffd5d160539a6da4';
         const MASTER_KEY = '$2a$10$lwmZR3vIjsFdZlgG4.WReOJzFNBqHERsLquMbL42GY/BNEBveQ896';
         
-        // 彩色带质感的原版 Logo 链接
-        const LOGO_URL = 'https://i.imgs.ovh/2026/10/31/bb2fabef06a8d6f0c5870e2c7d0be375.png';
+        // 更新为用户指定的最新 Logo 图床链接
+        const LOGO_URL = 'https://i.imgs.ovh/2026/10/31/aaba03f7954545ed22cbf0f81dd22561.png';
 
         let cloudData = {
             orders: [],
@@ -547,7 +547,10 @@
 
         function exportSettlementCSV() {
             const dateVal = document.getElementById('settlement-date-input').value;
-            const targetOrders = cloudData.orders.filter(o => o.time.includes(dateVal) || (o.id && o.id.includes(dateVal)));
+            const targetOrders = cloudData.orders.filter(o => {
+                if (!o.time) return false;
+                return o.time.includes(dateVal) || (o.id && o.id.includes(dateVal));
+            });
             let validOrders = targetOrders.filter(o => o.status === '已接单' || o.status === '已出餐');
             if (validOrders.length === 0 && dateVal === new Date().toISOString().slice(0, 10)) {
                 validOrders = cloudData.orders.filter(o => o.status === '已接单' || o.status === '已出餐');
@@ -663,7 +666,6 @@
             document.getElementById('refresh-btn').onclick = loadCloudData;
             document.getElementById('save-time-btn').onclick = saveTimeControl;
 
-            // 每隔15秒自动从云端静默刷新一次
             setInterval(loadCloudData, 15000);
         };
     </script>
