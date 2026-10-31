@@ -10,7 +10,7 @@
 <body class="bg-gray-100 font-sans">
     <div id="app" class="max-w-md mx-auto bg-white min-h-screen shadow-lg flex flex-col relative pb-10">
         
-        <!-- 登录拦截层：仅在未登录时显示 -->
+        <!-- 登录拦截层 -->
         <div v-if="!isLoggedIn" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
             <div class="bg-white w-full max-w-xs rounded-2xl p-6 space-y-4 shadow-2xl">
                 <h2 class="text-base font-bold text-gray-800 text-center">🔐 商家后台安全登录</h2>
@@ -36,12 +36,12 @@
             </div>
         </div>
 
-        <!-- 后台主界面 (登录后可见) -->
+        <!-- 后台主界面 -->
         <div class="flex-1 flex flex-col p-4 bg-gray-50 space-y-4">
             <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-sm">
                 <div>
                     <h2 class="font-bold text-gray-800 text-sm">📈 商家后台 OA 管理系统</h2>
-                    <p class="text-xs text-gray-500">客家腌面 · 独立核销看板</p>
+                    <p class="text-xs text-gray-500">客家腌面 · 云端实时同步看板</p>
                 </div>
                 <div class="space-x-2">
                     <button @click="logout" class="text-xs bg-gray-100 text-gray-600 px-2.5 py-1.5 rounded">退出</button>
@@ -65,11 +65,11 @@
             <div class="flex-1 space-y-3">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-gray-700 text-xs">📋 实时自提订单 (人工核销)</h3>
-                    <button @click="loadOrders" class="text-xs text-amber-600 hover:underline">🔄 刷新订单</button>
+                    <button @click="loadOrders" class="text-xs bg-amber-100 text-amber-800 px-2.5 py-1 rounded shadow-sm hover:bg-amber-200">🔄 刷新云端订单</button>
                 </div>
                 
                 <div v-if="orders.length === 0" class="text-center py-16 text-gray-400 bg-white rounded-xl border border-dashed">
-                    <p class="text-xs">暂无自提订单记录</p>
+                    <p class="text-xs">暂无云端自提订单记录</p>
                 </div>
 
                 <div v-for="order in orders" :key="order.id" class="bg-white border rounded-xl p-3 shadow-sm space-y-2">
@@ -112,6 +112,9 @@
     <script>
         const { createApp, ref, computed, onMounted } = Vue;
 
+        const BIN_ID = '6ae586c8ffd5d160539a6da4';
+        const MASTER_KEY = '$2a$10$lwmZR3vIjsFdZlgG4.WReOJzFNBqHERsLquMbL42GY/BNEBveQ896';
+
         createApp({
             setup() {
                 const isLoggedIn = ref(false);
@@ -133,6 +136,7 @@
                     if (username.value === correctUser && password.value === correctPass) {
                         isLoggedIn.value = true;
                         localStorage.setItem('hakka_admin_logged', 'true');
+                        loadOrders();
                     } else {
                         alert('账号或密码错误！(默认账号: admin, 密码: 123456)');
                     }
@@ -143,29 +147,56 @@
                     localStorage.removeItem('hakka_admin_logged');
                 };
 
-                const loadOrders = () => {
-                    const localOrders = localStorage.getItem('hakka_orders');
-                    if (localOrders) {
-                        orders.value = JSON.parse(localOrders);
+                // 从云端拉取订单
+                const loadOrders = async () => {
+                    try {
+                        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                            headers: { 'X-Master-Key': MASTER_KEY }
+                        });
+                        const data = await res.json();
+                        orders.value = (data.record && data.record.orders) ? data.record.orders : [];
+                    } catch (e) {
+                        console.error('获取云端订单失败', e);
                     }
                 };
 
-                const saveOrders = () => {
-                    localStorage.setItem('hakka_orders', JSON.stringify(orders.value));
-                };
-
-                const verifyOrder = (id) => {
+                // 核销订单并同步更新云端
+                const verifyOrder = async (id) => {
                     const order = orders.value.find(o => o.id === id);
                     if (order) {
                         order.status = '已核销完成';
-                        saveOrders();
+                        try {
+                            await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Master-Key': MASTER_KEY
+                                },
+                                body: JSON.stringify({ orders: orders.value })
+                            });
+                            loadOrders();
+                        } catch (e) {
+                            alert('同步核销状态到云端失败');
+                        }
                     }
                 };
 
-                const clearOrders = () => {
-                    if (confirm('确定清空所有订单记录吗？')) {
+                // 清空云端订单
+                const clearOrders = async () => {
+                    if (confirm('确定清空所有云端订单记录吗？')) {
                         orders.value = [];
-                        localStorage.removeItem('hakka_orders');
+                        try {
+                            await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Master-Key': MASTER_KEY
+                                },
+                                body: JSON.stringify({ orders: [] })
+                            });
+                        } catch (e) {
+                            alert('清空失败');
+                        }
                     }
                 };
 
