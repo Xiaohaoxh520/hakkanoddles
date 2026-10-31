@@ -4,212 +4,301 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>客家腌面 - 商家后台 OA 管理系统</title>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 font-sans">
-    <div id="app" class="max-w-md mx-auto bg-white min-h-screen shadow-lg flex flex-col relative pb-10">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #f3f4f6; color: #1f2937; display: flex; justify-content: center; }
+        #app { width: 100%; max-width: 480px; background-color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; position: relative; padding-bottom: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
+        header { background-color: #b45309; color: #ffffff; padding: 14px 16px; position: sticky; top: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: 14px; font-weight: bold; }
+        .nav-buttons { display: flex; gap: 4px; }
+        .nav-btn { background: #78350f; color: #fff; border: none; padding: 5px 8px; border-radius: 6px; font-size: 11px; cursor: pointer; }
+        
+        .tab-bar { display: flex; background: #fffbeb; border-bottom: 1px solid #fde68a; }
+        .tab-item { flex: 1; text-align: center; padding: 10px; font-size: 12px; font-weight: bold; color: #78350f; cursor: pointer; border-bottom: 2px solid transparent; }
+        .tab-item.active { border-bottom-color: #b45309; background: #fff; }
+
+        .content-box { padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+        .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .card h3 { font-size: 13px; font-weight: bold; color: #111827; margin-bottom: 8px; border-left: 3px solid #b45309; padding-left: 6px; }
+
+        .input-box { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px; font-size: 12px; outline: none; margin-top: 4px; }
+        .btn-primary { background-color: #b45309; color: #ffffff; border: none; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; text-align: center; }
+        
+        .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    </style>
+</head>
+<body>
+    <div id="app">
         <!-- 登录拦截层 -->
-        <div v-if="!isLoggedIn" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
-            <div class="bg-white w-full max-w-xs rounded-2xl p-6 space-y-4 shadow-2xl">
-                <h2 class="text-base font-bold text-gray-800 text-center">🔐 商家后台安全登录</h2>
-                <p class="text-xs text-gray-500 text-center">客家腌面到店自提管理端</p>
-                
-                <div class="space-y-3 pt-2">
-                    <div>
-                        <label class="text-xs font-bold text-gray-700 block mb-1">管理员账号：</label>
-                        <input v-model="username" type="text" placeholder="请输入账号" class="w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-amber-600">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-gray-700 block mb-1">登录密码：</label>
-                        <input v-model="password" type="password" placeholder="请输入密码" class="w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-amber-600">
-                    </div>
-                </div>
-
-                <button @click="handleLogin" class="w-full bg-amber-600 text-white py-2.5 rounded-xl font-bold text-xs shadow hover:bg-amber-700 transition">
-                    立即登录后台
-                </button>
-                <div class="text-center">
-                    <a href="index.html" class="text-xs text-amber-600 hover:underline">← 返回顾客点单页</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- 后台主界面 -->
-        <div class="flex-1 flex flex-col p-4 bg-gray-50 space-y-4">
-            <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-sm">
+        <div id="login-modal" class="modal-mask">
+            <div style="background: #fff; width: 100%; max-width: 300px; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+                <h2 style="font-size: 15px; font-weight: bold; text-align: center;">🔐 商家后台登录</h2>
                 <div>
-                    <h2 class="font-bold text-gray-800 text-sm">📈 商家后台 OA 管理系统</h2>
-                    <p class="text-xs text-gray-500">客家腌面 · 云端实时同步看板</p>
+                    <label style="font-size: 11px; font-weight: bold;">账号：</label>
+                    <input id="login-user" type="text" placeholder="admin" class="input-box">
                 </div>
-                <div class="space-x-2">
-                    <button @click="logout" class="text-xs bg-gray-100 text-gray-600 px-2.5 py-1.5 rounded">退出</button>
-                    <button @click="clearOrders" class="text-xs bg-red-100 text-red-600 px-2.5 py-1.5 rounded">清空记录</button>
+                <div>
+                    <label style="font-size: 11px; font-weight: bold;">密码：</label>
+                    <input id="login-pass" type="password" placeholder="123456" class="input-box">
                 </div>
-            </div>
-
-            <!-- 数据统计卡片 -->
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-amber-500">
-                    <div class="text-xs text-gray-500">今日已核销营业额</div>
-                    <div class="text-lg font-bold text-gray-800 mt-1">￥{{ totalRevenue }}</div>
-                </div>
-                <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-blue-500">
-                    <div class="text-xs text-gray-500">待核销自提订单</div>
-                    <div class="text-lg font-bold text-blue-600 mt-1">{{ pendingOrdersCount }} 单</div>
-                </div>
-            </div>
-
-            <!-- 实时订单列表 -->
-            <div class="flex-1 space-y-3">
-                <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-gray-700 text-xs">📋 实时自提订单 (人工核销)</h3>
-                    <button @click="loadOrders" class="text-xs bg-amber-100 text-amber-800 px-2.5 py-1 rounded shadow-sm hover:bg-amber-200">🔄 刷新云端订单</button>
-                </div>
-                
-                <div v-if="orders.length === 0" class="text-center py-16 text-gray-400 bg-white rounded-xl border border-dashed">
-                    <p class="text-xs">暂无云端自提订单记录</p>
-                </div>
-
-                <div v-for="order in orders" :key="order.id" class="bg-white border rounded-xl p-3 shadow-sm space-y-2">
-                    <div class="flex justify-between items-center border-b pb-2 text-xs">
-                        <span class="font-bold text-gray-500">订单号: {{ order.id }}</span>
-                        <span :class="order.status === '待核销' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'" class="px-2 py-0.5 rounded-full font-bold">
-                            {{ order.status }}
-                        </span>
-                    </div>
-
-                    <div class="text-xs text-gray-700 space-y-1">
-                        <div><strong>取餐电话:</strong> {{ order.phone }}</div>
-                        <div><strong>下单时间:</strong> {{ order.time }}</div>
-                        <div><strong>支付途径:</strong> {{ order.payType === 'wechat' ? '微信支付' : '支付宝' }}</div>
-                        <div class="border-t pt-1 mt-1 space-y-1">
-                            <div v-for="item in order.items" class="flex justify-between">
-                                <span>{{ item.name }} ({{ item.spec || '标配' }}) x{{ item.count }}</span>
-                                <span>￥{{ item.price * item.count }}</span>
-                            </div>
-                            <div class="flex justify-between text-gray-500">
-                                <span>自提打包费</span>
-                                <span>￥1.00</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between items-center pt-2 border-t">
-                        <span class="font-bold text-sm text-amber-600">实收: ￥{{ order.total }}</span>
-                        <button v-if="order.status === '待核销'" @click="verifyOrder(order.id)" class="bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg shadow hover:bg-green-700">
-                            ✅ 确认收款并接单
-                        </button>
-                        <span v-else class="text-xs text-gray-400">已核销完成</span>
-                    </div>
-                </div>
+                <button onclick="handleLogin()" class="btn-primary" style="margin-top: 6px;">登录后台</button>
             </div>
         </div>
 
+        <header>
+            <h1>📈 商家OA管理系统</h1>
+            <div class="nav-buttons">
+                <button onclick="exportOrdersCSV()" class="nav-btn" style="background:#059669;">📊 导出流水</button>
+                <button onclick="syncToCloud()" class="nav-btn">💾 保存云端</button>
+                <button onclick="logout()" class="nav-btn" style="background:#dc2626;">退出</button>
+            </div>
+        </header>
+
+        <div class="tab-bar">
+            <div id="tab-orders" onclick="switchTab('orders')" class="tab-item active">📋 实时订单</div>
+            <div id="tab-control" onclick="switchTab('control')" class="tab-item">⚙️ 营业与库存控制</div>
+        </div>
+
+        <!-- 1. 订单核销看板 -->
+        <div id="panel-orders" class="content-box">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 12px; color: #6b7280;" id="stats-text">加载中...</div>
+                <button onclick="loadCloudData()" class="nav-btn">🔄 刷新订单</button>
+            </div>
+            <div id="orders-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        </div>
+
+        <!-- 2. 营业与库存控制面板 -->
+        <div id="panel-control" class="content-box" style="display: none;">
+            <div class="card">
+                <h3>⏰ 下单时间段控制</h3>
+                <div style="display: flex; gap: 10px; margin-top: 6px; align-items: center;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; color: #6b7280;">开始时间：</label>
+                        <input id="time-start" type="time" class="input-box" value="08:00">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; color: #6b7280;">结束时间：</label>
+                        <input id="time-end" type="time" class="input-box" value="21:00">
+                    </div>
+                </div>
+                <button onclick="saveTimeControl()" class="btn-primary" style="margin-top: 10px;">保存营业时间设置</button>
+            </div>
+
+            <div class="card">
+                <h3>📦 商品库存云端管理</h3>
+                <p style="font-size: 11px; color: #6b7280; margin-bottom: 8px;">修改后点击上方“保存云端”即可实时同步给顾客端</p>
+                <div id="inventory-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 50vh; overflow-y: auto;"></div>
+            </div>
+        </div>
     </div>
 
     <script>
-        const { createApp, ref, computed, onMounted } = Vue;
-
         const BIN_ID = '6ae586c8ffd5d160539a6da4';
         const MASTER_KEY = '$2a$10$lwmZR3vIjsFdZlgG4.WReOJzFNBqHERsLquMbL42GY/BNEBveQ896';
 
-        createApp({
-            setup() {
-                const isLoggedIn = ref(false);
-                const username = ref('');
-                const password = ref('');
-                const orders = ref([]);
+        let cloudData = {
+            orders: [],
+            control: { start: '08:00', end: '21:00' },
+            stocks: {}
+        };
 
-                const correctUser = 'admin';
-                const correctPass = '123456';
+        const defaultMenuStructure = [
+            '紫菜蛋花汤套餐', '番茄蛋花汤套餐', '枸杞叶三及第汤套餐', '枸杞叶瘦肉汤套餐', 
+            '酸菜瘦肉汤套餐', '枸杞叶猪肉丸汤套餐', '枸杞叶牛肉丸汤套餐', '酸菜牛肉丸汤套餐',
+            '腌面', '腌米粉', '腌河粉', '腌珍珠粉',
+            '紫菜蛋花汤', '番茄蛋花汤', '枸杞叶三及第汤', '枸杞叶瘦肉汤', '酸菜瘦肉汤', 
+            '枸杞叶猪肉丸汤', '枸杞叶牛肉丸汤', '酸菜牛肉丸汤',
+            '猪杂汤', '猪肉丸瘦肉汤', '牛肉丸牛肉汤'
+        ];
 
-                onMounted(() => {
-                    if (localStorage.getItem('hakka_admin_logged') === 'true') {
-                        isLoggedIn.value = true;
+        function handleLogin() {
+            const u = document.getElementById('login-user').value.trim();
+            const p = document.getElementById('login-pass').value.trim();
+            if (u === 'admin' && p === '123456') {
+                localStorage.setItem('admin_logged', 'true');
+                document.getElementById('login-modal').style.display = 'none';
+                loadCloudData();
+            } else {
+                alert('账号或密码错误！');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('admin_logged');
+            document.getElementById('login-modal').style.display = 'flex';
+        }
+
+        function switchTab(tab) {
+            document.getElementById('tab-orders').className = `tab-item ${tab === 'orders' ? 'active' : ''}`;
+            document.getElementById('tab-control').className = `tab-item ${tab === 'control' ? 'active' : ''}`;
+            document.getElementById('panel-orders').style.display = tab === 'orders' ? 'flex' : 'none';
+            document.getElementById('panel-control').style.display = tab === 'control' ? 'flex' : 'none';
+        }
+
+        async function loadCloudData() {
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': MASTER_KEY }
+                });
+                const data = await res.json();
+                if (data.record) {
+                    cloudData.orders = data.record.orders || [];
+                    cloudData.control = data.record.control || { start: '08:00', end: '21:00' };
+                    cloudData.stocks = data.record.stocks || {};
+                }
+
+                defaultMenuStructure.forEach(name => {
+                    if (cloudData.stocks[name] === undefined) {
+                        cloudData.stocks[name] = 50;
                     }
-                    loadOrders();
                 });
 
-                const handleLogin = () => {
-                    if (username.value === correctUser && password.value === correctPass) {
-                        isLoggedIn.value = true;
-                        localStorage.setItem('hakka_admin_logged', 'true');
-                        loadOrders();
-                    } else {
-                        alert('账号或密码错误！(默认账号: admin, 密码: 123456)');
-                    }
-                };
-
-                const logout = () => {
-                    isLoggedIn.value = false;
-                    localStorage.removeItem('hakka_admin_logged');
-                };
-
-                // 从云端拉取订单
-                const loadOrders = async () => {
-                    try {
-                        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-                            headers: { 'X-Master-Key': MASTER_KEY }
-                        });
-                        const data = await res.json();
-                        orders.value = (data.record && data.record.orders) ? data.record.orders : [];
-                    } catch (e) {
-                        console.error('获取云端订单失败', e);
-                    }
-                };
-
-                // 核销订单并同步更新云端
-                const verifyOrder = async (id) => {
-                    const order = orders.value.find(o => o.id === id);
-                    if (order) {
-                        order.status = '已核销完成';
-                        try {
-                            await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-                                method: 'PUT',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-Master-Key': MASTER_KEY
-                                },
-                                body: JSON.stringify({ orders: orders.value })
-                            });
-                            loadOrders();
-                        } catch (e) {
-                            alert('同步核销状态到云端失败');
-                        }
-                    }
-                };
-
-                // 清空云端订单
-                const clearOrders = async () => {
-                    if (confirm('确定清空所有云端订单记录吗？')) {
-                        orders.value = [];
-                        try {
-                            await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-                                method: 'PUT',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-Master-Key': MASTER_KEY
-                                },
-                                body: JSON.stringify({ orders: [] })
-                            });
-                        } catch (e) {
-                            alert('清空失败');
-                        }
-                    }
-                };
-
-                const pendingOrdersCount = computed(() => orders.value.filter(o => o.status === '待核销').length);
-                const totalRevenue = computed(() => orders.value.filter(o => o.status === '已核销完成').reduce((s, o) => s + o.total, 0));
-
-                return {
-                    isLoggedIn, username, password, orders,
-                    handleLogin, logout, loadOrders, verifyOrder, clearOrders,
-                    pendingOrdersCount, totalRevenue
-                };
+                renderOrders();
+                renderControlPanel();
+            } catch (e) {
+                console.error(e);
+                alert('加载云端数据失败');
             }
-        }).mount('#app');
+        }
+
+        async function syncToCloud() {
+            defaultMenuStructure.forEach(name => {
+                const input = document.getElementById(`stock-${name}`);
+                if (input) {
+                    cloudData.stocks[name] = parseInt(input.value) || 0;
+                }
+            });
+
+            try {
+                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': MASTER_KEY
+                    },
+                    body: JSON.stringify(cloudData)
+                });
+                alert('✅ 成功同步至云端！顾客端已实时更新。');
+                loadCloudData();
+            } catch (e) {
+                console.error(e);
+                alert('同步云端失败');
+            }
+        }
+
+        function saveTimeControl() {
+            const start = document.getElementById('time-start').value;
+            const end = document.getElementById('time-end').value;
+            cloudData.control = { start, end };
+            syncToCloud();
+        }
+
+        function renderOrders() {
+            const orders = cloudData.orders;
+            const pendingCount = orders.filter(o => o.status === '待核销').length;
+            const revenue = orders.filter(o => o.status === '已核销完成').reduce((s, o) => s + o.total, 0);
+
+            document.getElementById('stats-text').innerHTML = `待核销: <strong style="color:#b45309;">${pendingCount}单</strong> | 已核销营业额: <strong>￥${revenue}</strong>`;
+
+            const container = document.getElementById('orders-list');
+            if (orders.length === 0) {
+                container.innerHTML = `<div style="text-align: center; padding: 30px; color: #9ca3af; font-size: 12px;">暂无订单记录</div>`;
+                return;
+            }
+
+            container.innerHTML = orders.map(order => `
+                <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px; background: #fff; font-size: 11px; display: flex; flex-direction: column; gap: 4px;">
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; border-bottom: 1px solid #f3f4f6; padding-bottom: 4px;">
+                        <span>单号: ${order.id}</span>
+                        <span style="color: ${order.status === '待核销' ? '#b45309' : '#059669'};">${order.status}</span>
+                    </div>
+                    <div style="color: #6b7280;">时间: ${order.time} | 尾号: ${order.phone}</div>
+                    <div style="border-top: 1px solid #f3f4f6; padding-top: 4px;">
+                        ${order.items.map(i => `
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
+                                <span>￥${i.price * i.count}</span>
+                            </div>
+                        `).join('')}
+                        <div style="display: flex; justify-content: space-between; color: #9ca3af;">
+                            <span>自提打包费</span><span>￥1.00</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f3f4f6; padding-top: 6px; font-size: 12px;">
+                        <span style="font-weight: bold; color: #b45309;">实收: ￥${order.total}</span>
+                        ${order.status === '待核销' ? `<button onclick="verifyOrder('${order.id}')" style="background:#059669; color:#fff; border:none; padding:4px 10px; border-radius:6px; cursor:pointer; font-size:11px;">✅ 确认核销</button>` : '<span style="color:#059669; font-size:11px;">已完成</span>'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function verifyOrder(orderId) {
+            const order = cloudData.orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = '已核销完成';
+                await syncToCloud();
+            }
+        }
+
+        // 导出流水 CSV 功能
+        function exportOrdersCSV() {
+            const orders = cloudData.orders;
+            if (!orders || orders.length === 0) {
+                alert('暂无订单数据可供导出！');
+                return;
+            }
+
+            // CSV 表头
+            let csvContent = "data:text/csv;charset=utf-8,\ufeff"; // \ufeff 防止 Excel 打开中文乱码
+            csvContent += "订单号,取餐手机尾号,下单时间,订单状态,商品明细,实付金额(含打包费)\r\n";
+
+            orders.forEach(order => {
+                const itemsStr = order.items.map(i => `${i.name}(${i.spec || '标配'})x${i.count}`).join('; ');
+                const row = [
+                    order.id,
+                    order.phone,
+                    order.time,
+                    order.status,
+                    `"${itemsStr}"`, // 用引号包裹商品明细防止逗号打乱表格
+                    order.total
+                ];
+                csvContent += row.join(",") + "\r\n";
+            });
+
+            // 触发浏览器下载
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `客家腌面营业流水_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function renderControlPanel() {
+            document.getElementById('time-start').value = cloudData.control.start || '08:00';
+            document.getElementById('time-end').value = cloudData.control.end || '21:00';
+
+            const container = document.getElementById('inventory-list');
+            container.innerHTML = defaultMenuStructure.map(name => `
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f3f4f6; padding-bottom: 6px;">
+                    <span style="font-size: 12px; font-weight: 500;">${name}</span>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 11px; color: #6b7280;">剩余库存:</span>
+                        <input id="stock-${name}" type="number" value="${cloudData.stocks[name] !== undefined ? cloudData.stocks[name] : 50}" style="width: 70px; border: 1px solid #d1d5db; border-radius: 6px; padding: 4px; text-align: center; font-size: 12px;">
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.onload = function() {
+            if (localStorage.getItem('admin_logged') === 'true') {
+                document.getElementById('login-modal').style.display = 'none';
+                loadCloudData();
+            }
+        };
     </script>
 </body>
 </html>
