@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>客家腌面 - 到店自提点单系统</title>
-    <!-- 使用极高稳定性的 jsDelivr CDN 引入 Vue 3 -->
-    <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.prod.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #f3f4f6; color: #1f2937; display: flex; justify-content: center; }
@@ -14,7 +12,7 @@
         /* 顶部导航 */
         header { background-color: #b45309; color: #ffffff; padding: 14px 16px; position: sticky; top: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         header h1 { font-size: 16px; font-weight: bold; }
-        .query-btn { background-color: #78350f !important; color: #ffffff !important; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .query-btn { background-color: #78350f; color: #ffffff; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; }
         
         /* 提示条 */
         .notice { background-color: #fef3c7; color: #78350f; font-size: 12px; padding: 8px 16px; border-bottom: 1px solid #fde68a; font-weight: 500; }
@@ -32,37 +30,34 @@
         .item-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .grid-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         
-        /* 按钮通用样式 */
+        /* 按钮样式 */
         .btn-primary { 
-            background-color: #b45309 !important; 
-            color: #ffffff !important; 
-            border: none !important; 
-            padding: 7px 12px !important; 
-            border-radius: 8px !important; 
-            font-size: 12px !important; 
-            font-weight: bold !important; 
-            cursor: pointer !important; 
-            text-align: center !important; 
-            display: inline-block !important;
-            -webkit-appearance: none !important;
-            appearance: none !important;
+            background-color: #b45309; 
+            color: #ffffff; 
+            border: none; 
+            padding: 7px 12px; 
+            border-radius: 8px; 
+            font-size: 12px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            text-align: center; 
         }
-        .btn-primary:active { background-color: #92400e !important; }
+        .btn-primary:active { background-color: #92400e; }
         .btn-price { font-size: 13px; font-weight: bold; color: #b45309; }
         
         /* 底部购物车 */
         .footer-cart { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: #ffffff; border-top: 1px solid #e5e7eb; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 20; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
         .cart-left { display: flex; align-items: center; gap: 12px; }
         .cart-icon-box { position: relative; background: #b45309; color: #ffffff; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; box-shadow: 0 2px 5px rgba(180,83,9,0.3); }
-        .cart-badge { position: absolute; top: -4px; right: -4px; background: #dc2626; color: #ffffff; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .cart-badge { position: absolute; top: -4px; right: -4px; background: #dc2626; color: #ffffff; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; display: none; }
         .cart-total-text { font-size: 13px; font-weight: bold; color: #111827; }
         .cart-total-text span { color: #b45309; font-size: 15px; }
         .cart-sub-text { font-size: 11px; color: #4b5563; }
-        .checkout-btn { background-color: #b45309 !important; color: #ffffff !important; border: none !important; padding: 10px 20px !important; border-radius: 10px !important; font-size: 13px !important; font-weight: bold !important; cursor: pointer !important; -webkit-appearance: none !important; }
-        .checkout-btn:disabled { background-color: #d1d5db !important; color: #9ca3af !important; cursor: not-allowed; }
+        .checkout-btn { background-color: #b45309; color: #ffffff; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .checkout-btn:disabled { background-color: #d1d5db; color: #9ca3af; cursor: not-allowed; }
 
         /* 弹窗遮罩 */
-        .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; }
+        .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; display: none; align-items: center; justify-content: center; padding: 16px; }
         .modal-box { background: #ffffff; width: 100%; max-width: 320px; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; }
         .modal-bottom { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: #ffffff; border-radius: 20px 20px 0 0; padding: 20px; max-height: 75vh; display: flex; flex-direction: column; gap: 14px; z-index: 40; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); }
         .close-x { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 16px; color: #6b7280; cursor: pointer; }
@@ -81,12 +76,12 @@
     </style>
 </head>
 <body>
-    <div id="app" style="display: none;" :style="{ display: 'flex' }">
+    <div id="app">
         
         <!-- 顶部导航栏 -->
         <header>
             <h1>🥣 客家腌面 (到店自提)</h1>
-            <button @click="showQueryModal = true" class="query-btn">🔍 查询订单</button>
+            <button onclick="openQueryModal()" class="query-btn">🔍 查询订单</button>
         </header>
 
         <!-- 提示横幅 -->
@@ -97,52 +92,25 @@
         <!-- 菜单主体 -->
         <div class="menu-container">
             
-            <!-- 1. 营养套餐系列 (优先展示) -->
+            <!-- 1. 营养套餐系列 -->
             <div>
                 <div class="section-title">
                     <span>🌟 营养套餐系列</span>
                     <span class="section-desc">(可选面/米粉/河粉/珍珠粉)</span>
                 </div>
-                <div>
-                    <div v-for="item in menu.combos" :key="item.name" class="item-card">
-                        <div class="item-info">
-                            <h3>{{ item.name }}</h3>
-                            <p>粉面：{{ item.options.join('/') }}</p>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 6px;">
-                            <button @click="openSpecModal(item, 'small')" class="btn-primary">小份 ￥{{ item.priceSmall }}</button>
-                            <button @click="openSpecModal(item, 'big')" class="btn-primary">大份 ￥{{ item.priceBig }}</button>
-                        </div>
-                    </div>
-                </div>
+                <div id="combos-list"></div>
             </div>
 
             <!-- 2. 主食系列 -->
             <div>
                 <div class="section-title"><span>🍜 主食系列</span></div>
-                <div class="item-grid-2">
-                    <div v-for="item in menu.staples" :key="item.name" class="grid-card">
-                        <div class="item-info"><h3>{{ item.name }}</h3></div>
-                        <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between;">
-                            <span style="font-size: 11px; color: #6b7280; font-weight: 600;">小{{ item.priceSmall }}/大{{ item.priceBig }}</span>
-                            <button @click="openSpecModal(item, 'small')" class="btn-primary" style="padding: 5px 10px !important;">选规格</button>
-                        </div>
-                    </div>
-                </div>
+                <div id="staples-list" class="item-grid-2"></div>
             </div>
 
             <!-- 3. 靓汤系列 -->
             <div>
                 <div class="section-title"><span>🍲 靓汤系列</span></div>
-                <div class="item-grid-2">
-                    <div v-for="item in menu.soups" :key="item.name" class="grid-card">
-                        <div class="item-info"><h3>{{ item.name }}</h3></div>
-                        <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between;">
-                            <span class="btn-price">￥{{ item.price }}</span>
-                            <button @click="addToCartDirect(item)" class="btn-primary" style="padding: 5px 10px !important;">+ 选购</button>
-                        </div>
-                    </div>
-                </div>
+                <div id="soups-list" class="item-grid-2"></div>
             </div>
 
             <!-- 4. 汤粉汤面系列 -->
@@ -151,18 +119,7 @@
                     <span>🍜 汤粉汤面系列</span>
                     <span class="section-desc">(面/米粉/河粉/珍珠粉)</span>
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div v-for="item in menu.noodlessoups" :key="item.name" class="item-card">
-                        <div class="item-info">
-                            <h3>{{ item.name }}</h3>
-                            <p>可选：{{ item.options.join('/') }}</p>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 6px;">
-                            <button @click="openSpecModal(item, 'small')" class="btn-primary">小份 ￥{{ item.priceSmall }}</button>
-                            <button @click="openSpecModal(item, 'big')" class="btn-primary">大份 ￥{{ item.priceBig }}</button>
-                        </div>
-                    </div>
-                </div>
+                <div id="noodlessoups-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
             </div>
 
         </div>
@@ -170,155 +127,115 @@
         <!-- 底部购物车悬浮栏 -->
         <div class="footer-cart">
             <div class="cart-left">
-                <div @click="toggleCartModal" class="cart-icon-box">
+                <div onclick="toggleCartModal()" class="cart-icon-box">
                     🛒
-                    <span v-if="cartCount > 0" class="cart-badge">{{ cartCount }}</span>
+                    <span id="cart-badge" class="cart-badge">0</span>
                 </div>
                 <div>
-                    <div class="cart-total-text">合计: <span>￥{{ cartTotalAmount }}</span></div>
+                    <div class="cart-total-text">合计: <span id="cart-total">￥0</span></div>
                     <div class="cart-sub-text">含自提打包费: ￥1.00</div>
                 </div>
             </div>
-            <button @click="checkout" :disabled="cart.length === 0" class="checkout-btn">
-                去结算 (￥{{ finalTotalAmount }})
+            <button id="checkout-btn" onclick="checkout()" class="checkout-btn" disabled>
+                去结算 (￥1.00)
             </button>
         </div>
 
         <!-- 规格选择弹窗 -->
-        <div v-if="showSpecModal" class="modal-mask">
+        <div id="spec-modal" class="modal-mask">
             <div class="modal-box">
-                <button @click="showSpecModal = false" class="close-x">✕</button>
-                <h3 style="font-size: 15px; font-weight: bold; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">{{ activeItem.name }}</h3>
+                <button onclick="closeSpecModal()" class="close-x">✕</button>
+                <h3 id="spec-title" style="font-size: 15px; font-weight: bold; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;"></h3>
                 
-                <div v-if="activeItem.options">
+                <div id="spec-options-container">
                     <label style="font-size: 12px; font-weight: bold; color: #374151; display: block; margin-bottom: 4px;">选择粉面规格：</label>
-                    <div class="option-grid">
-                        <div v-for="opt in activeItem.options" :key="opt" 
-                            @click="selectedOption = opt"
-                            :class="['option-btn', selectedOption === opt ? 'active' : '']">
-                            {{ opt }}
-                        </div>
-                    </div>
+                    <div id="spec-options-grid" class="option-grid"></div>
                 </div>
 
                 <div style="font-size: 12px; color: #4b5563; background: #f9fafb; padding: 10px; border-radius: 8px; border: 1px solid #e5e7eb;">
-                    已选规格：<span style="color: #b45309; font-weight: bold;">{{ activeSpecName }}</span><br>
-                    价格：<span style="color: #b45309; font-weight: bold; font-size: 14px;">￥{{ activeSpecPrice }}</span>
+                    已选规格：<span id="spec-selected-name" style="color: #b45309; font-weight: bold;"></span><br>
+                    价格：<span id="spec-selected-price" style="color: #b45309; font-weight: bold; font-size: 14px;"></span>
                 </div>
 
                 <div style="display: flex; gap: 10px; margin-top: 4px;">
-                    <button @click="showSpecModal = false" style="flex: 1; background: #e5e7eb; color: #374151; border: none; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">取消</button>
-                    <button @click="confirmAddToCart" class="btn-primary" style="flex: 1; padding: 10px !important;">加入购物车</button>
+                    <button onclick="closeSpecModal()" style="flex: 1; background: #e5e7eb; color: #374151; border: none; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">取消</button>
+                    <button onclick="confirmAddToCart()" class="btn-primary" style="flex: 1; padding: 10px;">加入购物车</button>
                 </div>
             </div>
         </div>
 
         <!-- 购物车抽屉弹窗 -->
-        <div v-if="showCartModal" class="modal-mask" style="align-items: flex-end; padding: 0;">
+        <div id="cart-modal" class="modal-mask" style="align-items: flex-end; padding: 0;" onclick="if(event.target === this) toggleCartModal()">
             <div class="modal-bottom">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">
                     <span style="font-weight: bold; font-size: 14px;">购物车明细 (到店自提)</span>
-                    <button @click="showCartModal = false" class="close-x" style="position: static;">✕</button>
+                    <button onclick="toggleCartModal()" class="close-x" style="position: static;">✕</button>
                 </div>
                 
-                <div style="max-height: 40vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
-                    <div v-for="(item, index) in cart" :key="index" style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; border-bottom: 1px solid #f3f4f6; padding-bottom: 8px;">
-                        <div>
-                            <div style="font-weight: bold;">{{ item.name }} <span v-if="item.spec" style="color: #b45309;">({{ item.spec }})</span></div>
-                            <div style="color: #6b7280; margin-top: 2px;">￥{{ item.price }}</div>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <button @click="decreaseCart(index)" style="width: 26px; height: 26px; background: #e5e7eb; border: none; border-radius: 50%; font-weight: bold; cursor: pointer;">-</button>
-                            <span style="font-weight: bold; width: 16px; text-align: center;">{{ item.count }}</span>
-                            <button @click="increaseCart(index)" class="btn-primary" style="width: 26px; height: 26px; border-radius: 50%; padding: 0 !important; display: flex; align-items: center; justify-content: center;">+</button>
-                        </div>
-                    </div>
-                </div>
+                <div id="cart-items-list" style="max-height: 40vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;"></div>
 
                 <div style="border-top: 1px solid #e5e7eb; padding-top: 10px; font-size: 12px; display: flex; flex-direction: column; gap: 4px;">
-                    <div style="display: flex; justify-content: space-between;"><span>商品金额:</span><span>￥{{ cartTotalAmount }}</span></div>
+                    <div style="display: flex; justify-content: space-between;"><span>商品金额:</span><span id="cart-goods-amount">￥0</span></div>
                     <div style="display: flex; justify-content: space-between;"><span>打包费 (到店自提):</span><span>￥1.00</span></div>
                     <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; color: #111827; padding-top: 4px; border-top: 1px dashed #e5e7eb;">
                         <span>应付总计:</span>
-                        <span style="color: #b45309; font-size: 16px;">￥{{ finalTotalAmount }}</span>
+                        <span id="cart-final-amount" style="color: #b45309; font-size: 16px;">￥1.00</span>
                     </div>
                 </div>
 
-                <button @click="checkout" class="btn-primary" style="padding: 12px !important; font-size: 14px !important; border-radius: 12px !important; width: 100%;">
-                    去结算 (￥{{ finalTotalAmount }})
+                <button onclick="checkout()" class="btn-primary" style="padding: 12px; font-size: 14px; border-radius: 12px; width: 100%;">
+                    去结算
                 </button>
             </div>
         </div>
 
         <!-- 个人收银台付款弹窗 -->
-        <div v-if="showPayModal" class="modal-mask">
+        <div id="pay-modal" class="modal-mask">
             <div class="modal-box" style="text-align: center;">
-                <button @click="showPayModal = false" class="close-x">✕</button>
+                <button onclick="closePayModal()" class="close-x">✕</button>
                 
                 <div style="color: #b45309; font-weight: bold; font-size: 13px;">客家腌面 · 个人收银台</div>
-                <div style="font-size: 26px; font-weight: black; color: #111827;">￥{{ finalTotalAmount }}</div>
+                <div id="pay-amount" style="font-size: 26px; font-weight: black; color: #111827;">￥1.00</div>
                 <p style="font-size: 11px; color: #6b7280;">（含自提打包费 1.00元）</p>
 
                 <!-- 支付方式 -->
                 <div class="pay-type-box">
-                    <div @click="payType = 'wechat'" :class="['pay-tab', payType === 'wechat' ? 'active' : '']">💚 微信支付</div>
-                    <div @click="payType = 'alipay'" :class="['pay-tab', payType === 'alipay' ? 'active' : '']">💙 支付宝</div>
+                    <div id="pay-tab-wechat" onclick="setPayType('wechat')" class="pay-tab active">💚 微信支付</div>
+                    <div id="pay-tab-alipay" onclick="setPayType('alipay')" class="pay-tab">💙 支付宝</div>
                 </div>
 
                 <!-- 收款码 -->
                 <div style="background: #f9fafb; padding: 12px; border-radius: 12px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; align-items: center;">
-                    <img :src="payType === 'wechat' ? 'https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=WECHAT_PAY_QR' : 'https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=ALIPAY_QR'" alt="收款码" style="width: 120px; height: 120px; object-fit: contain; background: #fff; padding: 4px; border-radius: 6px; border: 1px solid #e5e7eb; margin-bottom: 8px;">
-                    <span style="font-size: 11px; color: #4b5563;">请长按或扫描二维码转账<br><strong style="color: #b45309; font-size: 13px;">￥{{ finalTotalAmount }}</strong></span>
+                    <img id="pay-qrcode" src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=WECHAT_PAY_QR" alt="收款码" style="width: 120px; height: 120px; object-fit: contain; background: #fff; padding: 4px; border-radius: 6px; border: 1px solid #e5e7eb; margin-bottom: 8px;">
+                    <span style="font-size: 11px; color: #4b5563;">请长按或扫描二维码转账<br><strong id="pay-amount-tip" style="color: #b45309; font-size: 13px;">￥1.00</strong></span>
                 </div>
 
                 <!-- 取餐电话 -->
                 <div style="text-align: left;">
                     <label style="font-size: 11px; font-weight: bold; color: #374151; display: block; margin-bottom: 4px;">填写取餐手机尾号：</label>
-                    <input v-model="customerPhone" type="text" placeholder="用于到店核对自提" class="input-box">
+                    <input id="customer-phone-input" type="text" placeholder="用于到店核对自提" class="input-box">
                 </div>
 
-                <button @click="submitOrder" class="btn-primary" style="padding: 12px !important; font-size: 13px !important; border-radius: 10px !important; width: 100%;">
+                <button onclick="submitOrder()" class="btn-primary" style="padding: 12px; font-size: 13px; border-radius: 10px; width: 100%;">
                     我已付款，提交自提订单
                 </button>
             </div>
         </div>
 
         <!-- 订单查询弹窗 -->
-        <div v-if="showQueryModal" class="modal-mask">
+        <div id="query-modal" class="modal-mask">
             <div class="modal-box" style="max-height: 80vh;">
-                <button @click="showQueryModal = false" class="close-x">✕</button>
+                <button onclick="closeQueryModal()" class="close-x">✕</button>
                 <div style="color: #b45309; font-weight: bold; font-size: 13px; text-align: center;">🔍 自提订单状态查询</div>
                 
                 <div style="display: flex; gap: 8px;">
-                    <input v-model="searchPhone" type="text" placeholder="请输入手机尾号查询" class="input-box" style="flex: 1;">
-                    <button @click="searchOrders" class="btn-primary" style="padding: 8px 14px !important;">查询</button>
+                    <input id="search-phone-input" type="text" placeholder="请输入手机尾号查询" class="input-box" style="flex: 1;">
+                    <button onclick="searchOrders()" class="btn-primary" style="padding: 8px 14px;">查询</button>
                 </div>
 
                 <!-- 查询结果 -->
-                <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; max-height: 50vh;">
-                    <div v-if="hasSearched && queryResult.length === 0" style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">
-                        没有找到该手机号相关的订单
-                    </div>
-                    
-                    <div v-for="order in queryResult" :key="order.id" style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px; background: #f9fafb; font-size: 11px; display: flex; flex-direction: column; gap: 4px;">
-                        <div style="display: flex; justify-content: space-between; font-weight: bold; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px;">
-                            <span>单号: {{ order.id }}</span>
-                            <span :style="{ color: order.status === '待核销' ? '#b45309' : '#059669' }">{{ order.status }}</span>
-                        </div>
-                        <div style="color: #6b7280;">时间：{{ order.time }} | 尾号：{{ order.phone }}</div>
-                        <div style="border-top: 1px solid #e5e7eb; padding-top: 4px;">
-                            <div v-for="item in order.items" style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-                                <span>{{ item.name }} ({{ item.spec || '标配' }}) x{{ item.count }}</span>
-                                <span>￥{{ item.price * item.count }}</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; color: #9ca3af;">
-                                <span>自提打包费</span><span>￥1.00</span>
-                            </div>
-                        </div>
-                        <div style="text-align: right; font-weight: bold; color: #b45309; border-top: 1px solid #e5e7eb; padding-top: 4px; font-size: 12px;">
-                            实付总额：￥{{ order.total }}
-                        </div>
-                    </div>
+                <div id="query-results-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; max-height: 50vh;">
+                    <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">请输入手机号查询</div>
                 </div>
             </div>
         </div>
@@ -326,190 +243,388 @@
     </div>
 
     <script>
-        const { createApp, ref, computed, reactive } = Vue;
-
         const BIN_ID = '6ae586c8ffd5d160539a6da4';
         const MASTER_KEY = '$2a$10$lwmZR3vIjsFdZlgG4.WReOJzFNBqHERsLquMbL42GY/BNEBveQ896';
 
-        createApp({
-            setup() {
-                const showSpecModal = ref(false);
-                const showCartModal = ref(false);
-                const showPayModal = ref(false);
-                const showQueryModal = ref(false);
-                
-                const payType = ref('wechat');
-                const customerPhone = ref('');
-                const searchPhone = ref('');
-                const queryResult = ref([]);
-                const hasSearched = ref(false);
-                
-                const activeItem = ref({});
-                const selectedSpecType = ref('small');
-                const selectedOption = ref('');
+        // 菜单数据
+        const menuData = {
+            combos: [
+                { name: '紫菜蛋花汤套餐', priceSmall: 11, priceBig: 13, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                { name: '番茄蛋花汤套餐', priceSmall: 11, priceBig: 13, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                { name: '枸杞叶三及第汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                { name: '枸杞叶瘦肉汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                { name: '酸菜瘦肉汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                { name: '枸杞叶猪肉丸汤套餐', priceSmall: 15, priceBig: 17, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                { name: '枸杞叶牛肉丸汤套餐', priceSmall: 15, priceBig: 17, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                { name: '酸菜牛肉丸汤套餐', priceSmall: 15, priceBig: 17, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] }
+            ],
+            staples: [
+                { name: '腌面', priceSmall: 8, priceBig: 10, options: ['常规'] },
+                { name: '腌米粉', priceSmall: 8, priceBig: 10, options: ['常规'] },
+                { name: '腌河粉', priceSmall: 8, priceBig: 10, options: ['常规'] },
+                { name: '腌珍珠粉', priceSmall: 8, priceBig: 10, options: ['常规'] }
+            ],
+            soups: [
+                { name: '紫菜蛋花汤', price: 5 },
+                { name: '番茄蛋花汤', price: 5 },
+                { name: '枸杞叶三及第汤', price: 7 },
+                { name: '枸杞叶瘦肉汤', price: 7 },
+                { name: '酸菜瘦肉汤', price: 7 },
+                { name: '枸杞叶猪肉丸汤', price: 9 },
+                { name: '枸杞叶牛肉丸汤', price: 9 },
+                { name: '酸菜牛肉丸汤', price: 9 }
+            ],
+            noodlessoups: [
+                { name: '猪杂汤', priceSmall: 13, priceBig: 15, options: ['面条', '米粉', '河粉', '珍珠粉'] },
+                { name: '猪肉丸瘦肉汤', priceSmall: 15, priceBig: 17, options: ['面条', '米粉', '河粉', '珍珠粉'] },
+                { name: '牛肉丸牛肉汤', priceSmall: 17, priceBig: 19, options: ['面条', '米粉', '河粉', '珍珠粉'] }
+            ]
+        };
 
-                const cart = ref([]);
+        let cart = [];
+        let currentActiveItem = null;
+        let currentSpecType = 'small';
+        let currentOption = '';
+        let currentPayType = 'wechat';
 
-                const menu = reactive({
-                    combos: [
-                        { name: '紫菜蛋花汤套餐', priceSmall: 11, priceBig: 13, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
-                        { name: '番茄蛋花汤套餐', priceSmall: 11, priceBig: 13, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
-                        { name: '枸杞叶三及第汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
-                        { name: '枸杞叶瘦肉汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
-                        { name: '酸菜瘦肉汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
-                        { name: '枸杞叶猪肉丸汤套餐', priceSmall: 15, priceBig: 17, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
-                        { name: '枸杞叶牛肉丸汤套餐', priceSmall: 15, priceBig: 17, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
-                        { name: '酸菜牛肉丸汤套餐', priceSmall: 15, priceBig: 17, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
-                    ],
-                    staples: [
-                        { name: '腌面', priceSmall: 8, priceBig: 10, options: ['常规'] },
-                        { name: '腌米粉', priceSmall: 8, priceBig: 10, options: ['常规'] },
-                        { name: '腌河粉', priceSmall: 8, priceBig: 10, options: ['常规'] },
-                        { name: '腌珍珠粉', priceSmall: 8, priceBig: 10, options: ['常规'] },
-                    ],
-                    soups: [
-                        { name: '紫菜蛋花汤', price: 5 },
-                        { name: '番茄蛋花汤', price: 5 },
-                        { name: '枸杞叶三及第汤', price: 7 },
-                        { name: '枸杞叶瘦肉汤', price: 7 },
-                        { name: '酸菜瘦肉汤', price: 7 },
-                        { name: '枸杞叶猪肉丸汤', price: 9 },
-                        { name: '枸杞叶牛肉丸汤', price: 9 },
-                        { name: '酸菜牛肉丸汤', price: 9 },
-                    ],
-                    noodlessoups: [
-                        { name: '猪杂汤', priceSmall: 13, priceBig: 15, options: ['面条', '米粉', '河粉', '珍珠粉'] },
-                        { name: '猪肉丸瘦肉汤', priceSmall: 15, priceBig: 17, options: ['面条', '米粉', '河粉', '珍珠粉'] },
-                        { name: '牛肉丸牛肉汤', priceSmall: 17, priceBig: 19, options: ['面条', '米粉', '河粉', '珍珠粉'] }
-                    ]
-                });
+        // 初始化渲染菜单
+        function renderMenu() {
+            // 1. 套餐
+            document.getElementById('combos-list').innerHTML = menuData.combos.map((item, idx) => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <h3>${item.name}</h3>
+                        <p>粉面：${item.options.join('/')}</p>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <button onclick="openSpecModal('combos', ${idx}, 'small')" class="btn-primary">小份 ￥${item.priceSmall}</button>
+                        <button onclick="openSpecModal('combos', ${idx}, 'big')" class="btn-primary">大份 ￥${item.priceBig}</button>
+                    </div>
+                </div>
+            `).join('');
 
-                const openSpecModal = (item, specType) => {
-                    activeItem.value = item;
-                    selectedSpecType.value = specType;
-                    if (item.options) selectedOption.value = item.options[0];
-                    showSpecModal.value = true;
-                };
+            // 2. 主食
+            document.getElementById('staples-list').innerHTML = menuData.staples.map((item, idx) => `
+                <div class="grid-card">
+                    <div class="item-info"><h3>${item.name}</h3></div>
+                    <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-size: 11px; color: #6b7280; font-weight: 600;">小${item.priceSmall}/大${item.priceBig}</span>
+                        <button onclick="openSpecModal('staples', ${idx}, 'small')" class="btn-primary" style="padding: 5px 10px;">选规格</button>
+                    </div>
+                </div>
+            `).join('');
 
-                const activeSpecPrice = computed(() => selectedSpecType.value === 'small' ? activeItem.value.priceSmall : activeItem.value.priceBig);
-                const activeSpecName = computed(() => {
-                    const size = selectedSpecType.value === 'small' ? '小份' : '大份';
-                    return selectedOption.value ? `${size} (${selectedOption.value})` : size;
-                });
+            // 3. 靓汤
+            document.getElementById('soups-list').innerHTML = menuData.soups.map((item, idx) => `
+                <div class="grid-card">
+                    <div class="item-info"><h3>${item.name}</h3></div>
+                    <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between;">
+                        <span class="btn-price">￥${item.price}</span>
+                        <button onclick="addToCartDirect(${idx})" class="btn-primary" style="padding: 5px 10px;">+ 选购</button>
+                    </div>
+                </div>
+            `).join('');
 
-                const confirmAddToCart = () => {
-                    const spec = activeSpecName.value;
-                    const price = activeSpecPrice.value;
-                    const existing = cart.value.find(i => i.name === activeItem.value.name && i.spec === spec);
-                    if (existing) existing.count++;
-                    else cart.value.push({ name: activeItem.value.name, spec, price, count: 1 });
-                    showSpecModal.value = false;
-                };
+            // 4. 汤粉汤面
+            document.getElementById('noodlessoups-list').innerHTML = menuData.noodlessoups.map((item, idx) => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <h3>${item.name}</h3>
+                        <p>可选：${item.options.join('/')}</p>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <button onclick="openSpecModal('noodlessoups', ${idx}, 'small')" class="btn-primary">小份 ￥${item.priceSmall}</button>
+                        <button onclick="openSpecModal('noodlessoups', ${idx}, 'big')" class="btn-primary">大份 ￥${item.priceBig}</button>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-                const addToCartDirect = (item) => {
-                    const existing = cart.value.find(i => i.name === item.name && !i.spec);
-                    if (existing) existing.count++;
-                    else cart.value.push({ name: item.name, spec: '', price: item.price, count: 1 });
-                };
+        // 打开规格弹窗
+        function openSpecModal(category, index, specType) {
+            currentActiveItem = menuData[category][index];
+            currentSpecType = specType;
+            currentOption = currentActiveItem.options ? currentActiveItem.options[0] : '';
 
-                const toggleCartModal = () => { if (cart.value.length > 0) showCartModal.value = !showCartModal.value; };
-                const increaseCart = (i) => cart.value[i].count++;
-                const decreaseCart = (i) => {
-                    cart.value[i].count--;
-                    if (cart.value[i].count <= 0) cart.value.splice(i, 1);
-                };
-
-                const cartCount = computed(() => cart.value.reduce((s, i) => s + i.count, 0));
-                const cartTotalAmount = computed(() => cart.value.reduce((s, i) => s + i.price * i.count, 0));
-                const finalTotalAmount = computed(() => cartTotalAmount.value > 0 ? cartTotalAmount.value + 1.0 : 0);
-
-                const checkout = () => {
-                    if (cart.value.length === 0) return;
-                    showCartModal.value = false;
-                    showPayModal.value = true;
-                };
-
-                const submitOrder = async () => {
-                    if (!customerPhone.value.trim()) {
-                        alert('请填写取餐手机尾号！');
-                        return;
-                    }
-                    const newOrder = {
-                        id: 'HK' + Date.now().toString().slice(-6),
-                        phone: customerPhone.value.trim(),
-                        items: [...cart.value],
-                        total: finalTotalAmount.value,
-                        payType: payType.value,
-                        status: '待核销',
-                        time: new Date().toLocaleTimeString()
-                    };
-
-                    try {
-                        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-                            headers: { 'X-Master-Key': MASTER_KEY }
-                        });
-                        const data = await res.json();
-                        let remoteOrders = (data.record && data.record.orders) ? data.record.orders : [];
-
-                        remoteOrders.unshift(newOrder);
-
-                        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-Master-Key': MASTER_KEY
-                            },
-                            body: JSON.stringify({ orders: remoteOrders })
-                        });
-
-                        alert('订单已提交成功！请凭取餐电话到店自提。');
-                        cart.value = [];
-                        customerPhone.value = '';
-                        showPayModal.value = false;
-                    } catch (e) {
-                        console.error('云端同步失败', e);
-                        alert('网络异常，请重试！');
-                    }
-                };
-
-                const searchOrders = async () => {
-                    const keyword = searchPhone.value.trim();
-                    if (!keyword) {
-                        alert('请输入要查询的手机号或手机尾号');
-                        return;
-                    }
-                    try {
-                        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-                            headers: { 'X-Master-Key': MASTER_KEY }
-                        });
-                        const data = await res.json();
-                        let allOrders = [];
-                        if (data.record) {
-                            if (Array.isArray(data.record)) {
-                                allOrders = data.record;
-                            } else if (data.record.orders && Array.Array(data.record.orders)) {
-                                allOrders = data.record.orders;
-                            }
-                        }
-
-                        queryResult.value = allOrders.filter(o => o.phone && o.phone.includes(keyword));
-                        hasSearched.value = true;
-                    } catch (e) {
-                        console.error('查询订单失败', e);
-                        alert('查询请求失败，请检查网络');
-                    }
-                };
-
-                return {
-                    menu, cart, showSpecModal, showCartModal, showPayModal, showQueryModal,
-                    payType, customerPhone, searchPhone, queryResult, hasSearched,
-                    activeItem, selectedOption, activeSpecPrice, activeSpecName,
-                    openSpecModal, confirmAddToCart, addToCartDirect, toggleCartModal,
-                    increaseCart, decreaseCart, cartCount, cartTotalAmount, finalTotalAmount,
-                    checkout, submitOrder, searchOrders
-                };
+            document.getElementById('spec-title').innerText = currentActiveItem.name;
+            
+            const optionsContainer = document.getElementById('spec-options-container');
+            if (currentActiveItem.options && currentActiveItem.options.length > 0) {
+                optionsContainer.style.display = 'block';
+                document.getElementById('spec-options-grid').innerHTML = currentActiveItem.options.map(opt => `
+                    <div onclick="selectOption('${opt}')" id="opt-${opt}" class="option-btn ${opt === currentOption ? 'active' : ''}">${opt}</div>
+                `).join('');
+            } else {
+                optionsContainer.style.display = 'none';
             }
-        }).mount('#app');
+
+            updateSpecModalDisplay();
+            document.getElementById('spec-modal').style.display = 'flex';
+        }
+
+        function selectOption(opt) {
+            currentOption = opt;
+            currentActiveItem.options.forEach(o => {
+                const el = document.getElementById(`opt-${o}`);
+                if (el) el.className = `option-btn ${o === opt ? 'active' : ''}`;
+            });
+            updateSpecModalDisplay();
+        }
+
+        function updateSpecModalDisplay() {
+            const price = currentSpecType === 'small' ? currentActiveItem.priceSmall : currentActiveItem.priceBig;
+            const sizeName = currentSpecType === 'small' ? '小份' : '大份';
+            const fullName = currentOption ? `${sizeName} (${currentOption})` : sizeName;
+            
+            document.getElementById('spec-selected-name').innerText = fullName;
+            document.getElementById('spec-selected-price').innerText = '￥' + price;
+        }
+
+        function closeSpecModal() {
+            document.getElementById('spec-modal').style.display = 'none';
+        }
+
+        function confirmAddToCart() {
+            const price = currentSpecType === 'small' ? currentActiveItem.priceSmall : currentActiveItem.priceBig;
+            const sizeName = currentSpecType === 'small' ? '小份' : '大份';
+            const fullName = currentOption ? `${sizeName} (${currentOption})` : sizeName;
+
+            const existing = cart.find(i => i.name === currentActiveItem.name && i.spec === fullName);
+            if (existing) {
+                existing.count++;
+            } else {
+                cart.push({
+                    name: currentActiveItem.name,
+                    spec: fullName,
+                    price: price,
+                    count: 1
+                });
+            }
+            closeSpecModal();
+            updateCartUI();
+        }
+
+        function addToCartDirect(index) {
+            const item = menuData.soups[index];
+            const existing = cart.find(i => i.name === item.name && !i.spec);
+            if (existing) {
+                existing.count++;
+            } else {
+                cart.push({
+                    name: item.name,
+                    spec: '',
+                    price: item.price,
+                    count: 1
+                });
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const totalCount = cart.reduce((s, i) => s + i.count, 0);
+            const goodsAmount = cart.reduce((s, i) => s + i.price * i.count, 0);
+            const finalAmount = goodsAmount > 0 ? goodsAmount + 1.0 : 0;
+
+            const badge = document.getElementById('cart-badge');
+            if (totalCount > 0) {
+                badge.innerText = totalCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            document.getElementById('cart-total').innerText = '￥' + goodsAmount;
+            const checkoutBtn = document.getElementById('checkout-btn');
+            if (goodsAmount > 0) {
+                checkoutBtn.disabled = false;
+                checkoutBtn.innerText = `去结算 (￥${finalAmount.toFixed(2)})`;
+            } else {
+                checkoutBtn.disabled = true;
+                checkoutBtn.innerText = '去结算 (￥1.00)';
+            }
+
+            // 更新购物车抽屉列表
+            document.getElementById('cart-items-list').innerHTML = cart.map((item, idx) => `
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; border-bottom: 1px solid #f3f4f6; padding-bottom: 8px;">
+                    <div>
+                        <div style="font-weight: bold;">${item.name} <span style="color: #b45309;">(${item.spec})</span></div>
+                        <div style="color: #6b7280; margin-top: 2px;">￥${item.price}</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button onclick="changeCount(${idx}, -1)" style="width: 26px; height: 26px; background: #e5e7eb; border: none; border-radius: 50%; font-weight: bold; cursor: pointer;">-</button>
+                        <span style="font-weight: bold; width: 16px; text-align: center;">${item.count}</span>
+                        <button onclick="changeCount(${idx}, 1)" class="btn-primary" style="width: 26px; height: 26px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center;">+</button>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('cart-goods-amount').innerText = '￥' + goodsAmount;
+            document.getElementById('cart-final-amount').innerText = '￥' + finalAmount.toFixed(2);
+        }
+
+        function changeCount(index, delta) {
+            cart[index].count += delta;
+            if (cart[index].count <= 0) {
+                cart.splice(index, 1);
+            }
+            updateCartUI();
+            if (cart.length === 0) {
+                toggleCartModal();
+            }
+        }
+
+        function toggleCartModal() {
+            if (cart.length === 0) return;
+            const modal = document.getElementById('cart-modal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function checkout() {
+            if (cart.length === 0) return;
+            document.getElementById('cart-modal').style.display = 'none';
+            
+            const goodsAmount = cart.reduce((s, i) => s + i.price * i.count, 0);
+            const finalAmount = goodsAmount + 1.0;
+
+            document.getElementById('pay-amount').innerText = '￥' + finalAmount.toFixed(2);
+            document.getElementById('pay-amount-tip').innerText = '￥' + finalAmount.toFixed(2);
+            document.getElementById('pay-modal').style.display = 'flex';
+        }
+
+        function closePayModal() {
+            document.getElementById('pay-modal').style.display = 'none';
+        }
+
+        function setPayType(type) {
+            currentPayType = type;
+            document.getElementById('pay-tab-wechat').className = `pay-tab ${type === 'wechat' ? 'active' : ''}`;
+            document.getElementById('pay-tab-alipay').className = `pay-tab ${type === 'alipay' ? 'active' : ''}`;
+            
+            const qrcodeImg = document.getElementById('pay-qrcode');
+            if (type === 'wechat') {
+                qrcodeImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=WECHAT_PAY_QR';
+            } else {
+                qrcodeImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=ALIPAY_QR';
+            }
+        }
+
+        async function submitOrder() {
+            const phone = document.getElementById('customer-phone-input').value.trim();
+            if (!phone) {
+                alert('请填写取餐手机尾号！');
+                return;
+            }
+
+            const goodsAmount = cart.reduce((s, i) => s + i.price * i.count, 0);
+            const finalAmount = goodsAmount + 1.0;
+
+            const newOrder = {
+                id: 'HK' + Date.now().toString().slice(-6),
+                phone: phone,
+                items: [...cart],
+                total: finalAmount,
+                payType: currentPayType,
+                status: '待核销',
+                time: new Date().toLocaleTimeString()
+            };
+
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': MASTER_KEY }
+                });
+                const data = await res.json();
+                let remoteOrders = (data.record && data.record.orders) ? data.record.orders : [];
+
+                remoteOrders.unshift(newOrder);
+
+                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': MASTER_KEY
+                    },
+                    body: JSON.stringify({ orders: remoteOrders })
+                });
+
+                alert('订单已提交成功！请凭取餐电话到店自提。');
+                cart = [];
+                document.getElementById('customer-phone-input').value = '';
+                closePayModal();
+                updateCartUI();
+            } catch (e) {
+                console.error(e);
+                alert('网络异常，请重试！');
+            }
+        }
+
+        function openQueryModal() {
+            document.getElementById('query-modal').style.display = 'flex';
+        }
+
+        function closeQueryModal() {
+            document.getElementById('query-modal').style.display = 'none';
+        }
+
+        async function searchOrders() {
+            const keyword = document.getElementById('search-phone-input').value.trim();
+            if (!keyword) {
+                alert('请输入手机号或尾号');
+                return;
+            }
+
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': MASTER_KEY }
+                });
+                const data = await res.json();
+                let allOrders = [];
+                if (data.record) {
+                    if (Array.isArray(data.record)) allOrders = data.record;
+                    else if (data.record.orders && Array.isArray(data.record.orders)) allOrders = data.record.orders;
+                }
+
+                const matched = allOrders.filter(o => o.phone && o.phone.includes(keyword));
+                const container = document.getElementById('query-results-container');
+
+                if (matched.length === 0) {
+                    container.innerHTML = `<div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">没有找到该手机号相关的订单</div>`;
+                    return;
+                }
+
+                container.innerHTML = matched.map(order => `
+                    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px; background: #f9fafb; font-size: 11px; display: flex; flex-direction: column; gap: 4px;">
+                        <div style="display: flex; justify-content: space-between; font-weight: bold; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px;">
+                            <span>单号: ${order.id}</span>
+                            <span style="color: ${order.status === '待核销' ? '#b45309' : '#059669'};">${order.status}</span>
+                        </div>
+                        <div style="color: #6b7280;">时间：${order.time} | 尾号：${order.phone}</div>
+                        <div style="border-top: 1px solid #e5e7eb; padding-top: 4px;">
+                            ${order.items.map(i => `
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                                    <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
+                                    <span>￥${i.price * i.count}</span>
+                                </div>
+                            `).join('')}
+                            <div style="display: flex; justify-content: space-between; color: #9ca3af;">
+                                <span>自提打包费</span><span>￥1.00</span>
+                            </div>
+                        </div>
+                        <div style="text-align: right; font-weight: bold; color: #b45309; border-top: 1px solid #e5e7eb; padding-top: 4px; font-size: 12px;">
+                            实付总额：￥${order.total}
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (e) {
+                console.error(e);
+                alert('查询失败，请检查网络');
+            }
+        }
+
+        // 初始化加载
+        window.onload = function() {
+            renderMenu();
+        };
     </script>
 </body>
 </html>
