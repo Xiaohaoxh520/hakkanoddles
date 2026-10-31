@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>客家腌面 - 到店自提点单系统</title>
-    <!-- 使用更稳定、国内访问极佳的 Staticfile CDN 引入 Vue 3 -->
-    <script src="https://cdn.staticfile.org/vue/3.3.4/vue.global.prod.min.js"></script>
-    <!-- 使用 BootCDN 引入 Tailwind CSS，避免跟踪防护拦截 -->
-    <link href="https://cdn.bootcdn.net/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 font-sans">
     <div id="app" class="max-w-md mx-auto bg-white min-h-screen shadow-lg flex flex-col relative pb-24">
@@ -17,7 +15,7 @@
             <h1 class="text-base font-bold flex items-center">
                 🥣 客家腌面 (到店自提)
             </h1>
-            <a href="admin.html" class="text-xs bg-amber-700 px-3 py-1.5 rounded-full hover:bg-amber-800 transition">
+            <a href="admin.html" target="_blank" class="text-xs bg-amber-700 px-3 py-1.5 rounded-full hover:bg-amber-800 transition">
                 🔒 商家后台登录
             </a>
         </header>
@@ -233,6 +231,7 @@
     <script>
         const { createApp, ref, computed, reactive } = Vue;
 
+        // 填入你的云端配置
         const BIN_ID = '6ae586c8ffd5d160539a6da4';
         const MASTER_KEY = '$2a$10$lwmZR3vIjsFdZlgG4.WReOJzFNBqHERsLquMbL42GY/BNEBveQ896';
 
@@ -329,6 +328,7 @@
                     showPayModal.value = true;
                 };
 
+                // 核心：提交订单并实时云端同步
                 const submitOrder = async () => {
                     if (!customerPhone.value.trim()) {
                         alert('请填写取餐手机尾号！');
@@ -345,14 +345,17 @@
                     };
 
                     try {
+                        // 1. 先拉取云端现有订单
                         const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
                             headers: { 'X-Master-Key': MASTER_KEY }
                         });
                         const data = await res.json();
                         let remoteOrders = (data.record && data.record.orders) ? data.record.orders : [];
 
+                        // 2. 将新订单塞到最前面
                         remoteOrders.unshift(newOrder);
 
+                        // 3. 更新保存到云端
                         await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
                             method: 'PUT',
                             headers: {
