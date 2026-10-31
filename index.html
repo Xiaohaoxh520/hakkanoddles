@@ -9,20 +9,16 @@
         body { background-color: #f3f4f6; color: #1f2937; display: flex; justify-content: center; }
         #app { width: 100%; max-width: 480px; background-color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; position: relative; padding-bottom: 90px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
-        /* 顶部导航 */
         header { background-color: #b45309; color: #ffffff; padding: 14px 16px; position: sticky; top: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         header h1 { font-size: 16px; font-weight: bold; }
         .query-btn { background-color: #78350f; color: #ffffff; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; }
         
-        /* 提示条 */
         .notice { background-color: #fef3c7; color: #78350f; font-size: 12px; padding: 8px 16px; border-bottom: 1px solid #fde68a; font-weight: 500; }
         
-        /* 菜单区域 */
         .menu-container { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 20px; }
         .section-title { font-size: 14px; font-weight: bold; color: #111827; margin-bottom: 12px; border-left: 4px solid #b45309; padding-left: 8px; display: flex; align-items: center; justify-content: space-between; }
         .section-desc { font-size: 11px; font-weight: normal; color: #4b5563; }
         
-        /* 商品卡片 */
         .item-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 10px; }
         .item-info h3 { font-size: 14px; font-weight: bold; color: #111827; }
         .item-info p { font-size: 11px; color: #4b5563; margin-top: 4px; }
@@ -30,22 +26,10 @@
         .item-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .grid-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         
-        /* 按钮样式 */
-        .btn-primary { 
-            background-color: #b45309; 
-            color: #ffffff; 
-            border: none; 
-            padding: 7px 12px; 
-            border-radius: 8px; 
-            font-size: 12px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            text-align: center; 
-        }
+        .btn-primary { background-color: #b45309; color: #ffffff; border: none; padding: 7px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; }
         .btn-primary:active { background-color: #92400e; }
         .btn-price { font-size: 13px; font-weight: bold; color: #b45309; }
         
-        /* 底部购物车 */
         .footer-cart { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: #ffffff; border-top: 1px solid #e5e7eb; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 20; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
         .cart-left { display: flex; align-items: center; gap: 12px; }
         .cart-icon-box { position: relative; background: #b45309; color: #ffffff; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; box-shadow: 0 2px 5px rgba(180,83,9,0.3); }
@@ -56,13 +40,11 @@
         .checkout-btn { background-color: #b45309; color: #ffffff; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: bold; cursor: pointer; }
         .checkout-btn:disabled { background-color: #d1d5db; color: #9ca3af; cursor: not-allowed; }
 
-        /* 弹窗遮罩 */
         .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; display: none; align-items: center; justify-content: center; padding: 16px; }
         .modal-box { background: #ffffff; width: 100%; max-width: 320px; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; }
         .modal-bottom { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: #ffffff; border-radius: 20px 20px 0 0; padding: 20px; max-height: 75vh; display: flex; flex-direction: column; gap: 14px; z-index: 40; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); }
         .close-x { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 16px; color: #6b7280; cursor: pointer; }
         
-        /* 表单与选项 */
         .option-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 6px; }
         .option-btn { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 8px; border-radius: 8px; font-size: 12px; text-align: center; cursor: pointer; font-weight: 500; }
         .option-btn.active { background: #b45309; color: #ffffff; border-color: #b45309; font-weight: bold; }
@@ -73,22 +55,16 @@
 </head>
 <body>
     <div id="app">
-        
-        <!-- 顶部导航栏 -->
         <header>
             <h1>🥣 客家腌面 (到店自提)</h1>
             <button onclick="openQueryModal()" class="query-btn">🔍 查询订单</button>
         </header>
 
-        <!-- 提示横幅 -->
         <div class="notice">
             📢 提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。
         </div>
 
-        <!-- 菜单主体 -->
         <div class="menu-container">
-            
-            <!-- 1. 营养套餐系列 -->
             <div>
                 <div class="section-title">
                     <span>🌟 营养套餐系列</span>
@@ -97,19 +73,16 @@
                 <div id="combos-list"></div>
             </div>
 
-            <!-- 2. 主食系列 -->
             <div>
                 <div class="section-title"><span>🍜 主食系列</span></div>
                 <div id="staples-list" class="item-grid-2"></div>
             </div>
 
-            <!-- 3. 靓汤系列 -->
             <div>
                 <div class="section-title"><span>🍲 靓汤系列</span></div>
                 <div id="soups-list" class="item-grid-2"></div>
             </div>
 
-            <!-- 4. 汤粉汤面系列 -->
             <div>
                 <div class="section-title">
                     <span>🍜 汤粉汤面系列</span>
@@ -117,10 +90,8 @@
                 </div>
                 <div id="noodlessoups-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
             </div>
-
         </div>
 
-        <!-- 底部购物车悬浮栏 -->
         <div class="footer-cart">
             <div class="cart-left">
                 <div onclick="toggleCartModal()" class="cart-icon-box">
@@ -185,7 +156,7 @@
             </div>
         </div>
 
-        <!-- 个人收银台付款弹窗 -->
+        <!-- 支付弹窗 -->
         <div id="pay-modal" class="modal-mask">
             <div class="modal-box" style="text-align: center;">
                 <button onclick="closePayModal()" class="close-x">✕</button>
@@ -194,7 +165,6 @@
                 <div id="pay-amount" style="font-size: 26px; font-weight: black; color: #111827;">￥1.00</div>
                 <p style="font-size: 11px; color: #6b7280;">（含自提打包费 1.00元）</p>
 
-                <!-- 收款码 (使用你的真实微信收款码) -->
                 <div style="background: #f9fafb; padding: 12px; border-radius: 12px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; align-items: center;">
                     <img src="https://i.imgs.ovh/2026/10/31/a6be456b2a8b66f025967f7d2004f9b4.png" alt="微信收款码" style="width: 130px; height: 130px; object-fit: contain; background: #fff; padding: 4px; border-radius: 6px; border: 1px solid #e5e7eb; margin-bottom: 8px;">
                     <span style="font-size: 11px; color: #4b5563; line-height: 1.4;">
@@ -203,7 +173,6 @@
                     </span>
                 </div>
 
-                <!-- 取餐电话 -->
                 <div style="text-align: left;">
                     <label style="font-size: 11px; font-weight: bold; color: #374151; display: block; margin-bottom: 4px;">填写取餐手机尾号：</label>
                     <input id="customer-phone-input" type="text" placeholder="用于到店核对自提" class="input-box">
@@ -226,20 +195,17 @@
                     <button onclick="searchOrders()" class="btn-primary" style="padding: 8px 14px;">查询</button>
                 </div>
 
-                <!-- 查询结果 -->
                 <div id="query-results-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; max-height: 50vh;">
                     <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">请输入手机号查询</div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <script>
         const BIN_ID = '6ae586c8ffd5d160539a6da4';
         const MASTER_KEY = '$2a$10$lwmZR3vIjsFdZlgG4.WReOJzFNBqHERsLquMbL42GY/BNEBveQ896';
 
-        // 菜单数据
         const menuData = {
             combos: [
                 { name: '紫菜蛋花汤套餐', priceSmall: 11, priceBig: 13, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
@@ -279,7 +245,6 @@
         let currentSpecType = 'small';
         let currentOption = '';
 
-        // 初始化渲染菜单
         function renderMenu() {
             document.getElementById('combos-list').innerHTML = menuData.combos.map((item, idx) => `
                 <div class="item-card">
@@ -328,7 +293,6 @@
             `).join('');
         }
 
-        // 打开规格弹窗
         function openSpecModal(category, index, specType) {
             currentActiveItem = menuData[category][index];
             currentSpecType = specType;
@@ -574,4 +538,30 @@
                         <div style="color: #6b7280;">时间：${order.time} | 尾号：${order.phone}</div>
                         <div style="border-top: 1px solid #e5e7eb; padding-top: 4px;">
                             ${order.items.map(i => `
-                                <div style="display: flex; justify-content: space
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                                    <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
+                                    <span>￥${i.price * i.count}</span>
+                                </div>
+                            `).join('')}
+                            <div style="display: flex; justify-content: space-between; color: #9ca3af;">
+                                <span>自提打包费</span><span>￥1.00</span>
+                            </div>
+                        </div>
+                        <div style="text-align: right; font-weight: bold; color: #b45309; border-top: 1px solid #e5e7eb; padding-top: 4px; font-size: 12px;">
+                            实付总额：￥${order.total}
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (e) {
+                console.error(e);
+                alert('查询失败，请检查网络');
+            }
+        }
+
+        window.onload = function() {
+            renderMenu();
+        };
+    </script>
+</body>
+</html>
