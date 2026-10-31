@@ -10,7 +10,7 @@
 <body class="bg-gray-100 font-sans">
     <div id="app" class="max-w-md mx-auto bg-white min-h-screen shadow-lg flex flex-col relative pb-10">
         
-        <!-- 登录拦截层 -->
+        <!-- 登录拦截层：仅在未登录时显示 -->
         <div v-if="!isLoggedIn" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
             <div class="bg-white w-full max-w-xs rounded-2xl p-6 space-y-4 shadow-2xl">
                 <h2 class="text-base font-bold text-gray-800 text-center">🔐 商家后台安全登录</h2>
@@ -36,12 +36,12 @@
             </div>
         </div>
 
-        <!-- 后台主界面 -->
+        <!-- 后台主界面 (登录后可见) -->
         <div class="flex-1 flex flex-col p-4 bg-gray-50 space-y-4">
             <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-sm">
                 <div>
                     <h2 class="font-bold text-gray-800 text-sm">📈 商家后台 OA 管理系统</h2>
-                    <p class="text-xs text-gray-500">客家腌面 · 核销看板</p>
+                    <p class="text-xs text-gray-500">客家腌面 · 独立核销看板</p>
                 </div>
                 <div class="space-x-2">
                     <button @click="logout" class="text-xs bg-gray-100 text-gray-600 px-2.5 py-1.5 rounded">退出</button>
@@ -64,7 +64,7 @@
             <!-- 实时订单列表 -->
             <div class="flex-1 space-y-3">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-gray-700 text-xs">📋 实时自提订单</h3>
+                    <h3 class="font-bold text-gray-700 text-xs">📋 实时自提订单 (人工核销)</h3>
                     <button @click="loadOrders" class="text-xs text-amber-600 hover:underline">🔄 刷新订单</button>
                 </div>
                 
@@ -133,7 +133,6 @@
                     if (username.value === correctUser && password.value === correctPass) {
                         isLoggedIn.value = true;
                         localStorage.setItem('hakka_admin_logged', 'true');
-                        loadOrders();
                     } else {
                         alert('账号或密码错误！(默认账号: admin, 密码: 123456)');
                     }
