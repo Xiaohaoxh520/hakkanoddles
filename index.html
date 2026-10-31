@@ -69,7 +69,7 @@
 <body>
     <div id="app">
         <header>
-            <img src="https://i.imgs.ovh/2026/10/31/bb2fabef06a8d6f0c5870e2c7d0be375.png" alt="客家腌面 Logo" class="header-logo">
+            <img src="https://i.imgs.ovh/2026/10/31/3aa5068a33d19dddd0105e395ab88b74.png" alt="客家腌面 Logo" class="header-logo">
             <button onclick="openQueryModal()" class="query-btn">查询订单进度</button>
         </header>
 
@@ -175,42 +175,47 @@
             </div>
         </div>
 
-        <!-- 支付弹窗 -->
+        <!-- 支付弹窗 (已加入显著强调提示) -->
         <div id="pay-modal" class="modal-mask">
             <div class="modal-box" style="text-align: center;">
                 <button onclick="closePayModal()" class="close-x">✕</button>
                 
                 <div style="color: #b45309; font-weight: bold; font-size: 13px;">客家腌面 · 微信收银台</div>
-                <div id="pay-amount" style="font-size: 24px; font-weight: black; color: #111827;">￥1.00</div>
+                <div id="pay-amount" style="font-size: 22px; font-weight: black; color: #111827;">￥1.00</div>
 
-                <div style="text-align: left; background: #fffbeb; padding: 10px; border-radius: 8px; border: 1px solid #fde68a;">
-                    <label style="font-size: 11px; font-weight: bold; color: #78350f; display: block; margin-bottom: 6px;">选择取餐方式：</label>
-                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                        <button type="button" id="btn-asap" onclick="setOrderMode('asap')" style="flex: 1; padding: 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; border: 1px solid #b45309; background: #b45309; color: #fff;">默认尽快取餐</button>
-                        <button type="button" id="btn-reserve" onclick="setOrderMode('reserve')" style="flex: 1; padding: 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; border: 1px solid #d1d5db; background: #f3f4f6; color: #374151;">预约取餐时间</button>
+                <!-- 显著提示框：要求先付款、备注尾号、否则订单无效 -->
+                <div style="background: #fff5f5; border: 1.5px solid #dc2626; padding: 10px; border-radius: 8px; text-align: left; font-size: 11px; color: #991b1b; line-height: 1.5;">
+                    <div style="font-weight: bold; font-size: 12px; margin-bottom: 2px; color: #dc2626;">⚠️ 务必先付款后提交！</div>
+                    付款时<strong>必须备注您的手机尾号</strong>！手机尾号是订单<strong>唯一核对凭证</strong>，不备注尾号或未付款的订单一律无效！
+                </div>
+
+                <div style="text-align: left; background: #fffbeb; padding: 8px 10px; border-radius: 8px; border: 1px solid #fde68a;">
+                    <label style="font-size: 11px; font-weight: bold; color: #78350f; display: block; margin-bottom: 4px;">选择取餐方式：</label>
+                    <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                        <button type="button" id="btn-asap" onclick="setOrderMode('asap')" style="flex: 1; padding: 6px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; border: 1px solid #b45309; background: #b45309; color: #fff;">默认尽快取餐</button>
+                        <button type="button" id="btn-reserve" onclick="setOrderMode('reserve')" style="flex: 1; padding: 6px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; border: 1px solid #d1d5db; background: #f3f4f6; color: #374151;">预约取餐时间</button>
                     </div>
 
-                    <div id="reserve-time-box" style="display: none; margin-top: 6px;">
-                        <label style="font-size: 10px; color: #78350f; display: block; margin-bottom: 2px;">请选择预约时间 (15分钟/节)：</label>
+                    <div id="reserve-time-box" style="display: none; margin-top: 4px;">
                         <select id="pickup-time-select" class="input-box" style="background: #fff; font-weight: bold; color: #b45309;"></select>
                     </div>
                 </div>
 
-                <div style="background: #f9fafb; padding: 10px; border-radius: 12px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; align-items: center;">
-                    <img src="https://i.imgs.ovh/2026/10/31/a6be456b2a8b66f025967f7d2004f9b4.png" alt="微信收款码" style="width: 110px; height: 110px; object-fit: contain; background: #fff; padding: 4px; border-radius: 6px; border: 1px solid #e5e7eb; margin-bottom: 6px;">
+                <div style="background: #f9fafb; padding: 8px; border-radius: 10px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; align-items: center;">
+                    <img src="https://i.imgs.ovh/2026/10/31/a6be456b2a8b66f025967f7d2004f9b4.png" alt="微信收款码" style="width: 100px; height: 100px; object-fit: contain; background: #fff; padding: 4px; border-radius: 6px; border: 1px solid #e5e7eb; margin-bottom: 4px;">
                     <span style="font-size: 10px; color: #4b5563; line-height: 1.3;">
-                        长按扫描二维码转账 <strong id="pay-amount-tip" style="color: #b45309;">￥1.00</strong><br>
-                        <span style="color: #d97706;">付款后商家后台将确认接单，可在首页输入尾号查询进度</span>
+                        长按扫描二维码转账 <strong style="color: #b45309;" id="pay-amount-tip">￥1.00</strong><br>
+                        <span style="color: #dc2626; font-weight: bold;">付款时请务必填写备注信息！</span>
                     </span>
                 </div>
 
                 <div style="text-align: left;">
-                    <label style="font-size: 11px; font-weight: bold; color: #374151; display: block; margin-bottom: 4px;">填写取餐手机尾号：</label>
+                    <label style="font-size: 11px; font-weight: bold; color: #374151; display: block; margin-bottom: 2px;">填写取餐手机尾号：</label>
                     <input id="customer-phone-input" type="text" placeholder="用于到店核对自提" class="input-box">
                 </div>
 
                 <button onclick="submitOrder()" class="btn-primary" style="padding: 12px; font-size: 13px; border-radius: 10px; width: 100%;">
-                    我已付款，提交订单
+                    我已付款并备注，提交订单
                 </button>
             </div>
         </div>
@@ -333,7 +338,6 @@
             noticeTextEl.innerHTML = textInfo;
         }
 
-        // 繁忙度计算：合并“线上未完成实时单”与“堂食未完成单”
         function updateQueueStats() {
             const pendingOnlineAsap = cloudOrders.filter(o => {
                 const isNotFinished = o.status !== '已出餐';
@@ -341,10 +345,9 @@
                 return isNotFinished && !isReserve;
             });
 
-            // 堂食未完成单（状态不是“已出餐”的堂食订单）
             const pendingDineIn = dineInOrders.filter(o => o.status !== '已出餐');
-
             const totalPending = pendingOnlineAsap.length + pendingDineIn.length;
+
             document.getElementById('pending-orders-count').innerText = totalPending;
 
             const badge = document.getElementById('busyness-badge');
@@ -736,7 +739,7 @@
                     })
                 });
 
-                alert('订单已提交成功！请凭取餐电话到店自提。');
+                alert('订单已提交成功！请确保已转账并备注手机尾号。');
                 cart = [];
                 document.getElementById('customer-phone-input').value = '';
                 closePayModal();
