@@ -11,20 +11,20 @@
 <body class="bg-gray-100 font-sans">
     <div id="app" class="max-w-md mx-auto bg-white min-h-screen shadow-lg flex flex-col relative pb-24">
         
-        <!-- 顶部导航栏 (已移除后台入口按钮) -->
-        <header class="bg-amber-600 text-white p-4 sticky top-0 z-30 flex justify-between items-center shadow">
-            <h1 class="text-base font-bold flex items-center">
+        <!-- 顶部导航栏 -->
+        <header class="bg-amber-700 text-white p-4 sticky top-0 z-30 flex justify-between items-center shadow">
+            <h1 class="text-base font-bold flex items-center tracking-wide">
                 🥣 客家腌面 (到店自提)
             </h1>
             <div>
-                <button @click="showQueryModal = true" class="text-xs bg-amber-700 px-3 py-1.5 rounded-full hover:bg-amber-800 transition">
+                <button @click="showQueryModal = true" class="text-xs bg-amber-900 text-white font-semibold px-3 py-1.5 rounded-full shadow hover:bg-amber-950 transition">
                     🔍 查询订单
                 </button>
             </div>
         </header>
 
         <!-- 提示横幅 -->
-        <div class="bg-amber-50 text-amber-800 text-xs px-4 py-2 border-b border-amber-100">
+        <div class="bg-amber-50 text-amber-900 text-xs px-4 py-2 border-b border-amber-200 font-medium">
             📢 提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。
         </div>
 
@@ -33,20 +33,20 @@
             
             <!-- 1. 营养套餐系列 (优先展示) -->
             <div>
-                <h2 class="text-sm font-bold text-gray-800 mb-3 border-l-4 border-amber-600 pl-2">
-                    🌟 营养套餐系列 <span class="text-xs font-normal text-gray-500">(可选面/米粉/河粉/珍珠粉)</span>
+                <h2 class="text-sm font-bold text-gray-900 mb-3 border-l-4 border-amber-600 pl-2">
+                    🌟 营养套餐系列 <span class="text-xs font-normal text-gray-600">(可选面/米粉/河粉/珍珠粉)</span>
                 </h2>
                 <div class="space-y-3">
-                    <div v-for="item in menu.combos" :key="item.name" class="bg-white border rounded-xl p-3 shadow-sm flex justify-between items-center">
+                    <div v-for="item in menu.combos" :key="item.name" class="bg-white border border-gray-200 rounded-xl p-3 shadow-sm flex justify-between items-center">
                         <div>
-                            <h3 class="font-bold text-gray-800 text-sm">{{ item.name }}</h3>
-                            <p class="text-xs text-gray-500 mt-1">粉面：{{ item.options.join('/') }}</p>
+                            <h3 class="font-bold text-gray-900 text-sm">{{ item.name }}</h3>
+                            <p class="text-xs text-gray-600 mt-1">粉面：{{ item.options.join('/') }}</p>
                         </div>
                         <div class="flex flex-col space-y-2">
-                            <button @click="openSpecModal(item, 'small')" class="bg-amber-600 text-white text-xs px-3 py-1.5 rounded-lg shadow">
+                            <button @click="openSpecModal(item, 'small')" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg shadow">
                                 小份 ￥{{ item.priceSmall }}
                             </button>
-                            <button @click="openSpecModal(item, 'big')" class="bg-amber-600 text-white text-xs px-3 py-1.5 rounded-lg shadow">
+                            <button @click="openSpecModal(item, 'big')" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg shadow">
                                 大份 ￥{{ item.priceBig }}
                             </button>
                         </div>
@@ -56,15 +56,15 @@
 
             <!-- 2. 主食系列 -->
             <div>
-                <h2 class="text-sm font-bold text-gray-800 mb-3 border-l-4 border-amber-600 pl-2">
+                <h2 class="text-sm font-bold text-gray-900 mb-3 border-l-4 border-amber-600 pl-2">
                     🍜 主食系列
                 </h2>
                 <div class="grid grid-cols-2 gap-3">
-                    <div v-for="item in menu.staples" :key="item.name" class="bg-white border rounded-xl p-3 shadow-sm flex flex-col justify-between">
-                        <h3 class="font-bold text-gray-800 text-sm">{{ item.name }}</h3>
+                    <div v-for="item in menu.staples" :key="item.name" class="bg-white border border-gray-200 rounded-xl p-3 shadow-sm flex flex-col justify-between">
+                        <h3 class="font-bold text-gray-900 text-sm">{{ item.name }}</h3>
                         <div class="mt-3 flex items-center justify-between">
-                            <span class="text-xs text-gray-500">小{{ item.priceSmall }}/大{{ item.priceBig }}</span>
-                            <button @click="openSpecModal(item, 'small')" class="bg-amber-600 text-white text-xs px-2.5 py-1 rounded-lg">
+                            <span class="text-xs font-semibold text-gray-700">小{{ item.priceSmall }}/大{{ item.priceBig }}</span>
+                            <button @click="openSpecModal(item, 'small')" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg">
                                 选规格
                             </button>
                         </div>
@@ -74,15 +74,15 @@
 
             <!-- 3. 靓汤系列 -->
             <div>
-                <h2 class="text-sm font-bold text-gray-800 mb-3 border-l-4 border-amber-600 pl-2">
+                <h2 class="text-sm font-bold text-gray-900 mb-3 border-l-4 border-amber-600 pl-2">
                     🍲 靓汤系列
                 </h2>
                 <div class="grid grid-cols-2 gap-3">
-                    <div v-for="item in menu.soups" :key="item.name" class="bg-white border rounded-xl p-3 shadow-sm flex flex-col justify-between">
-                        <h3 class="font-bold text-gray-800 text-sm">{{ item.name }}</h3>
+                    <div v-for="item in menu.soups" :key="item.name" class="bg-white border border-gray-200 rounded-xl p-3 shadow-sm flex flex-col justify-between">
+                        <h3 class="font-bold text-gray-900 text-sm">{{ item.name }}</h3>
                         <div class="mt-3 flex items-center justify-between">
-                            <span class="text-amber-700 font-bold text-sm">￥{{ item.price }}</span>
-                            <button @click="addToCartDirect(item)" class="bg-amber-600 text-white text-xs px-2.5 py-1 rounded-lg">
+                            <span class="text-amber-800 font-extrabold text-sm">￥{{ item.price }}</span>
+                            <button @click="addToCartDirect(item)" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg">
                                 + 选购
                             </button>
                         </div>
@@ -92,18 +92,18 @@
 
             <!-- 4. 汤粉汤面系列 -->
             <div>
-                <h2 class="text-sm font-bold text-gray-800 mb-3 border-l-4 border-amber-600 pl-2">
+                <h2 class="text-sm font-bold text-gray-900 mb-3 border-l-4 border-amber-600 pl-2">
                     🍜 汤粉汤面系列
                 </h2>
                 <div class="space-y-3">
-                    <div v-for="item in menu.noodlessoups" :key="item.name" class="bg-white border rounded-xl p-3 shadow-sm flex justify-between items-center">
+                    <div v-for="item in menu.noodlessoups" :key="item.name" class="bg-white border border-gray-200 rounded-xl p-3 shadow-sm flex justify-between items-center">
                         <div>
-                            <h3 class="font-bold text-gray-800 text-sm">{{ item.name }}</h3>
-                            <p class="text-xs text-gray-500 mt-1">粉面：{{ item.options.join('/') }}</p>
+                            <h3 class="font-bold text-gray-900 text-sm">{{ item.name }}</h3>
+                            <p class="text-xs text-gray-600 mt-1">粉面：{{ item.options.join('/') }}</p>
                         </div>
                         <div class="flex flex-col space-y-2">
-                            <button @click="openSpecModal(item, 'small')" class="bg-amber-600 text-white text-xs px-3 py-1 rounded shadow">小份 ￥{{ item.priceSmall }}</button>
-                            <button @click="openSpecModal(item, 'big')" class="bg-amber-600 text-white text-xs px-3 py-1 rounded shadow">大份 ￥{{ item.priceBig }}</button>
+                            <button @click="openSpecModal(item, 'small')" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg shadow">小份 ￥{{ item.priceSmall }}</button>
+                            <button @click="openSpecModal(item, 'big')" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg shadow">大份 ￥{{ item.priceBig }}</button>
                         </div>
                     </div>
                 </div>
@@ -112,81 +112,85 @@
         </div>
 
         <!-- 底部购物车悬浮栏 -->
-        <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t p-3 flex justify-between items-center z-20 shadow-lg">
+        <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 p-3 flex justify-between items-center z-20 shadow-lg">
             <div class="flex items-center space-x-3">
-                <div @click="toggleCartModal" class="relative bg-amber-600 text-white w-11 h-11 rounded-full flex items-center justify-center shadow cursor-pointer text-base">
+                <div @click="toggleCartModal" class="relative bg-amber-700 text-white w-11 h-11 rounded-full flex items-center justify-center shadow cursor-pointer text-base font-bold">
                     🛒
-                    <span v-if="cartCount > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                    <span v-if="cartCount > 0" class="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
                         {{ cartCount }}
                     </span>
                 </div>
                 <div>
-                    <div class="text-sm font-bold text-gray-800">合计: <span class="text-amber-600">￥{{ cartTotalAmount }}</span></div>
-                    <div class="text-xs text-gray-500">含自提打包费: ￥1.00</div>
+                    <div class="text-sm font-bold text-gray-900">合计: <span class="text-amber-700 font-extrabold">￥{{ cartTotalAmount }}</span></div>
+                    <div class="text-xs text-gray-600">含自提打包费: ￥1.00</div>
                 </div>
             </div>
-            <button @click="checkout" :disabled="cart.length === 0" class="bg-amber-600 text-white px-6 py-2.5 rounded-xl font-bold text-xs shadow disabled:bg-gray-300">
+            <button @click="checkout" :disabled="cart.length === 0" class="bg-amber-700 hover:bg-amber-800 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow disabled:bg-gray-300 disabled:text-gray-500 transition">
                 去结算 (￥{{ finalTotalAmount }})
             </button>
         </div>
 
         <!-- 规格选择弹窗 -->
-        <div v-if="showSpecModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-            <div class="bg-white w-full max-w-xs rounded-2xl p-4 space-y-4 shadow-xl">
-                <h3 class="font-bold text-gray-800 text-sm border-b pb-2">{{ activeItem.name }}</h3>
+        <div v-if="showSpecModal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+            <div class="bg-white w-full max-w-xs rounded-2xl p-5 space-y-4 shadow-2xl">
+                <h3 class="font-bold text-gray-900 text-base border-b border-gray-200 pb-2">{{ activeItem.name }}</h3>
                 
                 <div v-if="activeItem.options">
-                    <label class="text-xs font-bold text-gray-600 block mb-2">选择粉面规格：</label>
+                    <label class="text-xs font-bold text-gray-800 block mb-2">选择粉面规格：</label>
                     <div class="grid grid-cols-2 gap-2">
                         <button v-for="opt in activeItem.options" :key="opt" 
                             @click="selectedOption = opt"
-                            :class="selectedOption === opt ? 'bg-amber-600 text-white' : 'bg-gray-100 text-gray-700'"
-                            class="text-xs py-2 rounded-lg border text-center">
+                            :class="selectedOption === opt ? 'bg-amber-700 text-white font-bold border-amber-700' : 'bg-gray-100 text-gray-800 font-medium border-gray-300'"
+                            class="text-xs py-2.5 rounded-lg border text-center transition">
                             {{ opt }}
                         </button>
                     </div>
                 </div>
 
-                <div class="text-xs text-gray-500">
-                    已选：<span class="text-amber-600 font-bold">{{ activeSpecName }}</span> | 价格：<span class="text-amber-600 font-bold">￥{{ activeSpecPrice }}</span>
+                <div class="text-xs text-gray-700 font-medium bg-gray-50 p-2.5 rounded-lg border border-gray-200">
+                    已选：<span class="text-amber-800 font-bold">{{ activeSpecName }}</span><br>
+                    价格：<span class="text-amber-800 font-bold text-sm">￥{{ activeSpecPrice }}</span>
                 </div>
 
                 <div class="flex space-x-2 pt-2">
-                    <button @click="showSpecModal = false" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl text-xs">取消</button>
-                    <button @click="confirmAddToCart" class="flex-1 bg-amber-600 text-white py-2 rounded-xl text-xs font-bold">加入购物车</button>
+                    <button @click="showSpecModal = false" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2.5 rounded-xl text-xs transition">取消</button>
+                    <button @click="confirmAddToCart" class="flex-1 bg-amber-700 hover:bg-amber-800 text-white font-bold py-2.5 rounded-xl text-xs shadow transition">加入购物车</button>
                 </div>
             </div>
         </div>
 
         <!-- 购物车抽屉弹窗 -->
-        <div v-if="showCartModal" class="fixed inset-0 bg-black bg-opacity-50 z-40 flex flex-col justify-end">
-            <div class="bg-white rounded-t-3xl p-4 max-h-[70vh] flex flex-col space-y-3">
-                <div class="flex justify-between items-center border-b pb-2 text-sm">
-                    <span class="font-bold text-gray-800">购物车明细 (到店自提)</span>
-                    <button @click="showCartModal = false" class="text-gray-400">✕</button>
+        <div v-if="showCartModal" class="fixed inset-0 bg-black bg-opacity-60 z-40 flex flex-col justify-end">
+            <div class="bg-white rounded-t-3xl p-5 max-h-[70vh] flex flex-col space-y-3 shadow-2xl">
+                <div class="flex justify-between items-center border-b border-gray-200 pb-2 text-sm">
+                    <span class="font-bold text-gray-900">购物车明细 (到店自提)</span>
+                    <button @click="showCartModal = false" class="text-gray-500 font-bold text-base">✕</button>
                 </div>
                 
                 <div class="flex-1 overflow-y-auto space-y-3">
-                    <div v-for="(item, index) in cart" :key="index" class="flex justify-between items-center text-xs border-b pb-2">
+                    <div v-for="(item, index) in cart" :key="index" class="flex justify-between items-center text-xs border-b border-gray-100 pb-2">
                         <div>
-                            <div class="font-bold text-gray-800">{{ item.name }} <span v-if="item.spec" class="text-amber-600">({{ item.spec }})</span></div>
-                            <div class="text-gray-500">￥{{ item.price }}</div>
+                            <div class="font-bold text-gray-900">{{ item.name }} <span v-if="item.spec" class="text-amber-800 font-semibold">({{ item.spec }})</span></div>
+                            <div class="text-gray-600 font-medium mt-0.5">￥{{ item.price }}</div>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <button @click="decreaseCart(index)" class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center">-</button>
-                            <span class="font-bold">{{ item.count }}</span>
-                            <button @click="increaseCart(index)" class="w-6 h-6 bg-amber-600 text-white rounded-full flex items-center justify-center">+</button>
+                            <button @click="decreaseCart(index)" class="w-7 h-7 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-full flex items-center justify-center font-bold">-</button>
+                            <span class="font-bold text-gray-900 w-5 text-center">{{ item.count }}</span>
+                            <button @click="increaseCart(index)" class="w-7 h-7 bg-amber-700 hover:bg-amber-800 text-white rounded-full flex items-center justify-center font-bold">+</button>
                         </div>
                     </div>
                 </div>
 
-                <div class="border-t pt-2 space-y-1 text-xs">
+                <div class="border-t border-gray-200 pt-3 space-y-1.5 text-xs font-medium text-gray-700">
                     <div class="flex justify-between"><span>商品金额:</span><span>￥{{ cartTotalAmount }}</span></div>
                     <div class="flex justify-between"><span>打包费 (到店自提):</span><span>￥1.00</span></div>
-                    <div class="flex justify-between font-bold text-sm text-amber-600 pt-1"><span>应付总计:</span><span>￥{{ finalTotalAmount }}</span></div>
+                    <div class="flex justify-between font-bold text-sm text-gray-900 pt-1 border-t border-gray-100">
+                        <span>应付总计:</span>
+                        <span class="text-amber-800 font-extrabold text-base">￥{{ finalTotalAmount }}</span>
+                    </div>
                 </div>
 
-                <button @click="checkout" class="w-full bg-amber-600 text-white py-3 rounded-xl font-bold text-xs shadow">
+                <button @click="checkout" class="w-full bg-amber-700 hover:bg-amber-800 text-white py-3 rounded-xl font-bold text-xs shadow transition">
                     去结算 (￥{{ finalTotalAmount }})
                 </button>
             </div>
@@ -195,74 +199,74 @@
         <!-- 个人收银台付款弹窗 -->
         <div v-if="showPayModal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
             <div class="bg-white w-full max-w-xs rounded-2xl p-5 space-y-4 text-center shadow-2xl relative">
-                <button @click="showPayModal = false" class="absolute top-3 right-3 text-gray-400">✕</button>
+                <button @click="showPayModal = false" class="absolute top-3 right-3 text-gray-500 font-bold">✕</button>
                 
-                <div class="text-amber-600 font-bold text-sm">客家腌面 · 个人收银台</div>
-                <div class="text-2xl font-black text-gray-800">￥{{ finalTotalAmount }}</div>
-                <p class="text-xs text-gray-500">（含自提打包费 1.00元）</p>
+                <div class="text-amber-800 font-bold text-sm">客家腌面 · 个人收银台</div>
+                <div class="text-3xl font-black text-gray-900">￥{{ finalTotalAmount }}</div>
+                <p class="text-xs text-gray-600 font-medium">（含自提打包费 1.00元）</p>
 
                 <!-- 支付方式 -->
                 <div class="flex justify-center space-x-3">
-                    <div @click="payType = 'wechat'" :class="payType === 'wechat' ? 'border-amber-600 bg-amber-50 text-amber-800' : 'border-gray-200 text-gray-600'" class="flex-1 border rounded-xl p-2 text-xs cursor-pointer">
+                    <div @click="payType = 'wechat'" :class="payType === 'wechat' ? 'border-amber-700 bg-amber-50 text-amber-900 font-bold' : 'border-gray-300 text-gray-700 font-medium'" class="flex-1 border-2 rounded-xl p-2.5 text-xs cursor-pointer transition">
                         💚 微信支付
                     </div>
-                    <div @click="payType = 'alipay'" :class="payType === 'alipay' ? 'border-amber-600 bg-amber-50 text-amber-800' : 'border-gray-200 text-gray-600'" class="flex-1 border rounded-xl p-2 text-xs cursor-pointer">
+                    <div @click="payType = 'alipay'" :class="payType === 'alipay' ? 'border-amber-700 bg-amber-50 text-amber-900 font-bold' : 'border-gray-300 text-gray-700 font-medium'" class="flex-1 border-2 rounded-xl p-2.5 text-xs cursor-pointer transition">
                         💙 支付宝
                     </div>
                 </div>
 
                 <!-- 收款码 -->
-                <div class="bg-gray-50 p-3 rounded-xl border flex flex-col items-center">
-                    <img :src="payType === 'wechat' ? 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=WECHAT_PAY_QR' : 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ALIPAY_QR'" alt="收款码" class="w-32 h-32 object-contain mb-2">
-                    <span class="text-xs text-gray-500">请长按或扫描二维码向店家转账 <strong class="text-amber-600">￥{{ finalTotalAmount }}</strong></span>
+                <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 flex flex-col items-center">
+                    <img :src="payType === 'wechat' ? 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=WECHAT_PAY_QR' : 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ALIPAY_QR'" alt="收款码" class="w-32 h-32 object-contain mb-2 bg-white p-1 rounded border border-gray-100">
+                    <span class="text-xs text-gray-700 font-medium">请长按或扫描二维码向店家转账<br><strong class="text-amber-800 font-bold text-sm">￥{{ finalTotalAmount }}</strong></span>
                 </div>
 
                 <!-- 取餐电话 -->
-                <div class="text-left">
-                    <label class="text-xs font-bold text-gray-700 block mb-1">填写取餐手机尾号：</label>
-                    <input v-model="customerPhone" type="text" placeholder="用于到店核对自提" class="w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-amber-600">
+                <div class="text-left space-y-1">
+                    <label class="text-xs font-bold text-gray-800 block">填写取餐手机尾号：</label>
+                    <input v-model="customerPhone" type="text" placeholder="用于到店核对自提" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs font-medium text-gray-900 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700">
                 </div>
 
-                <button @click="submitOrder" class="w-full bg-amber-600 text-white py-3 rounded-xl font-bold text-xs shadow">
+                <button @click="submitOrder" class="w-full bg-amber-700 hover:bg-amber-800 text-white py-3 rounded-xl font-bold text-xs shadow transition">
                     我已付款，提交自提订单
                 </button>
             </div>
         </div>
 
-        <!-- 订单查询弹窗 (UI 修复版) -->
+        <!-- 订单查询弹窗 -->
         <div v-if="showQueryModal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
             <div class="bg-white w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl relative flex flex-col max-h-[80vh]">
-                <button @click="showQueryModal = false" class="absolute top-3 right-3 text-gray-400">✕</button>
-                <div class="text-amber-600 font-bold text-sm text-center">🔍 自提订单状态查询</div>
+                <button @click="showQueryModal = false" class="absolute top-3 right-3 text-gray-500 font-bold">✕</button>
+                <div class="text-amber-800 font-bold text-sm text-center">🔍 自提订单状态查询</div>
                 
                 <div class="flex space-x-2">
-                    <input v-model="searchPhone" type="text" placeholder="请输入完整手机号或手机尾号" class="flex-1 border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-amber-600">
-                    <button @click="searchOrders" class="bg-amber-600 text-white px-4 py-2 rounded-lg text-xs font-bold">查询</button>
+                    <input v-model="searchPhone" type="text" placeholder="请输入完整手机号或手机尾号" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-xs font-medium text-gray-900 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700">
+                    <button @click="searchOrders" class="bg-amber-700 hover:bg-amber-800 text-white font-bold px-4 py-2 rounded-lg text-xs shadow transition">查询</button>
                 </div>
 
                 <!-- 查询结果列表 -->
                 <div class="flex-1 overflow-y-auto space-y-2 pt-2">
-                    <div v-if="hasSearched && queryResult.length === 0" class="text-center py-6 text-gray-400 text-xs">
+                    <div v-if="hasSearched && queryResult.length === 0" class="text-center py-6 text-gray-500 text-xs font-medium">
                         没有找到该手机号相关的订单
                     </div>
                     
-                    <div v-for="order in queryResult" :key="order.id" class="border rounded-xl p-3 bg-gray-50 space-y-1 text-xs">
-                        <div class="flex justify-between font-bold border-b pb-1">
+                    <div v-for="order in queryResult" :key="order.id" class="border border-gray-200 rounded-xl p-3 bg-gray-50 space-y-1.5 text-xs">
+                        <div class="flex justify-between font-bold border-b border-gray-200 pb-1.5 text-gray-900">
                             <span>单号: {{ order.id }}</span>
-                            <span :class="order.status === '待核销' ? 'text-amber-600 font-bold' : 'text-green-600 font-bold'">{{ order.status }}</span>
+                            <span :class="order.status === '待核销' ? 'text-amber-700 bg-amber-100 px-2 py-0.5 rounded font-bold' : 'text-green-700 bg-green-100 px-2 py-0.5 rounded font-bold'">{{ order.status }}</span>
                         </div>
-                        <div class="text-gray-500">下单时间：{{ order.time }} | 手机尾号：{{ order.phone }}</div>
-                        <div class="space-y-0.5 pt-1">
-                            <div v-for="item in order.items" class="flex justify-between">
+                        <div class="text-gray-600 font-medium">下单时间：{{ order.time }} | 手机尾号：{{ order.phone }}</div>
+                        <div class="space-y-1 pt-1 border-t border-gray-200">
+                            <div v-for="item in order.items" class="flex justify-between text-gray-800 font-medium">
                                 <span>{{ item.name }} ({{ item.spec || '标配' }}) x{{ item.count }}</span>
                                 <span>￥{{ item.price * item.count }}</span>
                             </div>
-                            <div class="flex justify-between text-gray-400">
+                            <div class="flex justify-between text-gray-500">
                                 <span>自提打包费</span>
                                 <span>￥1.00</span>
                             </div>
                         </div>
-                        <div class="text-right font-bold text-amber-600 pt-1 border-t">
+                        <div class="text-right font-bold text-amber-800 pt-1.5 border-t border-gray-200 text-sm">
                             实付总额：￥{{ order.total }}
                         </div>
                     </div>
@@ -363,7 +367,7 @@
                 const increaseCart = (i) => cart.value[i].count++;
                 const decreaseCart = (i) => {
                     cart.value[i].count--;
-                    if (cart.value[i].count <= 0) cart.value.splice(index, 1);
+                    if (cart.value[i].count <= 0) cart.value.splice(i, 1);
                 };
 
                 const cartCount = computed(() => cart.value.reduce((s, i) => s + i.count, 0));
@@ -411,7 +415,7 @@
 
                         alert('订单已提交成功！请凭取餐电话到店自提。');
                         cart.value = [];
-                        customerPhone.value = '';
+                        customerPhone.value = [];
                         showPayModal.value = false;
                     } catch (e) {
                         console.error('云端同步失败', e);
@@ -419,7 +423,6 @@
                     }
                 };
 
-                // 修复后的云端订单查询逻辑
                 const searchOrders = async () => {
                     const keyword = searchPhone.value.trim();
                     if (!keyword) {
@@ -431,7 +434,6 @@
                             headers: { 'X-Master-Key': MASTER_KEY }
                         });
                         const data = await res.json();
-                        // 兼容处理不同数据结构解析
                         let allOrders = [];
                         if (data.record) {
                             if (Array.isArray(data.record)) {
@@ -441,7 +443,6 @@
                             }
                         }
 
-                        // 模糊匹配手机号
                         queryResult.value = allOrders.filter(o => o.phone && o.phone.includes(keyword));
                         hasSearched.value = true;
                     } catch (e) {
