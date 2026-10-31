@@ -27,6 +27,7 @@
         
         .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; }
 
+        /* 小票打印专用样式：平时隐藏，打印时只显示小票内容 */
         #print-ticket { display: none; }
         @media print {
             body * { visibility: hidden; }
@@ -224,7 +225,7 @@
                         <span>单号: ${order.id}</span>
                         <span style="color: ${order.status === '待核销' ? '#b45309' : '#059669'};">${order.status}</span>
                     </div>
-                    <div style="color: #6b7280;">时间: ${order.time} | 尾号: ${order.phone}</div>
+                    <div style="color: #6b7280;">时间: ${order.time} | 尾号: <strong style="font-size:13px; color:#111827;">${order.phone}</strong></div>
                     <div style="border-top: 1px solid #f3f4f6; padding-top: 4px;">
                         ${order.items.map(i => `
                             <div style="display: flex; justify-content: space-between;">
@@ -255,18 +256,19 @@
             }
         }
 
+        // 小票打印功能（Logo 调小，手机尾号放大加粗）
         function printTicket(orderId) {
             const order = cloudData.orders.find(o => o.id === orderId);
             if (!order) return;
 
             const ticketHtml = `
-                <div style="text-align:center; margin-bottom:6px;">
-                    <img src="${LOGO_URL}" alt="Logo" style="width:46mm; height:auto; display:block; margin:0 auto 4px auto;" />
+                <div style="text-align:center; margin-bottom:4px;">
+                    <img src="${LOGO_URL}" alt="Logo" style="width:28mm; height:auto; display:block; margin:0 auto 2px auto;" />
                 </div>
                 <div style="text-align:center; font-size:11px; font-weight:bold; margin-bottom:6px; border:1px solid #000; padding:2px 0;">【 到店自提凭证 】</div>
                 <div style="font-size:11px;">订单编号：${order.id}</div>
                 <div style="font-size:11px;">下单时间：${order.time}</div>
-                <div style="font-size:12px; margin-top:2px;">取餐电话：<b>尾号 ${order.phone}</b></div>
+                <div style="font-size:13px; margin-top:4px; font-weight:bold;">取餐电话：<span style="font-size:18px; text-decoration:underline;">尾号 ${order.phone}</span></div>
                 <div style="border-bottom:1px dashed #000; margin:6px 0; padding-bottom:2px;"></div>
                 <div style="font-weight:bold; font-size:11px;">菜品明细：</div>
                 ${order.items.map(i => `
@@ -329,29 +331,24 @@
             `).join('');
         }
 
-        // 安全绑定所有交互事件
         window.onload = function() {
             if (localStorage.getItem('admin_logged') === 'true') {
                 document.getElementById('login-modal').style.display = 'none';
                 loadCloudData();
             }
 
-            // 绑定登录按钮
             document.getElementById('login-btn').onclick = handleLogin;
             document.getElementById('login-pass').onkeydown = function(e) {
                 if (e.key === 'Enter') handleLogin();
             };
 
-            // 绑定顶部导航
             document.getElementById('export-btn').onclick = exportOrdersCSV;
             document.getElementById('save-btn').onclick = syncToCloud;
             document.getElementById('logout-btn').onclick = logout;
 
-            // 绑定 Tab 切换
             document.getElementById('tab-orders').onclick = () => switchTab('orders');
             document.getElementById('tab-control').onclick = () => switchTab('control');
 
-            // 绑定其他按钮
             document.getElementById('refresh-btn').onclick = loadCloudData;
             document.getElementById('save-time-btn').onclick = saveTimeControl;
         };
