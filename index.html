@@ -13,7 +13,10 @@
         .header-logo { height: 28px; width: auto; object-fit: contain; display: block; }
         .query-btn { background-color: #78350f; color: #ffffff; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; }
         
-        .notice { background-color: #fef3c7; color: #78350f; font-size: 12px; padding: 8px 16px; border-bottom: 1px solid #fde68a; font-weight: 500; line-height: 1.4; }
+        .notice { background-color: #fef3c7; color: #78350f; font-size: 12px; padding: 10px 16px; border-bottom: 1px solid #fde68a; font-weight: 500; line-height: 1.4; display: flex; flex-direction: column; gap: 4px; }
+        .notice-top-row { display: flex; justify-content: space-between; align-items: center; }
+        .store-status-tag { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #fff; }
+        .queue-info-box { font-size: 11px; color: #92400e; font-weight: bold; border-top: 1px dashed #fde68a; padding-top: 4px; margin-top: 2px; }
         
         .menu-container { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 20px; }
         .section-title { font-size: 14px; font-weight: bold; color: #111827; margin-bottom: 12px; border-left: 4px solid #b45309; padding-left: 8px; display: flex; align-items: center; justify-content: space-between; }
@@ -70,9 +73,15 @@
             <button onclick="openQueryModal()" class="query-btn">查询订单进度</button>
         </header>
 
+        <!-- 提示横幅、休息标签与实时排队繁忙度显示 -->
         <div id="status-notice" class="notice">
-            提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>
-            营业时间：加载中...
+            <div class="notice-top-row">
+                <div id="notice-text">提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>营业时间：加载中...</div>
+                <div id="store-status-tag" class="store-status-tag" style="background: #10b981;">营业中</div>
+            </div>
+            <div id="queue-info-box" class="queue-info-box">
+                当前前方还有 <strong id="pending-orders-count">0</strong> 单未完成 | 门店繁忙度: <span id="busyness-badge" style="padding: 1px 6px; border-radius: 4px; background: #10b981; color: #fff;">畅通</span>
+            </div>
         </div>
 
         <div class="menu-container">
@@ -167,7 +176,7 @@
             </div>
         </div>
 
-        <!-- 支付与取餐方式选择弹窗 -->
+        <!-- 支付弹窗 -->
         <div id="pay-modal" class="modal-mask">
             <div class="modal-box" style="text-align: center;">
                 <button onclick="closePayModal()" class="close-x">✕</button>
@@ -175,7 +184,6 @@
                 <div style="color: #b45309; font-weight: bold; font-size: 13px;">客家腌面 · 微信收银台</div>
                 <div id="pay-amount" style="font-size: 24px; font-weight: black; color: #111827;">￥1.00</div>
 
-                <!-- 取餐方式双按钮选择 -->
                 <div style="text-align: left; background: #fffbeb; padding: 10px; border-radius: 8px; border: 1px solid #fde68a;">
                     <label style="font-size: 11px; font-weight: bold; color: #78350f; display: block; margin-bottom: 6px;">选择取餐方式：</label>
                     <div style="display: flex; gap: 8px; margin-bottom: 8px;">
@@ -183,7 +191,6 @@
                         <button type="button" id="btn-reserve" onclick="setOrderMode('reserve')" style="flex: 1; padding: 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; border: 1px solid #d1d5db; background: #f3f4f6; color: #374151;">预约取餐时间</button>
                     </div>
 
-                    <!-- 预约时间下拉框（15分钟/节） -->
                     <div id="reserve-time-box" style="display: none; margin-top: 6px;">
                         <label style="font-size: 10px; color: #78350f; display: block; margin-bottom: 2px;">请选择预约时间 (15分钟/节)：</label>
                         <select id="pickup-time-select" class="input-box" style="background: #fff; font-weight: bold; color: #b45309;"></select>
@@ -266,7 +273,8 @@
         };
 
         let cloudStocks = {};
-        let storeControl = { start: '08:00', end: '21:00' };
+        let storeControl = { start: '08:00', end: '21:00', manualClosed: false };
+        let cloudOrders = [];
         let cart = [];
         let currentActiveItem = null;
         let currentSpecType = 'small';
@@ -282,11 +290,13 @@
                 const data = await res.json();
                 if (data.record) {
                     cloudStocks = data.record.stocks || {};
+                    cloudOrders = data.record.orders || [];
                     if (data.record.control) {
                         storeControl = data.record.control;
                     }
                 }
                 checkStoreTime();
+                updateQueueStats();
                 renderMenu();
             } catch (e) {
                 console.error('加载云端配置失败', e);
@@ -298,20 +308,49 @@
             const now = new Date();
             const currentHourMin = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
             
-            const noticeEl = document.getElementById('status-notice');
+            const noticeTextEl = document.getElementById('notice-text');
+            const statusTag = document.getElementById('store-status-tag');
             const startTime = storeControl.start || '08:00';
             const endTime = storeControl.end || '21:00';
 
-            if (currentHourMin < startTime || currentHourMin > endTime) {
+            if (storeControl.manualClosed || currentHourMin < startTime || currentHourMin > endTime) {
                 isStoreOpen = false;
-                noticeEl.innerHTML = `本店已打烊 (营业时间: ${startTime} ~ ${endTime})，当前无法下单！`;
-                noticeEl.style.backgroundColor = '#fee2e2';
-                noticeEl.style.color = '#991b1b';
+                statusTag.innerText = '休息中';
+                statusTag.style.background = '#d97706';
             } else {
                 isStoreOpen = true;
-                noticeEl.innerHTML = `提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>营业时间：${startTime} ~ ${endTime}`;
-                noticeEl.style.backgroundColor = '#fef3c7';
-                noticeEl.style.color = '#78350f';
+                statusTag.innerText = '营业中';
+                statusTag.style.background = '#10b981';
+            }
+
+            let textInfo = `提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>营业时间：${startTime} ~ ${endTime}`;
+            if (storeControl.manualClosed) {
+                textInfo = `<strong>[本店已休息]</strong> 当前无法下单！`;
+            } else if (!isStoreOpen) {
+                textInfo = `<strong>[不在营业时间内]</strong> (营业时间: ${startTime} ~ ${endTime})`;
+            }
+            noticeTextEl.innerHTML = textInfo;
+        }
+
+        // 计算待完成的实时单及繁忙度（预约单不计入）
+        function updateQueueStats() {
+            // 过滤未完成（状态不是“已出餐”）的订单，并且必须是“实时单”（pickupTime 为 尽快取餐 或 不存在）
+            const pendingAsapOrders = cloudOrders.filter(o => {
+                const isNotFinished = o.status !== '已出餐';
+                const isReserve = o.pickupTime && o.pickupTime !== '尽快取餐';
+                return isNotFinished && !isReserve;
+            });
+
+            const count = pendingAsapOrders.length;
+            document.getElementById('pending-orders-count').innerText = count;
+
+            const badge = document.getElementById('busyness-badge');
+            if (count < 5) {
+                badge.innerText = '畅通';
+                badge.style.background = '#10b981'; // 绿色
+            } else {
+                badge.innerText = '繁忙';
+                badge.style.background = '#ea580c'; // 橙红色
             }
         }
 
@@ -325,21 +364,17 @@
                 btnAsap.style.background = '#b45309';
                 btnAsap.style.color = '#fff';
                 btnAsap.style.borderColor = '#b45309';
-
                 btnReserve.style.background = '#f3f4f6';
                 btnReserve.style.color = '#374151';
                 btnReserve.style.borderColor = '#d1d5db';
-
                 reserveBox.style.display = 'none';
             } else {
                 btnReserve.style.background = '#b45309';
                 btnReserve.style.color = '#fff';
                 btnReserve.style.borderColor = '#b45309';
-
                 btnAsap.style.background = '#f3f4f6';
                 btnAsap.style.color = '#374151';
                 btnAsap.style.borderColor = '#d1d5db';
-
                 reserveBox.style.display = 'block';
                 generateTimeOptions();
             }
@@ -446,7 +481,7 @@
 
         function openSpecModal(category, index, specType) {
             if (!isStoreOpen) {
-                alert('当前不在营业时间内，无法下单！');
+                alert('当前本店已休息，无法下单！');
                 return;
             }
             currentActiveItem = menuData[category][index];
@@ -526,7 +561,7 @@
 
         function addToCartDirect(index) {
             if (!isStoreOpen) {
-                alert('当前不在营业时间内！');
+                alert('当前本店已休息！');
                 return;
             }
             const item = menuData.soups[index];
@@ -617,7 +652,7 @@
 
         function checkout() {
             if (!isStoreOpen) {
-                alert('当前不在营业时间内！');
+                alert('当前本店已休息！');
                 return;
             }
             if (cart.length === 0) return;
@@ -805,6 +840,7 @@
 
         window.onload = function() {
             fetchCloudConfig();
+            setInterval(fetchCloudConfig, 10000);
         };
     </script>
 </body>
