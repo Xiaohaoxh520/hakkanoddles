@@ -2,12 +2,10 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>客家腌面 - 商家后台 OA 管理系统</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-gray-100 font-sans">
     <div id="app" class="max-w-md mx-auto bg-white min-h-screen shadow-lg flex flex-col relative pb-10">
@@ -43,10 +41,11 @@
             <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-sm">
                 <div>
                     <h2 class="font-bold text-gray-800 text-sm">📈 商家后台 OA 管理系统</h2>
-                    <p class="text-xs text-gray-500">客家腌面 · 云端实时看板</p>
+                    <p class="text-xs text-gray-500">客家腌面 · 核销看板</p>
                 </div>
                 <div class="space-x-2">
                     <button @click="logout" class="text-xs bg-gray-100 text-gray-600 px-2.5 py-1.5 rounded">退出</button>
+                    <button @click="clearOrders" class="text-xs bg-red-100 text-red-600 px-2.5 py-1.5 rounded">清空记录</button>
                 </div>
             </div>
 
@@ -65,7 +64,7 @@
             <!-- 实时订单列表 -->
             <div class="flex-1 space-y-3">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-gray-700 text-xs">📋 实时自提订单 (云端同步)</h3>
+                    <h3 class="font-bold text-gray-700 text-xs">📋 实时自提订单</h3>
                     <button @click="loadOrders" class="text-xs text-amber-600 hover:underline">🔄 刷新订单</button>
                 </div>
                 
@@ -75,7 +74,7 @@
 
                 <div v-for="order in orders" :key="order.id" class="bg-white border rounded-xl p-3 shadow-sm space-y-2">
                     <div class="flex justify-between items-center border-b pb-2 text-xs">
-                        <span class="font-bold text-gray-500">订单号: {{ order.orderId }}</span>
+                        <span class="font-bold text-gray-500">订单号: {{ order.id }}</span>
                         <span :class="order.status === '待核销' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'" class="px-2 py-0.5 rounded-full font-bold">
                             {{ order.status }}
                         </span>
@@ -111,10 +110,6 @@
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://oxgsbioorlhbrydeazac.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94Z3NiaW9vcmxoYnJ5ZGVhemFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MTY5MDgsImV4cCI6MjEwODk5MjkwOH0.We2CpO3JDXvrG4OaYbzD73pcLRgOKJ18r867M901fqE';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
         const { createApp, ref, computed, onMounted } = Vue;
 
         createApp({
@@ -130,8 +125,8 @@
                 onMounted(() => {
                     if (localStorage.getItem('hakka_admin_logged') === 'true') {
                         isLoggedIn.value = true;
-                        loadOrders();
                     }
+                    loadOrders();
                 });
 
                 const handleLogin = () => {
@@ -140,7 +135,7 @@
                         localStorage.setItem('hakka_admin_logged', 'true');
                         loadOrders();
                     } else {
-                        alert('账号或密码错误！');
+                        alert('账号或密码错误！(默认账号: admin, 密码: 123456)');
                     }
                 };
 
@@ -149,31 +144,29 @@
                     localStorage.removeItem('hakka_admin_logged');
                 };
 
-                // 从 Supabase 加载订单
-                const loadOrders = async () => {
-                    const { data, error } = await supabase
-                        .from('orders')
-                        .select('*')
-                        .order('created_at', { ascending: false });
-
-                    if (error) {
-                        console.error('加载订单失败', error);
-                    } else {
-                        orders.value = data;
+                const loadOrders = () => {
+                    const localOrders = localStorage.getItem('hakka_orders');
+                    if (localOrders) {
+                        orders.value = JSON.parse(localOrders);
                     }
                 };
 
-                // 在 Supabase 中更新订单状态为已核销
-                const verifyOrder = async (id) => {
-                    const { error } = await supabase
-                        .from('orders')
-                        .update({ status: '已核销完成' })
-                        .eq('id', id);
+                const saveOrders = () => {
+                    localStorage.setItem('hakka_orders', JSON.stringify(orders.value));
+                };
 
-                    if (error) {
-                        console.error('核销失败', error);
-                    } else {
-                        loadOrders();
+                const verifyOrder = (id) => {
+                    const order = orders.value.find(o => o.id === id);
+                    if (order) {
+                        order.status = '已核销完成';
+                        saveOrders();
+                    }
+                };
+
+                const clearOrders = () => {
+                    if (confirm('确定清空所有订单记录吗？')) {
+                        orders.value = [];
+                        localStorage.removeItem('hakka_orders');
                     }
                 };
 
@@ -182,7 +175,7 @@
 
                 return {
                     isLoggedIn, username, password, orders,
-                    handleLogin, logout, loadOrders, verifyOrder,
+                    handleLogin, logout, loadOrders, verifyOrder, clearOrders,
                     pendingOrdersCount, totalRevenue
                 };
             }
