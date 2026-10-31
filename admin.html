@@ -68,7 +68,6 @@
 
         <header>
             <div class="header-brand">
-                <!-- 更新后的最新 Logo 图床 -->
                 <img src="https://i.imgs.ovh/2026/10/31/aaba03f7954545ed22cbf0f81dd22561.png" alt="Logo" class="header-logo">
                 <span class="header-title-text">订单管理系统</span>
             </div>
@@ -111,7 +110,7 @@
 
             <div class="pc-col-middle content-box" style="padding: 16px; background: #fff; height: 100%;">
                 <div style="font-size: 14px; font-weight: bold; color: #111827; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">
-                    <span>全部订单流水与预约单大屏 (每15秒自动刷新)</span>
+                    <span>全部订单流水与预约单大屏 (每35秒自动刷新)</span>
                     <span style="font-size: 12px; color: #059669; font-weight: bold;">自动同步中</span>
                 </div>
                 <div id="orders-list"></div>
@@ -128,7 +127,7 @@
                 <div class="card" style="margin: 0; background: #f9fafb;">
                     <h3>系统使用提示</h3>
                     <p style="font-size: 12px; color: #4b5563; line-height: 1.5; margin-top: 6px;">
-                        1. 后台每隔 <strong>15 秒</strong>自动从云端拉取最新订单。<br>
+                        1. 后台每隔 <strong>35 秒</strong>自动从云端拉取最新订单。<br>
                         2. 预约单卡片带有<strong>黄色醒目背景</strong>。<br>
                         3. 点击一键休息后，顾客端将无法下单。
                     </p>
@@ -220,8 +219,6 @@
     <script>
         const BIN_ID = '6ae586c8ffd5d160539a6da4';
         const MASTER_KEY = '$2a$10$lwmZR3vIjsFdZlgG4.WReOJzFNBqHERsLquMbL42GY/BNEBveQ896';
-        
-        // 更新为用户指定的最新 Logo 图床链接
         const LOGO_URL = 'https://i.imgs.ovh/2026/10/31/aaba03f7954545ed22cbf0f81dd22561.png';
 
         let cloudData = {
@@ -666,7 +663,8 @@
             document.getElementById('refresh-btn').onclick = loadCloudData;
             document.getElementById('save-time-btn').onclick = saveTimeControl;
 
-            setInterval(loadCloudData, 15000);
+            // 每隔35秒自动从云端静默刷新一次
+            setInterval(loadCloudData, 35000);
         };
     </script>
 </body>
