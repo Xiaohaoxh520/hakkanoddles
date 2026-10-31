@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>客家腌面 - 商家后台 OA 管理系统</title>
+    <title>客家腌面 - 商家后台与堂食点单系统</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         body { background-color: #f3f4f6; color: #1f2937; min-height: 100vh; font-size: 14px; display: flex; justify-content: center; }
         
         #app { width: 100%; max-width: 480px; background-color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; position: relative; padding-bottom: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
-        /* PC 端专业大屏三栏式布局适配 */
         @media (min-width: 1024px) {
             #app { max-width: 1440px; border-radius: 12px; margin: 16px auto; min-height: calc(100vh - 32px); }
-            .pc-workspace { display: grid; grid-template-columns: 320px 1fr 340px; gap: 16px; padding: 16px; flex: 1; align-items: start; height: calc(100vh - 110px); overflow: hidden; }
+            .pc-workspace { display: grid; grid-template-columns: 300px 1fr 340px; gap: 16px; padding: 16px; flex: 1; align-items: start; height: calc(100vh - 110px); overflow: hidden; }
             .pc-col-left, .pc-col-middle, .pc-col-right { height: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-right: 4px; }
             .pc-col-middle { grid-column: 2; }
             #orders-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -41,11 +40,15 @@
         .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; }
         .footer-copyright { text-align: center; font-size: 12px; color: #9ca3af; padding: 12px 0; border-top: 1px solid #f3f4f6; }
 
+        .dinein-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 8px; }
+        .dinein-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; }
+
         #print-ticket { display: none; }
         @media print {
             body * { visibility: hidden; }
             #print-ticket, #print-ticket * { visibility: visible; }
             #print-ticket { position: absolute; left: 0; top: 0; width: 58mm; display: block !important; font-family: monospace; font-size: 12px; color: #000; padding: 4px; background: #fff; }
+            .page-break { page-break-after: always; break-after: page; }
         }
     </style>
 </head>
@@ -79,15 +82,16 @@
         </header>
 
         <div class="tab-bar">
-            <div id="tab-orders" class="tab-item active" onclick="switchTab('orders')">工作台 (订单大屏)</div>
-            <div id="tab-control" class="tab-item" onclick="switchTab('control')">营业、结算与库存</div>
+            <div id="tab-orders" class="tab-item active" onclick="switchTab('orders')">线上自提工作台</div>
+            <div id="tab-dinein" class="tab-item" onclick="switchTab('dinein')">堂食柜台点单</div>
+            <div id="tab-control" class="tab-item" onclick="switchTab('control')">营业与库存</div>
         </div>
 
-        <!-- 1. 工作台 -->
+        <!-- 1. 线上自提工作台 -->
         <div id="panel-orders" class="pc-workspace content-box" style="padding: 0; background: #f3f4f6;">
             <div class="pc-col-left content-box" style="padding: 16px; background: #fff; height: 100%;">
                 <div class="card" style="margin: 0; background: #fffbeb; border-color: #fde68a;">
-                    <h3 style="border-left-color: #b45309; color: #78350f;">营业实时统计</h3>
+                    <h3 style="border-left-color: #b45309; color: #78350f;">线上营业实时统计</h3>
                     <div id="stats-text" style="font-size: 13px; color: #78350f; font-weight: bold; margin-top: 6px; line-height: 1.5;">加载中...</div>
                 </div>
 
@@ -103,14 +107,14 @@
                     <h3>快捷操作面板</h3>
                     <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
                         <button onclick="openSettlementModal()" class="btn-primary" style="background: #059669; padding: 9px;">查看当日完整结算报表</button>
-                        <button id="refresh-btn" class="btn-primary" style="background: #4b5563; padding: 9px;">立即刷新全部订单</button>
+                        <button id="refresh-btn" class="btn-primary" style="background: #4b5563; padding: 9px;">立即刷新订单</button>
                     </div>
                 </div>
             </div>
 
             <div class="pc-col-middle content-box" style="padding: 16px; background: #fff; height: 100%;">
                 <div style="font-size: 14px; font-weight: bold; color: #111827; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">
-                    <span>全部订单流水与预约单大屏 (每35秒自动刷新)</span>
+                    <span>线上自提订单大屏 (每35秒自动刷新)</span>
                     <span style="font-size: 12px; color: #059669; font-weight: bold;">自动同步中</span>
                 </div>
                 <div id="orders-list"></div>
@@ -118,28 +122,64 @@
 
             <div class="pc-col-right content-box" style="padding: 16px; background: #fff; height: 100%;">
                 <div class="card" style="margin: 0;">
-                    <h3>今日营收快捷小结</h3>
+                    <h3>今日线上营收小结</h3>
                     <div style="font-size: 13px; display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
-                        <div>今日营业总额: <br><strong id="quick-rev" style="color: #b45309; font-size: 20px;">￥0</strong></div>
-                        <div>今日有效订单: <br><strong id="quick-count" style="font-size: 16px;">0 单</strong></div>
+                        <div>线上营业总额: <br><strong id="quick-rev" style="color: #b45309; font-size: 20px;">￥0</strong></div>
+                        <div>线上有效订单: <br><strong id="quick-count" style="font-size: 16px;">0 单</strong></div>
                     </div>
-                </div>
-                <div class="card" style="margin: 0; background: #f9fafb;">
-                    <h3>系统使用提示</h3>
-                    <p style="font-size: 12px; color: #4b5563; line-height: 1.5; margin-top: 6px;">
-                        1. 后台每隔 <strong>35 秒</strong>自动从云端拉取最新订单。<br>
-                        2. 预约单卡片带有<strong>黄色醒目背景</strong>。<br>
-                        3. 点击一键休息后，顾客端将无法下单。
-                    </p>
                 </div>
             </div>
         </div>
 
-        <!-- 2. 控制面板 -->
+        <!-- 2. 堂食柜台点单页面 -->
+        <div id="panel-dinein" class="content-box" style="display: none; background: #fff; flex: 1; max-width: 900px; margin: 0 auto; width: 100%;">
+            <div class="card" style="background: #f0fdf4; border-color: #bbf7d0;">
+                <h3 style="border-left-color: #16a34a; color: #166534;">堂食柜台点单收银台 (0-999循环取餐号，免打包费/手机号)</h3>
+                <p style="font-size: 12px; color: #15803d; margin-top: 4px;">点餐后系统将自动生成 3-4 位以内醒目取餐号，并直接双联打印小票。</p>
+            </div>
+
+            <div class="card">
+                <h3>点餐菜单与快速结算</h3>
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    <div>
+                        <label style="font-size: 12px; font-weight: bold; color: #374151;">选择系列菜品：</label>
+                        <select id="dinein-category-select" class="input-box" onchange="renderDineInItems()">
+                            <option value="combos">营养套餐系列 (可选粉面)</option>
+                            <option value="staples">主食系列</option>
+                            <option value="soups">靓汤系列</option>
+                            <option value="noodlessoups">汤粉汤面系列</option>
+                        </select>
+                    </div>
+                    
+                    <div id="dinein-items-grid" class="dinein-grid"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>当前堂食订单明细</h3>
+                <div id="dinein-cart-list" style="display: flex; flex-direction: column; gap: 8px; min-height: 60px; max-height: 25vh; overflow-y: auto; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">
+                    <div style="color: #9ca3af; font-size: 12px; text-align: center; padding: 10px;">暂未选择菜品</div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 15px; font-weight: bold;">
+                    <span>堂食应付总计: <span id="dinein-total" style="color: #16a34a; font-size: 18px;">￥0</span></span>
+                    <button onclick="submitDineInOrder()" class="btn-primary" style="background: #16a34a; width: auto; padding: 10px 24px;">提交堂食订单并打印双联小票</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h3>堂食柜台今日流水账单</h3>
+                    <span id="dinein-stats-text" style="font-size: 12px; color: #166534; font-weight: bold;">今日堂食营业额: ￥0</span>
+                </div>
+                <div id="dinein-orders-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 35vh; overflow-y: auto;"></div>
+            </div>
+        </div>
+
+        <!-- 3. 营业与库存控制面板 -->
         <div id="panel-control" class="content-box" style="display: none; background: #fff; flex: 1;">
             <div class="card" style="background: #fffbeb; border-color: #fde68a;">
                 <h3 style="border-left-color: #b45309; color: #78350f;">当日营业结算中心</h3>
-                <p style="font-size: 12px; color: #78350f; margin-bottom: 10px;">一键生成今日打烊结算报表，核对营业额与订单量。</p>
+                <p style="font-size: 12px; color: #78350f; margin-bottom: 10px;">生成今日结算报表（线上自提流水与堂食柜台流水将独立统计）。</p>
                 <button onclick="openSettlementModal()" class="btn-primary" style="background-color: #059669; padding: 10px;">生成今日结算报表</button>
             </div>
 
@@ -180,7 +220,29 @@
         </div>
     </div>
 
-    <!-- 弹窗部分 -->
+    <!-- 堂食规格选择弹窗 -->
+    <div id="dinein-spec-modal" class="modal-mask" style="display: none;">
+        <div style="background: #fff; width: 100%; max-width: 320px; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+            <h3 id="dinein-spec-title" style="font-size: 15px; font-weight: bold; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;"></h3>
+            <div>
+                <label style="font-size: 12px; font-weight: bold; color: #374151;">选择规格：</label>
+                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                    <button type="button" onclick="selectDineInSpecType('small')" id="dinein-btn-small" style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #b45309; background: #b45309; color: #fff; font-size: 12px; font-weight: bold; cursor: pointer;">小份</button>
+                    <button type="button" onclick="selectDineInSpecType('big')" id="dinein-btn-big" style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #d1d5db; background: #f3f4f6; color: #374151; font-size: 12px; font-weight: bold; cursor: pointer;">大份</button>
+                </div>
+            </div>
+            <div id="dinein-options-box">
+                <label style="font-size: 12px; font-weight: bold; color: #374151; display: block; margin-top: 6px; margin-bottom: 4px;">选择粉面：</label>
+                <div id="dinein-options-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;"></div>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 10px;">
+                <button onclick="closeDineInSpecModal()" style="flex: 1; background: #e5e7eb; border: none; padding: 10px; border-radius: 8px; font-size: 12px; cursor: pointer;">取消</button>
+                <button onclick="confirmAddDineInCart()" class="btn-primary" style="flex: 1; padding: 10px;">加入堂食清单</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 当日结算报表弹窗 -->
     <div id="settlement-modal" class="modal-mask" style="display: none;">
         <div style="background: #fff; width: 100%; max-width: 380px; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px;">
             <h3 style="font-size: 16px; font-weight: bold; text-align: center; color: #b45309;">客家腌面 · 当日营业结算单</h3>
@@ -221,11 +283,51 @@
         const MASTER_KEY = '$2a$10$lwmZR3vIjsFdZlgG4.WReOJzFNBqHERsLquMbL42GY/BNEBveQ896';
         const LOGO_URL = 'https://i.imgs.ovh/2026/10/31/aaba03f7954545ed22cbf0f81dd22561.png';
 
+        const menuData = {
+            combos: [
+                { name: '紫菜蛋花汤套餐', priceSmall: 11, priceBig: 13, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                { name: '番茄蛋花汤套餐', priceSmall: 11, priceBig: 13, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                { name: '枸杞叶三及第汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                { name: '枸杞叶瘦肉汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                { name: '酸菜瘦肉汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                { name: '枸杞叶猪肉丸汤套餐', priceSmall: 15, priceBig: 17, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                { name: '枸杞叶牛肉丸汤套餐', priceSmall: 15, priceBig: 17, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                { name: '酸菜牛肉丸汤套餐', priceSmall: 15, priceBig: 17, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] }
+            ],
+            staples: [
+                { name: '腌面', priceSmall: 8, priceBig: 10, options: ['常规'] },
+                { name: '腌米粉', priceSmall: 8, priceBig: 10, options: ['常规'] },
+                { name: '腌河粉', priceSmall: 8, priceBig: 10, options: ['常规'] },
+                { name: '腌珍珠粉', priceSmall: 8, priceBig: 10, options: ['常规'] }
+            ],
+            soups: [
+                { name: '紫菜蛋花汤', price: 5 },
+                { name: '番茄蛋花汤', price: 5 },
+                { name: '枸杞叶三及第汤', price: 7 },
+                { name: '枸杞叶瘦肉汤', price: 7 },
+                { name: '酸菜瘦肉汤', price: 7 },
+                { name: '枸杞叶猪肉丸汤', price: 9 },
+                { name: '枸杞叶牛肉丸汤', price: 9 },
+                { name: '酸菜牛肉丸汤', price: 9 }
+            ],
+            noodlessoups: [
+                { name: '猪杂汤', priceSmall: 13, priceBig: 15, options: ['面条', '米粉', '河粉', '珍珠粉'] },
+                { name: '猪肉丸瘦肉汤', priceSmall: 15, priceBig: 17, options: ['面条', '米粉', '河粉', '珍珠粉'] },
+                { name: '牛肉丸牛肉汤', priceSmall: 17, priceBig: 19, options: ['面条', '米粉', '河粉', '珍珠粉'] }
+            ]
+        };
+
         let cloudData = {
             orders: [],
+            dineInOrders: [],
             control: { start: '08:00', end: '21:00', manualClosed: false },
             stocks: {}
         };
+
+        let dineInCart = [];
+        let currentDineInItem = null;
+        let currentDineInSpec = 'small';
+        let currentDineInOpt = '';
 
         const defaultMenuStructure = [
             '紫菜蛋花汤套餐', '番茄蛋花汤套餐', '枸杞叶三及第汤套餐', '枸杞叶瘦肉汤套餐', 
@@ -255,9 +357,17 @@
 
         function switchTab(tab) {
             document.getElementById('tab-orders').className = `tab-item ${tab === 'orders' ? 'active' : ''}`;
+            document.getElementById('tab-dinein').className = `tab-item ${tab === 'dinein' ? 'active' : ''}`;
             document.getElementById('tab-control').className = `tab-item ${tab === 'control' ? 'active' : ''}`;
+            
             document.getElementById('panel-orders').style.display = tab === 'orders' ? (window.innerWidth >= 1024 ? 'grid' : 'flex') : 'none';
+            document.getElementById('panel-dinein').style.display = tab === 'dinein' ? 'flex' : 'none';
             document.getElementById('panel-control').style.display = tab === 'control' ? 'flex' : 'none';
+
+            if (tab === 'dinein') {
+                renderDineInItems();
+                renderDineInOrders();
+            }
         }
 
         async function loadCloudData() {
@@ -268,6 +378,7 @@
                 const data = await res.json();
                 if (data.record) {
                     cloudData.orders = data.record.orders || [];
+                    cloudData.dineInOrders = data.record.dineInOrders || [];
                     cloudData.control = data.record.control || { start: '08:00', end: '21:00', manualClosed: false };
                     cloudData.stocks = data.record.stocks || {};
                 }
@@ -282,6 +393,7 @@
                 renderControlPanel();
                 updateQuickSummary();
                 updateStoreStatusUI();
+                renderDineInOrders();
             } catch (e) {
                 console.error(e);
             }
@@ -358,10 +470,11 @@
         }
 
         async function clearAllOrders() {
-            if (!confirm('警告：确定要清空云端所有的订单流水吗？此操作不可恢复！')) {
+            if (!confirm('警告：确定要清空云端所有的线上自提与堂食流水吗？此操作不可恢复！')) {
                 return;
             }
             cloudData.orders = [];
+            cloudData.dineInOrders = [];
             try {
                 await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
                     method: 'PUT',
@@ -379,16 +492,279 @@
             }
         }
 
+        function renderDineInItems() {
+            const category = document.getElementById('dinein-category-select').value;
+            const items = menuData[category] || [];
+            const container = document.getElementById('dinein-items-grid');
+
+            container.innerHTML = items.map((item, idx) => {
+                const isSoup = category === 'soups';
+                const priceDisplay = isSoup ? `￥${item.price}` : `小￥${item.priceSmall}/大￥${item.priceBig}`;
+                return `
+                <div class="dinein-item">
+                    <div>
+                        <div style="font-weight: bold; font-size: 13px;">${item.name}</div>
+                        <div style="color: #b45309; font-size: 12px; margin-top: 2px; font-weight: bold;">${priceDisplay}</div>
+                    </div>
+                    <button onclick="openDineInSpec('${category}', ${idx})" class="btn-primary" style="padding: 6px; font-size: 11px;">+ 选购</button>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function openDineInSpec(category, index) {
+            currentDineInItem = menuData[category][index];
+            currentDineInSpec = 'small';
+            
+            document.getElementById('dinein-spec-title').innerText = currentDineInItem.name;
+            const optionsBox = document.getElementById('dinein-options-box');
+
+            if (currentDineInItem.options && currentDineInItem.options.length > 0) {
+                optionsBox.style.display = 'block';
+                currentDineInOpt = currentDineInItem.options[0];
+                document.getElementById('dinein-options-grid').innerHTML = currentDineInItem.options.map(opt => `
+                    <div onclick="selectDineInOpt('${opt}')" id="dinein-opt-${opt}" style="background: ${opt === currentDineInOpt ? '#b45309' : '#f3f4f6'}; color: ${opt === currentDineInOpt ? '#fff' : '#374151'}; padding: 6px; border-radius: 6px; font-size: 11px; text-align: center; cursor: pointer; font-weight: bold;">${opt}</div>
+                `).join('');
+            } else {
+                optionsBox.style.display = 'none';
+                currentDineInOpt = '';
+            }
+
+            selectDineInSpecType('small');
+            document.getElementById('dinein-spec-modal').style.display = 'flex';
+        }
+
+        function selectDineInSpecType(type) {
+            currentDineInSpec = type;
+            const btnSmall = document.getElementById('dinein-btn-small');
+            const btnBig = document.getElementById('dinein-btn-big');
+            if (type === 'small') {
+                btnSmall.style.background = '#b45309'; btnSmall.style.color = '#fff'; btnSmall.style.borderColor = '#b45309';
+                btnBig.style.background = '#f3f4f6'; btnBig.style.color = '#374151'; btnBig.style.borderColor = '#d1d5db';
+            } else {
+                btnBig.style.background = '#b45309'; btnBig.style.color = '#fff'; btnBig.style.borderColor = '#b45309';
+                btnSmall.style.background = '#f3f4f6'; btnSmall.style.color = '#374151'; btnSmall.style.borderColor = '#d1d5db';
+            }
+        }
+
+        function selectDineInOpt(opt) {
+            currentDineInOpt = opt;
+            currentDineInItem.options.forEach(o => {
+                const el = document.getElementById(`dinein-opt-${o}`);
+                if (el) {
+                    el.style.background = o === opt ? '#b45309' : '#f3f4f6';
+                    el.style.color = o === opt ? '#fff' : '#374151';
+                }
+            });
+        }
+
+        function closeDineInSpecModal() {
+            document.getElementById('dinein-spec-modal').style.display = 'none';
+        }
+
+        function confirmAddDineInCart() {
+            const isSoup = currentDineInItem.price !== undefined;
+            const price = isSoup ? currentDineInItem.price : (currentDineInSpec === 'small' ? currentDineInItem.priceSmall : currentDineInItem.priceBig);
+            const sizeName = isSoup ? '' : (currentDineInSpec === 'small' ? '小份' : '大份');
+            const specName = currentDineInOpt ? `${sizeName} (${currentDineInOpt})` : sizeName;
+
+            const existing = dineInCart.find(i => i.name === currentDineInItem.name && i.spec === specName);
+            if (existing) {
+                existing.count++;
+            } else {
+                dineInCart.push({
+                    name: currentDineInItem.name,
+                    spec: specName,
+                    price: price,
+                    count: 1
+                });
+            }
+            closeDineInSpecModal();
+            renderDineInCart();
+        }
+
+        function renderDineInCart() {
+            const container = document.getElementById('dinein-cart-list');
+            const total = dineInCart.reduce((s, i) => s + i.price * i.count, 0);
+            document.getElementById('dinein-total').innerText = '￥' + total;
+
+            if (dineInCart.length === 0) {
+                container.innerHTML = `<div style="color: #9ca3af; font-size: 12px; text-align: center; padding: 10px;">暂未选择菜品</div>`;
+                return;
+            }
+
+            container.innerHTML = dineInCart.map((item, idx) => `
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; background: #f9fafb; padding: 6px 10px; border-radius: 6px;">
+                    <div><strong>${item.name}</strong> <span style="color: #b45309;">${item.spec}</span> (￥${item.price})</div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>x${item.count}</span>
+                        <button onclick="changeDineInCount(${idx}, -1)" style="background: #e5e7eb; border: none; width: 20px; height: 20px; border-radius: 50%; font-weight: bold; cursor: pointer;">-</button>
+                        <button onclick="changeDineInCount(${idx}, 1)" style="background: #16a34a; color: #fff; border: none; width: 20px; height: 20px; border-radius: 50%; font-weight: bold; cursor: pointer;">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function changeDineInCount(index, delta) {
+            dineInCart[index].count += delta;
+            if (dineInCart[index].count <= 0) {
+                dineInCart.splice(index, 1);
+            }
+            renderDineInCart();
+        }
+
+        // 提交堂食订单 (取餐号限制在 0-999，循环递增)
+        async function submitDineInOrder() {
+            if (dineInCart.length === 0) {
+                alert('请先选择堂食菜品！');
+                return;
+            }
+
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': MASTER_KEY }
+                });
+                const data = await res.json();
+                let remoteDineInOrders = (data.record && data.record.dineInOrders) ? data.record.dineInOrders : [];
+                let remoteOrders = (data.record && data.record.orders) ? data.record.orders : [];
+                let remoteStocks = (data.record && data.record.stocks) ? data.record.stocks : {};
+                let remoteControl = (data.record && data.record.control) ? data.record.control : cloudData.control;
+
+                for (let item of dineInCart) {
+                    let stock = remoteStocks[item.name] !== undefined ? remoteStocks[item.name] : 50;
+                    if (stock < item.count) {
+                        alert(`商品 [${item.name}] 库存不足！`);
+                        return;
+                    }
+                    remoteStocks[item.name] = stock - item.count;
+                }
+
+                const totalAmount = dineInCart.reduce((s, i) => s + i.price * i.count, 0);
+
+                // 取餐号限制在 0-999 (000 ~ 999 循环)
+                let seqNumber = 0;
+                if (remoteDineInOrders.length > 0) {
+                    let lastNo = parseInt(remoteDineInOrders[0].mealNo) || 0;
+                    seqNumber = (lastNo + 1) % 1000;
+                }
+                const mealNoStr = String(seqNumber).padStart(3, '0');
+
+                const newDineInOrder = {
+                    id: 'DI' + Date.now().toString().slice(-6),
+                    mealNo: mealNoStr,
+                    items: [...dineInCart],
+                    total: totalAmount,
+                    status: '已出餐',
+                    time: new Date().toLocaleTimeString(),
+                    type: '堂食柜台'
+                };
+
+                remoteDineInOrders.unshift(newDineInOrder);
+
+                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': MASTER_KEY
+                    },
+                    body: JSON.stringify({
+                        orders: remoteOrders,
+                        dineInOrders: remoteDineInOrders,
+                        stocks: remoteStocks,
+                        control: remoteControl
+                    })
+                });
+
+                cloudData.dineInOrders = remoteDineInOrders;
+                
+                printDineInTicket(newDineInOrder);
+
+                alert(`堂食订单下单成功！取餐号：【 ${mealNoStr} 】`);
+                dineInCart = [];
+                renderDineInCart();
+                renderDineInOrders();
+                loadCloudData();
+            } catch (e) {
+                console.error(e);
+                alert('提交堂食订单失败，请检查网络');
+            }
+        }
+
+        function printDineInTicket(order) {
+            const singleTicketHtml = (titleTag) => `
+                <div style="text-align:center; margin-bottom:4px;">
+                    <img src="${LOGO_URL}" alt="Logo" style="width:28mm; height:auto; display:block; margin:0 auto 2px auto;" />
+                </div>
+                <div style="text-align:center; font-size:12px; font-weight:bold; margin-bottom:4px; border:1px solid #000; padding:2px 0;">[ 堂食点单凭证 - ${titleTag} ]</div>
+                
+                <div style="border: 3px solid #000; padding: 6px; margin-bottom: 6px; text-align: center;">
+                    <div style="font-size: 11px; font-weight: bold;">[ 柜台取餐号 ]</div>
+                    <div style="font-size: 36px; font-weight: 900; margin-top: 2px; letter-spacing: 3px;">${order.mealNo}</div>
+                </div>
+
+                <div style="font-size:11px;">流水单号：${order.id}</div>
+                <div style="font-size:11px;">下单时间：${order.time}</div>
+                <div style="border-bottom:1px dashed #000; margin:6px 0; padding-bottom:2px;"></div>
+                <div style="font-weight:bold; font-size:11px;">菜品明细 (免打包费)：</div>
+                ${order.items.map(i => `
+                    <div style="display:flex; justify-content:space-between; margin:3px 0; font-size:11px;">
+                        <span>${i.name}(${i.spec || '标配'})</span>
+                        <span>x${i.count} ￥${i.price * i.count}</span>
+                    </div>
+                `).join('')}
+                <div style="border-bottom:1px dashed #000; margin:6px 0; padding-bottom:2px;"></div>
+                <div style="text-align:right; font-weight:bold; font-size:15px;">堂食应付总计：￥${order.total}</div>
+                <div style="text-align:center; font-size:10px; margin-top:10px; font-weight:bold;">*** 请凭 3 位数取餐号取餐 ***</div>
+            `;
+
+            const doubleTicketHtml = `
+                <div>${singleTicketHtml('1联 顾客取单联')}</div>
+                <div class="page-break" style="margin: 15px 0; border-top: 2px dashed #000;"></div>
+                <div>${singleTicketHtml('2联 商家留存联')}</div>
+            `;
+
+            document.getElementById('print-ticket').innerHTML = doubleTicketHtml;
+            window.print();
+        }
+
+        function renderDineInOrders() {
+            const orders = cloudData.dineInOrders || [];
+            const todayStr = new Date().toISOString().slice(0, 10);
+            const todayOrders = orders.filter(o => o.time.includes(todayStr) || (o.id && o.id.includes(todayStr)));
+            const todayRev = todayOrders.reduce((s, o) => s + o.total, 0);
+
+            document.getElementById('dinein-stats-text').innerText = `今日堂食营业额: ￥${todayRev} (${todayOrders.length}单)`;
+
+            const container = document.getElementById('dinein-orders-list');
+            if (orders.length === 0) {
+                container.innerHTML = `<div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">暂无堂食柜台订单流水</div>`;
+                return;
+            }
+
+            container.innerHTML = orders.map(order => `
+                <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; background: #fff; font-size: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: bold; font-size: 14px; color: #16a34a;">取餐号: #${order.mealNo} <span style="font-size: 11px; color: #6b7280; font-weight: normal;">(${order.time})</span></div>
+                        <div style="color: #374151; margin-top: 2px;">${order.items.map(i => `${i.name}(${i.spec || '标配'})x${i.count}`).join('; ')}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: bold; color: #16a34a; font-size: 14px;">￥${order.total}</div>
+                        <button onclick="printDineInTicket({mealNo:'${order.mealNo}', id:'${order.id}', time:'${order.time}', items:${JSON.stringify(order.items).replace(/"/g, '&quot;')}, total:${order.total}})" style="background:#4b5563; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:10px; margin-top:4px;">补打双联小票</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         function renderOrders() {
             const allOrders = cloudData.orders;
             const pendingCount = allOrders.filter(o => o.status === '待接单').length;
             const revenue = allOrders.filter(o => o.status === '已接单' || o.status === '已出餐').reduce((s, o) => s + o.total, 0);
 
-            document.getElementById('stats-text').innerHTML = `全部订单统计 -> 待接单: <strong style="color:#b45309; font-size:15px;">${pendingCount} 单</strong><br>总营业额: <strong style="font-size:15px;">￥${revenue}</strong>`;
+            document.getElementById('stats-text').innerHTML = `线上自提统计 -> 待接单: <strong style="color:#b45309; font-size:15px;">${pendingCount} 单</strong><br>线上总营业额: <strong style="font-size:15px;">￥${revenue}</strong>`;
 
             const container = document.getElementById('orders-list');
             if (allOrders.length === 0) {
-                container.innerHTML = `<div style="text-align: center; padding: 40px; color: #9ca3af; font-size: 13px; grid-column: span 2;">暂无订单流水记录</div>`;
+                container.innerHTML = `<div style="text-align: center; padding: 40px; color: #9ca3af; font-size: 13px; grid-column: span 2;">暂无线上自提订单</div>`;
                 return;
             }
 
@@ -398,7 +774,6 @@
                 if (order.status === '已出餐') statusColor = '#059669';
 
                 const isReserve = order.pickupTime && order.pickupTime !== '尽快取餐';
-
                 const cardBg = isReserve ? '#fffbeb' : '#ffffff';
                 const cardBorder = isReserve ? '2px solid #f59e0b' : '2px solid #d1d5db';
 
@@ -504,77 +879,40 @@
 
         function calculateSettlement() {
             const dateVal = document.getElementById('settlement-date-input').value;
-            const targetOrders = cloudData.orders.filter(o => {
-                if (!o.time) return false;
-                return o.time.includes(dateVal) || (o.id && o.id.includes(dateVal));
-            });
+            
+            const targetOrders = cloudData.orders.filter(o => o.time && (o.time.includes(dateVal) || (o.id && o.id.includes(dateVal))));
             let validOrders = targetOrders.filter(o => o.status === '已接单' || o.status === '已出餐');
             if (validOrders.length === 0 && dateVal === new Date().toISOString().slice(0, 10)) {
                 validOrders = cloudData.orders.filter(o => o.status === '已接单' || o.status === '已出餐');
             }
+            const onlineRev = validOrders.reduce((s, o) => s + o.total, 0);
 
-            const totalRev = validOrders.reduce((s, o) => s + o.total, 0);
-            const packingFeeTotal = validOrders.length * 1.0;
-            const goodsRev = totalRev - packingFeeTotal;
+            const targetDineIn = (cloudData.dineInOrders || []).filter(o => o.time && (o.time.includes(dateVal) || (o.id && o.id.includes(dateVal))));
+            let validDineIn = targetDineIn;
+            if (validDineIn.length === 0 && dateVal === new Date().toISOString().slice(0, 10)) {
+                validDineIn = cloudData.dineInOrders || [];
+            }
+            const dineInRev = validDineIn.reduce((s, o) => s + o.total, 0);
 
-            let itemCounts = {};
-            validOrders.forEach(o => {
-                if (o.items && Array.isArray(o.items)) {
-                    o.items.forEach(i => {
-                        let key = `${i.name} (${i.spec || '标配'})`;
-                        itemCounts[key] = (itemCounts[key] || 0) + i.count;
-                    });
-                }
-            });
-
-            let itemsHtml = Object.entries(itemCounts).map(([name, count]) => `<div>- ${name}: <strong>x${count}</strong></div>`).join('') || '<div>所选日期无有效销售记录</div>';
+            const grandTotalRev = onlineRev + dineInRev;
 
             document.getElementById('settlement-details').innerHTML = `
                 <div>结算日期: <strong>${dateVal}</strong></div>
-                <div>总有效订单: <strong>${validOrders.length} 单</strong></div>
-                <div>商品总销售额: <strong>￥${goodsRev.toFixed(2)}</strong></div>
-                <div>打包费总计: <strong>￥${packingFeeTotal.toFixed(2)}</strong></div>
-                <div style="border-top: 1px dashed #d1d5db; padding-top: 6px; font-weight: bold; color: #b45309; font-size: 14px;">
-                    当日营业总额 (含打包费): ￥${totalRev.toFixed(2)}
+                <div style="border-top: 1px dashed #d1d5db; padding-top: 4px; color: #b45309;">
+                    线上自提营业额 (${validOrders.length}单): <strong>￥${onlineRev.toFixed(2)}</strong>
                 </div>
-                <div style="margin-top: 6px; font-weight: bold; border-top: 1px solid #e5e7eb; padding-top: 6px;">菜品销量统计:</div>
-                <div style="max-height: 140px; overflow-y: auto;">${itemsHtml}</div>
+                <div style="color: #16a34a;">
+                    堂食柜台营业额 (${validDineIn.length}单): <strong>￥${dineInRev.toFixed(2)}</strong>
+                </div>
+                <div style="border-top: 2px solid #b45309; padding-top: 6px; font-weight: bold; color: #111827; font-size: 15px;">
+                    全店当日营业总额: ￥${grandTotalRev.toFixed(2)}
+                </div>
             `;
         }
 
         function exportSettlementCSV() {
             const dateVal = document.getElementById('settlement-date-input').value;
-            const targetOrders = cloudData.orders.filter(o => {
-                if (!o.time) return false;
-                return o.time.includes(dateVal) || (o.id && o.id.includes(dateVal));
-            });
-            let validOrders = targetOrders.filter(o => o.status === '已接单' || o.status === '已出餐');
-            if (validOrders.length === 0 && dateVal === new Date().toISOString().slice(0, 10)) {
-                validOrders = cloudData.orders.filter(o => o.status === '已接单' || o.status === '已出餐');
-            }
-
-            if (validOrders.length === 0) {
-                alert('所选日期没有有效营业流水！');
-                return;
-            }
-
-            let csvContent = "data:text/csv;charset=utf-8,\ufeff";
-            csvContent += `客家腌面营业结算报表 (${dateVal})\r\n`;
-            csvContent += "订单号,取餐类型,取餐手机尾号,下单时间,订单状态,商品明细,实付金额(含打包费)\r\n";
-
-            validOrders.forEach(order => {
-                const itemsStr = order.items.map(i => `${i.name}(${i.spec || '标配'})x${i.count}`).join('; ');
-                const row = [order.id, order.pickupTime || '尽快取餐', order.phone, order.time, order.status, `"${itemsStr}"`, order.total];
-                csvContent += row.join(",") + "\r\n";
-            });
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `客家腌面结算报表_${dateVal}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            alert('结算报表已确认！');
             closeSettlementModal();
         }
 
@@ -590,36 +928,29 @@
             const selectMonth = document.getElementById('export-month-input').value;
 
             let orders = cloudData.orders;
-            if (!orders || orders.length === 0) {
+            if (!orders || (orders.length === 0 && (!cloudData.dineInOrders || cloudData.dineInOrders.length === 0))) {
                 alert('暂无订单数据可供导出！');
                 closeExportModal();
                 return;
             }
 
-            if (selectDate) {
-                orders = orders.filter(o => o.time.includes(selectDate) || (o.id && o.id.includes(selectDate)));
-            } else if (selectMonth) {
-                orders = orders.filter(o => o.time.startsWith(selectMonth) || (o.id && o.id.includes(selectMonth)));
-            }
-
-            if (orders.length === 0) {
-                alert('所选时间段内没有找到订单记录！');
-                return;
-            }
-
             let csvContent = "data:text/csv;charset=utf-8,\ufeff";
-            csvContent += "订单号,取餐类型,取餐手机尾号,下单时间,订单状态,商品明细,实付金额(含打包费)\r\n";
+            csvContent += "订单号,类型,手机号尾号或取餐号,下单时间,状态,菜品明细,实付金额\r\n";
 
             orders.forEach(order => {
                 const itemsStr = order.items.map(i => `${i.name}(${i.spec || '标配'})x${i.count}`).join('; ');
-                const row = [order.id, order.pickupTime || '尽快取餐', order.phone, order.time, order.status, `"${itemsStr}"`, order.total];
-                csvContent += row.join(",") + "\r\n";
+                csvContent += [order.id, '线上自提', order.phone, order.time, order.status, `"${itemsStr}"`, order.total].join(",") + "\r\n";
+            });
+
+            (cloudData.dineInOrders || []).forEach(order => {
+                const itemsStr = order.items.map(i => `${i.name}(${i.spec || '标配'})x${i.count}`).join('; ');
+                csvContent += [order.id, '堂食柜台', '#' + order.mealNo, order.time, order.status, `"${itemsStr}"`, order.total].join(",") + "\r\n";
             });
 
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `客家腌面营业流水_${selectDate || selectMonth || '全部'}.csv`);
+            link.setAttribute("download", `客家腌面全店营业流水_${selectDate || selectMonth || '全部'}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -658,12 +989,12 @@
             document.getElementById('logout-btn').onclick = logout;
 
             document.getElementById('tab-orders').onclick = () => switchTab('orders');
+            document.getElementById('tab-dinein').onclick = () => switchTab('dinein');
             document.getElementById('tab-control').onclick = () => switchTab('control');
 
             document.getElementById('refresh-btn').onclick = loadCloudData;
             document.getElementById('save-time-btn').onclick = saveTimeControl;
 
-            // 每隔35秒自动从云端静默刷新一次
             setInterval(loadCloudData, 35000);
         };
     </script>
