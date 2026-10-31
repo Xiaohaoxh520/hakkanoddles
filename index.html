@@ -9,12 +9,10 @@
         body { background-color: #f3f4f6; color: #1f2937; display: flex; justify-content: center; }
         #app { width: 100%; max-width: 480px; background-color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; position: relative; padding-bottom: 90px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
-        /* 顶部导航栏 */
         header { background-color: #b45309; color: #ffffff; padding: 10px 16px; position: sticky; top: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .header-logo { height: 28px; width: auto; object-fit: contain; display: block; }
         .query-btn { background-color: #78350f; color: #ffffff; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; }
         
-        /* 提示条 */
         .notice { background-color: #fef3c7; color: #78350f; font-size: 12px; padding: 8px 16px; border-bottom: 1px solid #fde68a; font-weight: 500; line-height: 1.4; }
         
         .menu-container { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 20px; }
@@ -44,25 +42,21 @@
         .checkout-btn:disabled { background-color: #d1d5db; color: #9ca3af; cursor: not-allowed; }
 
         .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; display: none; align-items: center; justify-content: center; padding: 16px; }
-        .modal-box { background: #ffffff; width: 100%; max-width: 340px; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; }
+        .modal-box { background: #ffffff; width: 100%; max-width: 340px; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; max-height: 90vh; overflow-y: auto; }
         .close-x { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 16px; color: #6b7280; cursor: pointer; }
         
         .option-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 6px; }
         .option-btn { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 8px; border-radius: 8px; font-size: 12px; text-align: center; cursor: pointer; font-weight: 500; }
         .option-btn.active { background: #b45309; color: #ffffff; border-color: #b45309; font-weight: bold; }
         
-        .input-box { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px; font-size: 12px; outline: none; color: #111827; background: #fff; }
+        .input-box { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px; font-size: 12px; outline: none; background: #fff; }
         .input-box:focus { border-color: #b45309; box-shadow: 0 0 0 2px rgba(180,83,9,0.15); }
 
-        /* 节点式步骤条样式 */
         .step-container { display: flex; justify-content: space-between; align-items: center; margin: 10px 0 6px 0; position: relative; padding: 0 10px; }
         .step-item { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; flex: 1; }
         .step-circle { width: 22px; height: 22px; border-radius: 50%; background: #e5e7eb; color: #9ca3af; font-size: 10px; font-weight: bold; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; border: 2px solid #fff; }
         .step-text { font-size: 10px; color: #9ca3af; text-align: center; font-weight: 500; }
-        
         .step-line { position: absolute; top: 11px; left: 20%; right: 20%; height: 2px; background: #e5e7eb; z-index: 1; }
-
-        /* 节点激活状态 */
         .step-item.active .step-circle { background: #b45309; color: #fff; box-shadow: 0 0 0 3px rgba(180,83,9,0.15); }
         .step-item.active .step-text { color: #b45309; font-weight: bold; }
         .step-item.completed .step-circle { background: #059669; color: #fff; }
@@ -71,16 +65,14 @@
 </head>
 <body>
     <div id="app">
-        <!-- 顶部导航栏 -->
         <header>
             <img src="https://i.imgs.ovh/2026/10/31/bb2fabef06a8d6f0c5870e2c7d0be375.png" alt="客家腌面 Logo" class="header-logo">
             <button onclick="openQueryModal()" class="query-btn">🔍 查询订单进度</button>
         </header>
 
-        <!-- 提示横幅 (显示自提、打包费及营业时间) -->
         <div id="status-notice" class="notice">
             📢 提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>
-            ⏰ 营业时间：同步中...
+            ⏰ 营业时间：加载中...
         </div>
 
         <div class="menu-container">
@@ -175,20 +167,25 @@
             </div>
         </div>
 
-        <!-- 支付弹窗 -->
+        <!-- 支付与预约弹窗 -->
         <div id="pay-modal" class="modal-mask">
             <div class="modal-box" style="text-align: center;">
                 <button onclick="closePayModal()" class="close-x">✕</button>
                 
                 <div style="color: #b45309; font-weight: bold; font-size: 13px;">客家腌面 · 微信收银台</div>
-                <div id="pay-amount" style="font-size: 26px; font-weight: black; color: #111827;">￥1.00</div>
-                <p style="font-size: 11px; color: #6b7280;">（含自提打包费 1.00元）</p>
+                <div id="pay-amount" style="font-size: 24px; font-weight: black; color: #111827;">￥1.00</div>
 
-                <div style="background: #f9fafb; padding: 12px; border-radius: 12px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; align-items: center;">
-                    <img src="https://i.imgs.ovh/2026/10/31/a6be456b2a8b66f025967f7d2004f9b4.png" alt="微信收款码" style="width: 130px; height: 130px; object-fit: contain; background: #fff; padding: 4px; border-radius: 6px; border: 1px solid #e5e7eb; margin-bottom: 8px;">
-                    <span style="font-size: 11px; color: #4b5563; line-height: 1.4;">
-                        请长按或扫描二维码转账 <strong id="pay-amount-tip" style="color: #b45309; font-size: 12px;">￥1.00</strong><br>
-                        <span style="color: #d97706; font-size: 10px;">若无法识别截图保存后付款。付款后商家后台将进行确认核销，届时您可在首页订单中输入尾号查询</span>
+                <!-- 预约取餐时间选择 -->
+                <div style="text-align: left; background: #fffbeb; padding: 10px; border-radius: 8px; border: 1px solid #fde68a;">
+                    <label style="font-size: 11px; font-weight: bold; color: #78350f; display: block; margin-bottom: 4px;">⏰ 选择预约取餐时间 (10分钟/节)：</label>
+                    <select id="pickup-time-select" class="input-box" style="background: #fff; font-weight: bold; color: #b45309;"></select>
+                </div>
+
+                <div style="background: #f9fafb; padding: 10px; border-radius: 12px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; align-items: center;">
+                    <img src="https://i.imgs.ovh/2026/10/31/a6be456b2a8b66f025967f7d2004f9b4.png" alt="微信收款码" style="width: 110px; height: 110px; object-fit: contain; background: #fff; padding: 4px; border-radius: 6px; border: 1px solid #e5e7eb; margin-bottom: 6px;">
+                    <span style="font-size: 10px; color: #4b5563; line-height: 1.3;">
+                        长按扫描二维码转账 <strong id="pay-amount-tip" style="color: #b45309;">￥1.00</strong><br>
+                        <span style="color: #d97706;">付款后商家后台将确认接单，可在首页输入尾号查询进度</span>
                     </span>
                 </div>
 
@@ -198,12 +195,12 @@
                 </div>
 
                 <button onclick="submitOrder()" class="btn-primary" style="padding: 12px; font-size: 13px; border-radius: 10px; width: 100%;">
-                    我已付款，提交自提订单
+                    我已付款，提交预约订单
                 </button>
             </div>
         </div>
 
-        <!-- 节点式订单进度查询弹窗 -->
+        <!-- 订单进度查询弹窗 -->
         <div id="query-modal" class="modal-mask">
             <div class="modal-box" style="max-height: 85vh;">
                 <button onclick="closeQueryModal()" class="close-x">✕</button>
@@ -275,7 +272,6 @@
                 const data = await res.json();
                 if (data.record) {
                     cloudStocks = data.record.stocks || {};
-                    // 适配和保护营业时间字段
                     if (data.record.control) {
                         storeControl = data.record.control;
                     }
@@ -307,6 +303,55 @@
                 noticeEl.style.backgroundColor = '#fef3c7';
                 noticeEl.style.color = '#78350f';
             }
+        }
+
+        // 生成10分钟节点预约时间选项
+        function generateTimeOptions() {
+            const select = document.getElementById('pickup-time-select');
+            select.innerHTML = '';
+
+            const now = new Date();
+            // 计算下单后20分钟，并进行10分钟节点四舍五入
+            let targetTimeMs = now.getTime() + 20 * 60 * 1000;
+            let targetDate = new Date(targetTimeMs);
+            let mins = targetDate.getMinutes();
+            let roundedMins = Math.round(mins / 10) * 10;
+            targetDate.setMinutes(roundedMins);
+            targetDate.setSeconds(0);
+
+            let startHour = targetDate.getHours();
+            let startMin = targetDate.getMinutes();
+
+            const endTimeStr = storeControl.end || '21:00';
+            const [endH, endM] = endTimeStr.split(':').map(Number);
+
+            let optionsHtml = '';
+            let curH = startHour;
+            let curM = startMin;
+
+            while (curH < endH || (curH === endH && curM <= endM)) {
+                let timeStr = String(curH).padStart(2, '0') + ':' + String(curM).padStart(2, '0');
+                optionsHtml += `<option value="${timeStr}">尽快取餐 (约 ${timeStr})</option>`;
+                break; // 默认提供第一个合理计算的时间作为首选，之后以10分钟递增
+            }
+
+            // 补充后续10分钟节点的预约时间段
+            let tempDate = new Date(targetDate.getTime());
+            // 如果计算出来的时间已经过了当前10分钟，往后推
+            while (true) {
+                let h = tempDate.getHours();
+                let m = tempDate.getMinutes();
+                if (h > endH || (h === endH && m > endM)) break;
+
+                let timeStr = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+                optionsHtml += `<option value="${timeStr}">${timeStr} 左右取餐</option>`;
+
+                tempDate.setMinutes(tempDate.getMinutes() + 10);
+                // 防止死循环限制最多生成24个时间段
+                if (tempDate.getHours() > endH + 2) break;
+            }
+
+            select.innerHTML = optionsHtml;
         }
 
         function renderMenu() {
@@ -559,6 +604,9 @@
 
             document.getElementById('pay-amount').innerText = '￥' + finalAmount.toFixed(2);
             document.getElementById('pay-amount-tip').innerText = '￥' + finalAmount.toFixed(2);
+            
+            // 生成可选预约时间段
+            generateTimeOptions();
             document.getElementById('pay-modal').style.display = 'flex';
         }
 
@@ -572,6 +620,8 @@
                 alert('请填写取餐手机尾号！');
                 return;
             }
+
+            const pickupTime = document.getElementById('pickup-time-select').value;
 
             try {
                 const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
@@ -600,8 +650,9 @@
                     items: [...cart],
                     total: finalAmount,
                     payType: 'wechat',
-                    status: '待核销',
-                    time: new Date().toLocaleTimeString()
+                    status: '待接单',
+                    time: new Date().toLocaleTimeString(),
+                    pickupTime: pickupTime // 保存预约取餐时间
                 };
 
                 remoteOrders.unshift(newOrder);
@@ -619,7 +670,7 @@
                     })
                 });
 
-                alert('订单已提交成功！请凭取餐电话到店自提。');
+                alert('预约订单已提交成功！请凭取餐电话到店自提。');
                 cart = [];
                 document.getElementById('customer-phone-input').value = '';
                 closePayModal();
@@ -665,12 +716,12 @@
                 }
 
                 container.innerHTML = matched.map(order => {
-                    const status = order.status || '待核销';
+                    const status = order.status || '待接单';
                     
                     let step1Class = 'completed', step2Class = '', step3Class = '';
-                    if (status === '待核销') {
+                    if (status === '待接单') {
                         step1Class = 'active';
-                    } else if (status === '已核销完成') {
+                    } else if (status === '已接单') {
                         step1Class = 'completed';
                         step2Class = 'active';
                     } else if (status === '已出餐') {
@@ -683,7 +734,7 @@
                     <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #f9fafb; font-size: 11px; display: flex; flex-direction: column; gap: 8px;">
                         <div style="display: flex; justify-content: space-between; font-weight: bold; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px;">
                             <span>单号: ${order.id}</span>
-                            <span style="color: #b45309;">尾号: ${order.phone}</span>
+                            <span style="color: #b45309;">预约时间: ${order.pickupTime || '尽快取餐'}</span>
                         </div>
 
                         <div class="step-container">
@@ -694,7 +745,7 @@
                             </div>
                             <div class="step-item ${step2Class}">
                                 <div class="step-circle">${step2Class === 'completed' ? '✓' : '2'}</div>
-                                <div class="step-text">已核销</div>
+                                <div class="step-text">已接单</div>
                             </div>
                             <div class="step-item ${step3Class}">
                                 <div class="step-circle">${step3Class === 'completed' ? '✓' : '3'}</div>
@@ -714,7 +765,7 @@
                             </div>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e5e7eb; padding-top: 6px; font-size: 12px;">
-                            <span style="color: #6b7280;">下单时间: ${order.time}</span>
+                            <span style="color: #6b7280;">尾号: ${order.phone}</span>
                             <span style="font-weight: bold; color: #b45309;">实付: ￥${order.total}</span>
                         </div>
                     </div>
