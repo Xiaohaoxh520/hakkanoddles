@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>客家腌面 - 到店自提点单系统</title>
-    <!-- 引入 Vue 3 -->
-    <script src="https://cdn.staticfile.org/vue/3.3.4/vue.global.prod.min.js"></script>
+    <!-- 使用极高稳定性的 jsDelivr CDN 引入 Vue 3 -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.prod.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #f3f4f6; color: #1f2937; display: flex; justify-content: center; }
@@ -32,7 +32,7 @@
         .item-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .grid-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         
-        /* 强制修复按钮外观，防止微信浏览器把按钮渲染成透明白框 */
+        /* 按钮通用样式 */
         .btn-primary { 
             background-color: #b45309 !important; 
             color: #ffffff !important; 
@@ -81,7 +81,7 @@
     </style>
 </head>
 <body>
-    <div id="app">
+    <div id="app" style="display: none;" :style="{ display: 'flex' }">
         
         <!-- 顶部导航栏 -->
         <header>
@@ -487,7 +487,7 @@
                         if (data.record) {
                             if (Array.isArray(data.record)) {
                                 allOrders = data.record;
-                            } else if (data.record.orders && Array.isArray(data.record.orders)) {
+                            } else if (data.record.orders && Array.Array(data.record.orders)) {
                                 allOrders = data.record.orders;
                             }
                         }
