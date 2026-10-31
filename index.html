@@ -9,10 +9,12 @@
         body { background-color: #f3f4f6; color: #1f2937; display: flex; justify-content: center; }
         #app { width: 100%; max-width: 480px; background-color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; position: relative; padding-bottom: 90px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
-        header { background-color: #b45309; color: #ffffff; padding: 14px 16px; position: sticky; top: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        header h1 { font-size: 16px; font-weight: bold; }
+        /* 顶部导航栏 (Logo 替换) */
+        header { background-color: #b45309; color: #ffffff; padding: 10px 16px; position: sticky; top: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header-logo { height: 28px; width: auto; object-fit: contain; display: block; }
         .query-btn { background-color: #78350f; color: #ffffff; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; }
         
+        /* 提示条 (保留自提与打包费提示) */
         .notice { background-color: #fef3c7; color: #78350f; font-size: 12px; padding: 8px 16px; border-bottom: 1px solid #fde68a; font-weight: 500; }
         
         .menu-container { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 20px; }
@@ -56,11 +58,13 @@
 </head>
 <body>
     <div id="app">
+        <!-- 顶部导航栏 (Logo 替换与查询入口) -->
         <header>
-            <h1>🥣 客家腌面 (到店自提)</h1>
-            <button onclick="openQueryModal()" class="query-btn">🔍 查询订单</button>
+            <img src="https://i.imgs.ovh/2026/10/31/72633fa7af899240fab9cda0c196efb7.png" alt="客家腌面 Logo" class="header-logo">
+            <button onclick="openQueryModal()" class="query-btn">🔍 查询订单进度</button>
         </header>
 
+        <!-- 提示横幅 (保留自提与打包费提示) -->
         <div id="status-notice" class="notice">
             📢 提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。
         </div>
@@ -185,14 +189,14 @@
             </div>
         </div>
 
-        <!-- 订单查询弹窗 -->
+        <!-- 订单进度查询弹窗 -->
         <div id="query-modal" class="modal-mask">
             <div class="modal-box" style="max-height: 80vh;">
                 <button onclick="closeQueryModal()" class="close-x">✕</button>
-                <div style="color: #b45309; font-weight: bold; font-size: 13px; text-align: center;">🔍 自提订单状态查询</div>
+                <div style="color: #b45309; font-weight: bold; font-size: 13px; text-align: center;">🔍 自提订单进度查询</div>
                 
                 <div style="display: flex; gap: 8px;">
-                    <input id="search-phone-input" type="text" placeholder="请输入手机尾号查询" class="input-box" style="flex: 1;">
+                    <input id="search-phone-input" type="text" placeholder="请输入手机尾号查询进度" class="input-box" style="flex: 1;">
                     <button onclick="searchOrders()" class="btn-primary" style="padding: 8px 14px;">查询</button>
                 </div>
 
@@ -263,11 +267,10 @@
                 renderMenu();
             } catch (e) {
                 console.error('加载云端配置失败', e);
-                renderMenu(); // 降级渲染
+                renderMenu();
             }
         }
 
-        // 检查当前时间是否在营业时间段内
         function checkStoreTime() {
             const now = new Date();
             const currentHourMin = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
@@ -285,7 +288,6 @@
         }
 
         function renderMenu() {
-            // 1. 套餐
             document.getElementById('combos-list').innerHTML = menuData.combos.map((item, idx) => {
                 const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 50;
                 const isSoldOut = stock <= 0 || !isStoreOpen;
@@ -302,7 +304,6 @@
                 </div>
             `;}).join('');
 
-            // 2. 主食
             document.getElementById('staples-list').innerHTML = menuData.staples.map((item, idx) => {
                 const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 100;
                 const isSoldOut = stock <= 0 || !isStoreOpen;
@@ -319,7 +320,6 @@
                 </div>
             `;}).join('');
 
-            // 3. 靓汤
             document.getElementById('soups-list').innerHTML = menuData.soups.map((item, idx) => {
                 const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 40;
                 const isSoldOut = stock <= 0 || !isStoreOpen;
@@ -336,7 +336,6 @@
                 </div>
             `;}).join('');
 
-            // 4. 汤粉汤面
             document.getElementById('noodlessoups-list').innerHTML = menuData.noodlessoups.map((item, idx) => {
                 const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 40;
                 const isSoldOut = stock <= 0 || !isStoreOpen;
@@ -553,7 +552,6 @@
             }
 
             try {
-                // 1. 重新从云端获取最新数据，确保并发安全
                 const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
                     headers: { 'X-Master-Key': MASTER_KEY }
                 });
@@ -562,7 +560,6 @@
                 let remoteStocks = (data.record && data.record.stocks) ? data.record.stocks : {};
                 let remoteControl = (data.record && data.record.control) ? data.record.control : storeControl;
 
-                // 2. 检查并扣减库存
                 for (let item of cart) {
                     let stock = remoteStocks[item.name] !== undefined ? remoteStocks[item.name] : 50;
                     if (stock < item.count) {
@@ -587,7 +584,6 @@
 
                 remoteOrders.unshift(newOrder);
 
-                // 3. 提交回云端
                 await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
                     method: 'PUT',
                     headers: {
@@ -606,7 +602,7 @@
                 document.getElementById('customer-phone-input').value = '';
                 closePayModal();
                 updateCartUI();
-                fetchCloudConfig(); // 刷新本地库存显示
+                fetchCloudConfig();
             } catch (e) {
                 console.error(e);
                 alert('网络异常，请重试！');
@@ -646,11 +642,16 @@
                     return;
                 }
 
-                container.innerHTML = matched.map(order => `
+                container.innerHTML = matched.map(order => {
+                    let statusColor = '#b45309';
+                    if (order.status === '已核销完成') statusColor = '#2563eb';
+                    if (order.status === '已出餐') statusColor = '#059669';
+
+                    return `
                     <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px; background: #f9fafb; font-size: 11px; display: flex; flex-direction: column; gap: 4px;">
                         <div style="display: flex; justify-content: space-between; font-weight: bold; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px;">
                             <span>单号: ${order.id}</span>
-                            <span style="color: ${order.status === '待核销' ? '#b45309' : '#059669'};">${order.status}</span>
+                            <span style="color: ${statusColor}; font-weight: bold;">进度: ${order.status || '待核销'}</span>
                         </div>
                         <div style="color: #6b7280;">时间：${order.time} | 尾号：${order.phone}</div>
                         <div style="border-top: 1px solid #e5e7eb; padding-top: 4px;">
@@ -668,7 +669,7 @@
                             实付总额：￥${order.total}
                         </div>
                     </div>
-                `).join('');
+                `;}).join('');
 
             } catch (e) {
                 console.error(e);
