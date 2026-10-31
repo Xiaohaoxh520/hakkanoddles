@@ -109,7 +109,7 @@
         const BIN_ID = '6ae586c8ffd5d160539a6da4';
         const MASTER_KEY = '$2a$10$lwmZR3vIjsFdZlgG4.WReOJzFNBqHERsLquMbL42GY/BNEBveQ896';
         
-        // 你的真实 Logo 直链
+        // 你的最新 Logo 图片直链
         const LOGO_URL = 'https://i.imgs.ovh/2026/10/31/3aa5068a33d19dddd0105e395ab88b74.png';
 
         let cloudData = {
@@ -259,15 +259,14 @@
             }
         }
 
-        // 小票打印功能（上方嵌入 Logo 图片）[cite: 6]
+        // 小票打印功能（使用你提供的 Logo 图片）
         function printTicket(orderId) {
             const order = cloudData.orders.find(o => o.id === orderId);
             if (!order) return;
 
             const ticketHtml = `
                 <div style="text-align:center; margin-bottom:6px;">
-                    <img src="${https://i.imgs.ovh/2026/10/31/3aa5068a33d19dddd0105e395ab88b74.png}" alt="Logo" style="width:42mm; height:auto; display:block; margin:0 auto 4px auto;" />
-                    <div style="font-size:10px; font-weight:bold; letter-spacing:1px;">HAKKA SNACKS</div>
+                    <img src="${LOGO_URL}" alt="Logo" style="width:46mm; height:auto; display:block; margin:0 auto 4px auto;" />
                 </div>
                 <div style="text-align:center; font-size:11px; font-weight:bold; margin-bottom:6px; border:1px solid #000; padding:2px 0;">【 到店自提凭证 】</div>
                 <div style="font-size:11px;">订单编号：${order.id}</div>
