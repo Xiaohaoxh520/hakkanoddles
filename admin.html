@@ -3,179 +3,367 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>客家腌面 - 商家后台 OA 管理系统</title>
+    <title>客家腌面 - 到店自提点单系统</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-gray-100 font-sans">
-    <div id="app" class="max-w-md mx-auto bg-white min-h-screen shadow-lg flex flex-col relative pb-10">
+    <div id="app" class="max-w-md mx-auto bg-white min-h-screen shadow-lg flex flex-col relative pb-24">
         
-        <!-- 登录拦截层：仅在未登录时显示 -->
-        <div v-if="!isLoggedIn" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
-            <div class="bg-white w-full max-w-xs rounded-2xl p-6 space-y-4 shadow-2xl">
-                <h2 class="text-base font-bold text-gray-800 text-center">🔐 商家后台安全登录</h2>
-                <p class="text-xs text-gray-500 text-center">客家腌面到店自提管理端</p>
-                
-                <div class="space-y-3 pt-2">
-                    <div>
-                        <label class="text-xs font-bold text-gray-700 block mb-1">管理员账号：</label>
-                        <input v-model="username" type="text" placeholder="请输入账号" class="w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-amber-600">
+        <!-- 顶部导航栏 -->
+        <header class="bg-amber-600 text-white p-4 sticky top-0 z-30 flex justify-between items-center shadow">
+            <h1 class="text-base font-bold flex items-center">
+                🥣 客家腌面 (四季轩负一层到店自提)
+            </a>
+        </header>
+
+        <!-- 提示横幅 -->
+        <div class="bg-amber-50 text-amber-800 text-xs px-4 py-2 border-b border-amber-100">
+            📢 提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。
+        </div>
+
+        <!-- 菜单主体 -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-6">
+            
+            <!-- 1. 营养套餐系列 (优先展示) -->
+            <div>
+                <h2 class="text-sm font-bold text-gray-800 mb-3 border-l-4 border-amber-600 pl-2">
+                    🌟 营养套餐系列 <span class="text-xs font-normal text-gray-500">(可选面/米粉/河粉/珍珠粉)</span>
+                </h2>
+                <div class="space-y-3">
+                    <div v-for="item in menu.combos" :key="item.name" class="bg-white border rounded-xl p-3 shadow-sm flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-sm">{{ item.name }}</h3>
+                            <p class="text-xs text-gray-500 mt-1">粉面：{{ item.options.join('/') }}</p>
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <button @click="openSpecModal(item, 'small')" class="bg-amber-600 text-white text-xs px-3 py-1.5 rounded-lg shadow">
+                                小份 ￥{{ item.priceSmall }}
+                            </button>
+                            <button @click="openSpecModal(item, 'big')" class="bg-amber-600 text-white text-xs px-3 py-1.5 rounded-lg shadow">
+                                大份 ￥{{ item.priceBig }}
+                            </button>
+                        </div>
                     </div>
-                    <div>
-                        <label class="text-xs font-bold text-gray-700 block mb-1">登录密码：</label>
-                        <input v-model="password" type="password" placeholder="请输入密码" class="w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-amber-600">
+                </div>
+            </div>
+
+            <!-- 2. 主食系列 -->
+            <div>
+                <h2 class="text-sm font-bold text-gray-800 mb-3 border-l-4 border-amber-600 pl-2">
+                    🍜 主食系列
+                </h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <div v-for="item in menu.staples" :key="item.name" class="bg-white border rounded-xl p-3 shadow-sm flex flex-col justify-between">
+                        <h3 class="font-bold text-gray-800 text-sm">{{ item.name }}</h3>
+                        <div class="mt-3 flex items-center justify-between">
+                            <span class="text-xs text-gray-500">小{{ item.priceSmall }}/大{{ item.priceBig }}</span>
+                            <button @click="openSpecModal(item, 'small')" class="bg-amber-600 text-white text-xs px-2.5 py-1 rounded-lg">
+                                选规格
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 靓汤系列 -->
+            <div>
+                <h2 class="text-sm font-bold text-gray-800 mb-3 border-l-4 border-amber-600 pl-2">
+                    🍲 靓汤系列
+                </h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <div v-for="item in menu.soups" :key="item.name" class="bg-white border rounded-xl p-3 shadow-sm flex flex-col justify-between">
+                        <h3 class="font-bold text-gray-800 text-sm">{{ item.name }}</h3>
+                        <div class="mt-3 flex items-center justify-between">
+                            <span class="text-amber-700 font-bold text-sm">￥{{ item.price }}</span>
+                            <button @click="addToCartDirect(item)" class="bg-amber-600 text-white text-xs px-2.5 py-1 rounded-lg">
+                                + 选购
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. 汤粉汤面系列 -->
+            <div>
+                <h2 class="text-sm font-bold text-gray-800 mb-3 border-l-4 border-amber-600 pl-2">
+                    🍜 汤粉汤面系列
+                </h2>
+                <div class="space-y-3">
+                    <div v-for="item in menu.noodlessoups" :key="item.name" class="bg-white border rounded-xl p-3 shadow-sm flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-sm">{{ item.name }}</h3>
+                            <p class="text-xs text-gray-500 mt-1">粉面：{{ item.options.join('/') }}</p>
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <button @click="openSpecModal(item, 'small')" class="bg-amber-600 text-white text-xs px-3 py-1 rounded shadow">小份 ￥{{ item.priceSmall }}</button>
+                            <button @click="openSpecModal(item, 'big')" class="bg-amber-600 text-white text-xs px-3 py-1 rounded shadow">大份 ￥{{ item.priceBig }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 底部购物车悬浮栏 -->
+        <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t p-3 flex justify-between items-center z-20 shadow-lg">
+            <div class="flex items-center space-x-3">
+                <div @click="toggleCartModal" class="relative bg-amber-600 text-white w-11 h-11 rounded-full flex items-center justify-center shadow cursor-pointer text-base">
+                    🛒
+                    <span v-if="cartCount > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                        {{ cartCount }}
+                    </span>
+                </div>
+                <div>
+                    <div class="text-sm font-bold text-gray-800">合计: <span class="text-amber-600">￥{{ cartTotalAmount }}</span></div>
+                    <div class="text-xs text-gray-500">含自提打包费: ￥1.00</div>
+                </div>
+            </div>
+            <button @click="checkout" :disabled="cart.length === 0" class="bg-amber-600 text-white px-6 py-2.5 rounded-xl font-bold text-xs shadow disabled:bg-gray-300">
+                去结算 (￥{{ finalTotalAmount }})
+            </button>
+        </div>
+
+        <!-- 规格选择弹窗 -->
+        <div v-if="showSpecModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div class="bg-white w-full max-w-xs rounded-2xl p-4 space-y-4 shadow-xl">
+                <h3 class="font-bold text-gray-800 text-sm border-b pb-2">{{ activeItem.name }}</h3>
+                
+                <div v-if="activeItem.options">
+                    <label class="text-xs font-bold text-gray-600 block mb-2">选择粉面规格：</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button v-for="opt in activeItem.options" :key="opt" 
+                            @click="selectedOption = opt"
+                            :class="selectedOption === opt ? 'bg-amber-600 text-white' : 'bg-gray-100 text-gray-700'"
+                            class="text-xs py-2 rounded-lg border text-center">
+                            {{ opt }}
+                        </button>
                     </div>
                 </div>
 
-                <button @click="handleLogin" class="w-full bg-amber-600 text-white py-2.5 rounded-xl font-bold text-xs shadow hover:bg-amber-700 transition">
-                    立即登录后台
-                </button>
-                <div class="text-center">
-                    <a href="index.html" class="text-xs text-amber-600 hover:underline">← 返回顾客点单页</a>
+                <div class="text-xs text-gray-500">
+                    已选：<span class="text-amber-600 font-bold">{{ activeSpecName }}</span> | 价格：<span class="text-amber-600 font-bold">￥{{ activeSpecPrice }}</span>
+                </div>
+
+                <div class="flex space-x-2 pt-2">
+                    <button @click="showSpecModal = false" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl text-xs">取消</button>
+                    <button @click="confirmAddToCart" class="flex-1 bg-amber-600 text-white py-2 rounded-xl text-xs font-bold">加入购物车</button>
                 </div>
             </div>
         </div>
 
-        <!-- 后台主界面 (登录后可见) -->
-        <div class="flex-1 flex flex-col p-4 bg-gray-50 space-y-4">
-            <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-sm">
-                <div>
-                    <h2 class="font-bold text-gray-800 text-sm">📈 商家后台 OA 管理系统</h2>
-                    <p class="text-xs text-gray-500">客家腌面 · 独立核销看板</p>
-                </div>
-                <div class="space-x-2">
-                    <button @click="logout" class="text-xs bg-gray-100 text-gray-600 px-2.5 py-1.5 rounded">退出</button>
-                    <button @click="clearOrders" class="text-xs bg-red-100 text-red-600 px-2.5 py-1.5 rounded">清空记录</button>
-                </div>
-            </div>
-
-            <!-- 数据统计卡片 -->
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-amber-500">
-                    <div class="text-xs text-gray-500">今日已核销营业额</div>
-                    <div class="text-lg font-bold text-gray-800 mt-1">￥{{ totalRevenue }}</div>
-                </div>
-                <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-blue-500">
-                    <div class="text-xs text-gray-500">待核销自提订单</div>
-                    <div class="text-lg font-bold text-blue-600 mt-1">{{ pendingOrdersCount }} 单</div>
-                </div>
-            </div>
-
-            <!-- 实时订单列表 -->
-            <div class="flex-1 space-y-3">
-                <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-gray-700 text-xs">📋 实时自提订单 (人工核销)</h3>
-                    <button @click="loadOrders" class="text-xs text-amber-600 hover:underline">🔄 刷新订单</button>
+        <!-- 购物车抽屉弹窗 -->
+        <div v-if="showCartModal" class="fixed inset-0 bg-black bg-opacity-50 z-40 flex flex-col justify-end">
+            <div class="bg-white rounded-t-3xl p-4 max-h-[70vh] flex flex-col space-y-3">
+                <div class="flex justify-between items-center border-b pb-2 text-sm">
+                    <span class="font-bold text-gray-800">购物车明细 (到店自提)</span>
+                    <button @click="showCartModal = false" class="text-gray-400">✕</button>
                 </div>
                 
-                <div v-if="orders.length === 0" class="text-center py-16 text-gray-400 bg-white rounded-xl border border-dashed">
-                    <p class="text-xs">暂无自提订单记录</p>
-                </div>
-
-                <div v-for="order in orders" :key="order.id" class="bg-white border rounded-xl p-3 shadow-sm space-y-2">
-                    <div class="flex justify-between items-center border-b pb-2 text-xs">
-                        <span class="font-bold text-gray-500">订单号: {{ order.id }}</span>
-                        <span :class="order.status === '待核销' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'" class="px-2 py-0.5 rounded-full font-bold">
-                            {{ order.status }}
-                        </span>
-                    </div>
-
-                    <div class="text-xs text-gray-700 space-y-1">
-                        <div><strong>取餐电话:</strong> {{ order.phone }}</div>
-                        <div><strong>下单时间:</strong> {{ order.time }}</div>
-                        <div><strong>支付途径:</strong> {{ order.payType === 'wechat' ? '微信支付' : '支付宝' }}</div>
-                        <div class="border-t pt-1 mt-1 space-y-1">
-                            <div v-for="item in order.items" class="flex justify-between">
-                                <span>{{ item.name }} ({{ item.spec || '标配' }}) x{{ item.count }}</span>
-                                <span>￥{{ item.price * item.count }}</span>
-                            </div>
-                            <div class="flex justify-between text-gray-500">
-                                <span>自提打包费</span>
-                                <span>￥1.00</span>
-                            </div>
+                <div class="flex-1 overflow-y-auto space-y-3">
+                    <div v-for="(item, index) in cart" :key="index" class="flex justify-between items-center text-xs border-b pb-2">
+                        <div>
+                            <div class="font-bold text-gray-800">{{ item.name }} <span v-if="item.spec" class="text-amber-600">({{ item.spec }})</span></div>
+                            <div class="text-gray-500">￥{{ item.price }}</div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button @click="decreaseCart(index)" class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center">-</button>
+                            <span class="font-bold">{{ item.count }}</span>
+                            <button @click="increaseCart(index)" class="w-6 h-6 bg-amber-600 text-white rounded-full flex items-center justify-center">+</button>
                         </div>
                     </div>
+                </div>
 
-                    <div class="flex justify-between items-center pt-2 border-t">
-                        <span class="font-bold text-sm text-amber-600">实收: ￥{{ order.total }}</span>
-                        <button v-if="order.status === '待核销'" @click="verifyOrder(order.id)" class="bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg shadow hover:bg-green-700">
-                            ✅ 确认收款并接单
-                        </button>
-                        <span v-else class="text-xs text-gray-400">已核销完成</span>
+                <div class="border-t pt-2 space-y-1 text-xs">
+                    <div class="flex justify-between"><span>商品金额:</span><span>￥{{ cartTotalAmount }}</span></div>
+                    <div class="flex justify-between"><span>打包费 (到店自提):</span><span>￥1.00</span></div>
+                    <div class="flex justify-between font-bold text-sm text-amber-600 pt-1"><span>应付总计:</span><span>￥{{ finalTotalAmount }}</span></div>
+                </div>
+
+                <button @click="checkout" class="w-full bg-amber-600 text-white py-3 rounded-xl font-bold text-xs shadow">
+                    去结算 (￥{{ finalTotalAmount }})
+                </button>
+            </div>
+        </div>
+
+        <!-- 个人收银台付款弹窗 -->
+        <div v-if="showPayModal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+            <div class="bg-white w-full max-w-xs rounded-2xl p-5 space-y-4 text-center shadow-2xl relative">
+                <button @click="showPayModal = false" class="absolute top-3 right-3 text-gray-400">✕</button>
+                
+                <div class="text-amber-600 font-bold text-sm">客家腌面 · 个人收银台</div>
+                <div class="text-2xl font-black text-gray-800">￥{{ finalTotalAmount }}</div>
+                <p class="text-xs text-gray-500">（含自提打包费 1.00元）</p>
+
+                <!-- 支付方式 -->
+                <div class="flex justify-center space-x-3">
+                    <div @click="payType = 'wechat'" :class="payType === 'wechat' ? 'border-amber-600 bg-amber-50 text-amber-800' : 'border-gray-200 text-gray-600'" class="flex-1 border rounded-xl p-2 text-xs cursor-pointer">
+                        💚 微信支付
+                    </div>
+                    <div @click="payType = 'alipay'" :class="payType === 'alipay' ? 'border-amber-600 bg-amber-50 text-amber-800' : 'border-gray-200 text-gray-600'" class="flex-1 border rounded-xl p-2 text-xs cursor-pointer">
+                        💙 支付宝
                     </div>
                 </div>
+
+                <!-- 收款码 -->
+                <div class="bg-gray-50 p-3 rounded-xl border flex flex-col items-center">
+                    <img :src="payType === 'wechat' ? 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=WECHAT_PAY_QR' : 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ALIPAY_QR'" alt="收款码" class="w-32 h-32 object-contain mb-2">
+                    <span class="text-xs text-gray-500">请长按或扫描二维码向店家转账 <strong class="text-amber-600">￥{{ finalTotalAmount }}</strong></span>
+                </div>
+
+                <!-- 取餐电话 -->
+                <div class="text-left">
+                    <label class="text-xs font-bold text-gray-700 block mb-1">填写取餐手机尾号：</label>
+                    <input v-model="customerPhone" type="text" placeholder="用于到店核对自提" class="w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-amber-600">
+                </div>
+
+                <button @click="submitOrder" class="w-full bg-amber-600 text-white py-3 rounded-xl font-bold text-xs shadow">
+                    我已付款，提交自提订单
+                </button>
             </div>
         </div>
 
     </div>
 
     <script>
-        const { createApp, ref, computed, onMounted } = Vue;
+        // 已为你填入专属 Supabase 凭证
+        const SUPABASE_URL = 'https://oxgsbioorlhbrydeazac.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94Z3NiaW9vcmxoYnJ5ZGVhemFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MTY5MDgsImV4cCI6MjEwODk5MjkwOH0.We2CpO3JDXvrG4OaYbzD73pcLRgOKJ18r867M901fqE';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const { createApp, ref, computed, reactive } = Vue;
 
         createApp({
             setup() {
-                const isLoggedIn = ref(false);
-                const username = ref('');
-                const password = ref('');
-                const orders = ref([]);
+                const showSpecModal = ref(false);
+                const showCartModal = ref(false);
+                const showPayModal = ref(false);
+                const payType = ref('wechat');
+                const customerPhone = ref('');
+                
+                const activeItem = ref({});
+                const selectedSpecType = ref('small');
+                const selectedOption = ref('');
 
-                const correctUser = 'admin';
-                const correctPass = '123456';
+                const cart = ref([]);
 
-                onMounted(() => {
-                    if (localStorage.getItem('hakka_admin_logged') === 'true') {
-                        isLoggedIn.value = true;
-                    }
-                    loadOrders();
+                const menu = reactive({
+                    combos: [
+                        { name: '紫菜蛋花汤套餐', priceSmall: 11, priceBig: 13, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                        { name: '番茄蛋花汤套餐', priceSmall: 11, priceBig: 13, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                        { name: '枸杞叶三及第汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                        { name: '枸杞叶瘦肉汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                        { name: '酸菜瘦肉汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                        { name: '枸杞叶猪肉丸汤套餐', priceSmall: 15, priceBig: 17, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                        { name: '枸杞叶牛肉丸汤套餐', priceSmall: 15, priceBig: 17, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                        { name: '酸菜牛肉丸汤套餐', priceSmall: 15, priceBig: 17, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                    ],
+                    staples: [
+                        { name: '腌面', priceSmall: 8, priceBig: 10, options: ['常规'] },
+                        { name: '腌米粉', priceSmall: 8, priceBig: 10, options: ['常规'] },
+                        { name: '腌河粉', priceSmall: 8, priceBig: 10, options: ['常规'] },
+                        { name: '腌珍珠粉', priceSmall: 8, priceBig: 10, options: ['常规'] },
+                    ],
+                    soups: [
+                        { name: '紫菜蛋花汤', price: 5 },
+                        { name: '番茄蛋花汤', price: 5 },
+                        { name: '枸杞叶三及第汤', price: 7 },
+                        { name: '枸杞叶瘦肉汤', price: 7 },
+                        { name: '酸菜瘦肉汤', price: 7 },
+                        { name: '枸杞叶猪肉丸汤', price: 9 },
+                        { name: '枸杞叶牛肉丸汤', price: 9 },
+                        { name: '酸菜牛肉丸汤', price: 9 },
+                    ],
+                    noodlessoups: [
+                        { name: '猪杂汤', priceSmall: 13, priceBig: 15, options: ['面条', '米粉', '河粉', '珍珠粉'] },
+                        { name: '猪肉丸瘦肉汤', priceSmall: 15, priceBig: 17, options: ['面条', '米粉', '河粉', '珍珠粉'] },
+                        { name: '牛肉丸牛肉汤', priceSmall: 17, priceBig: 19, options: ['面条', '米粉', '河粉', '珍珠粉'] }
+                    ]
                 });
 
-                const handleLogin = () => {
-                    if (username.value === correctUser && password.value === correctPass) {
-                        isLoggedIn.value = true;
-                        localStorage.setItem('hakka_admin_logged', 'true');
+                const openSpecModal = (item, specType) => {
+                    activeItem.value = item;
+                    selectedSpecType.value = specType;
+                    if (item.options) selectedOption.value = item.options[0];
+                    showSpecModal.value = true;
+                };
+
+                const activeSpecPrice = computed(() => selectedSpecType.value === 'small' ? activeItem.value.priceSmall : activeItem.value.priceBig);
+                const activeSpecName = computed(() => {
+                    const size = selectedSpecType.value === 'small' ? '小份' : '大份';
+                    return selectedOption.value ? `${size} (${selectedOption.value})` : size;
+                });
+
+                const confirmAddToCart = () => {
+                    const spec = activeSpecName.value;
+                    const price = activeSpecPrice.value;
+                    const existing = cart.value.find(i => i.name === activeItem.value.name && i.spec === spec);
+                    if (existing) existing.count++;
+                    else cart.value.push({ name: activeItem.value.name, spec, price, count: 1 });
+                    showSpecModal.value = false;
+                };
+
+                const addToCartDirect = (item) => {
+                    const existing = cart.value.find(i => i.name === item.name && !i.spec);
+                    if (existing) existing.count++;
+                    else cart.value.push({ name: item.name, spec: '', price: item.price, count: 1 });
+                };
+
+                const toggleCartModal = () => { if (cart.value.length > 0) showCartModal.value = !showCartModal.value; };
+                const increaseCart = (i) => cart.value[i].count++;
+                const decreaseCart = (i) => {
+                    cart.value[i].count--;
+                    if (cart.value[i].count <= 0) cart.value.splice(i, 1);
+                };
+
+                const cartCount = computed(() => cart.value.reduce((s, i) => s + i.count, 0));
+                const cartTotalAmount = computed(() => cart.value.reduce((s, i) => s + i.price * i.count, 0));
+                const finalTotalAmount = computed(() => cartTotalAmount.value > 0 ? cartTotalAmount.value + 1.0 : 0);
+
+                const checkout = () => {
+                    if (cart.value.length === 0) return;
+                    showCartModal.value = false;
+                    showPayModal.value = true;
+                };
+
+                // 异步提交订单到 Supabase
+                const submitOrder = async () => {
+                    if (!customerPhone.value.trim()) {
+                        alert('请填写取餐手机尾号！');
+                        return;
+                    }
+
+                    const newOrder = {
+                        orderId: 'HK' + Date.now().toString().slice(-6),
+                        phone: customerPhone.value,
+                        items: cart.value,
+                        total: finalTotalAmount.value,
+                        payType: payType.value,
+                        status: '待核销',
+                        time: new Date().toLocaleTimeString()
+                    };
+
+                    const { error } = await supabase.from('orders').insert([newOrder]);
+
+                    if (error) {
+                        console.error('提交失败', error);
+                        alert('订单提交失败，请检查网络');
                     } else {
-                        alert('账号或密码错误！(默认账号: admin, 密码: 123456)');
+                        alert('订单已提交成功！请凭取餐电话到店自提。');
+                        cart.value = [];
+                        customerPhone.value = '';
+                        showPayModal.value = false;
                     }
                 };
-
-                const logout = () => {
-                    isLoggedIn.value = false;
-                    localStorage.removeItem('hakka_admin_logged');
-                };
-
-                const loadOrders = () => {
-                    const localOrders = localStorage.getItem('hakka_orders');
-                    if (localOrders) {
-                        orders.value = JSON.parse(localOrders);
-                    }
-                };
-
-                const saveOrders = () => {
-                    localStorage.setItem('hakka_orders', JSON.stringify(orders.value));
-                };
-
-                const verifyOrder = (id) => {
-                    const order = orders.value.find(o => o.id === id);
-                    if (order) {
-                        order.status = '已核销完成';
-                        saveOrders();
-                    }
-                };
-
-                const clearOrders = () => {
-                    if (confirm('确定清空所有订单记录吗？')) {
-                        orders.value = [];
-                        localStorage.removeItem('hakka_orders');
-                    }
-                };
-
-                const pendingOrdersCount = computed(() => orders.value.filter(o => o.status === '待核销').length);
-                const totalRevenue = computed(() => orders.value.filter(o => o.status === '已核销完成').reduce((s, o) => s + o.total, 0));
 
                 return {
-                    isLoggedIn, username, password, orders,
-                    handleLogin, logout, loadOrders, verifyOrder, clearOrders,
-                    pendingOrdersCount, totalRevenue
+                    menu, cart, showSpecModal, showCartModal, showPayModal, payType, customerPhone,
+                    activeItem, selectedOption, activeSpecPrice, activeSpecName,
+                    openSpecModal, confirmAddToCart, addToCartDirect, toggleCartModal,
+                    increaseCart, decreaseCart, cartCount, cartTotalAmount, finalTotalAmount,
+                    checkout, submitOrder
                 };
             }
         }).mount('#app');
