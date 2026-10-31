@@ -9,12 +9,12 @@
         body { background-color: #f3f4f6; color: #1f2937; display: flex; justify-content: center; }
         #app { width: 100%; max-width: 480px; background-color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; position: relative; padding-bottom: 90px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
-        /* 顶部导航栏 (Logo 替换) */
+        /* 顶部导航栏 */
         header { background-color: #b45309; color: #ffffff; padding: 10px 16px; position: sticky; top: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .header-logo { height: 28px; width: auto; object-fit: contain; display: block; }
         .query-btn { background-color: #78350f; color: #ffffff; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; }
         
-        /* 提示条 (显示自提、打包费及营业时间) */
+        /* 提示条 */
         .notice { background-color: #fef3c7; color: #78350f; font-size: 12px; padding: 8px 16px; border-bottom: 1px solid #fde68a; font-weight: 500; line-height: 1.4; }
         
         .menu-container { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 20px; }
@@ -44,8 +44,7 @@
         .checkout-btn:disabled { background-color: #d1d5db; color: #9ca3af; cursor: not-allowed; }
 
         .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; display: none; align-items: center; justify-content: center; padding: 16px; }
-        .modal-box { background: #ffffff; width: 100%; max-width: 320px; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; }
-        .modal-bottom { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: #ffffff; border-radius: 20px 20px 0 0; padding: 20px; max-height: 75vh; display: flex; flex-direction: column; gap: 14px; z-index: 40; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); }
+        .modal-box { background: #ffffff; width: 100%; max-width: 340px; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; }
         .close-x { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 16px; color: #6b7280; cursor: pointer; }
         
         .option-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 6px; }
@@ -54,20 +53,34 @@
         
         .input-box { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px; font-size: 12px; outline: none; color: #111827; background: #fff; }
         .input-box:focus { border-color: #b45309; box-shadow: 0 0 0 2px rgba(180,83,9,0.15); }
+
+        /* 节点式步骤条样式 */
+        .step-container { display: flex; justify-content: space-between; align-items: center; margin: 10px 0 6px 0; position: relative; padding: 0 10px; }
+        .step-item { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; flex: 1; }
+        .step-circle { width: 22px; height: 22px; border-radius: 50%; background: #e5e7eb; color: #9ca3af; font-size: 10px; font-weight: bold; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; border: 2px solid #fff; }
+        .step-text { font-size: 10px; color: #9ca3af; text-align: center; font-weight: 500; }
+        
+        .step-line { position: absolute; top: 11px; left: 20%; right: 20%; height: 2px; background: #e5e7eb; z-index: 1; }
+
+        /* 节点激活状态 */
+        .step-item.active .step-circle { background: #b45309; color: #fff; box-shadow: 0 0 0 3px rgba(180,83,9,0.15); }
+        .step-item.active .step-text { color: #b45309; font-weight: bold; }
+        .step-item.completed .step-circle { background: #059669; color: #fff; }
+        .step-item.completed .step-text { color: #059669; }
     </style>
 </head>
 <body>
     <div id="app">
-        <!-- 顶部导航栏 (已更新为新的 Logo 链接) -->
+        <!-- 顶部导航栏 -->
         <header>
             <img src="https://i.imgs.ovh/2026/10/31/bb2fabef06a8d6f0c5870e2c7d0be375.png" alt="客家腌面 Logo" class="header-logo">
             <button onclick="openQueryModal()" class="query-btn">🔍 查询订单进度</button>
         </header>
 
-        <!-- 提示横幅 (包含自提提示及云端同步的营业时间) -->
+        <!-- 提示横幅 (显示自提、打包费及营业时间) -->
         <div id="status-notice" class="notice">
             📢 提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>
-            ⏰ 营业时间：加载中...
+            ⏰ 营业时间：同步中...
         </div>
 
         <div class="menu-container">
@@ -190,9 +203,9 @@
             </div>
         </div>
 
-        <!-- 订单进度查询弹窗 -->
+        <!-- 节点式订单进度查询弹窗 -->
         <div id="query-modal" class="modal-mask">
-            <div class="modal-box" style="max-height: 80vh;">
+            <div class="modal-box" style="max-height: 85vh;">
                 <button onclick="closeQueryModal()" class="close-x">✕</button>
                 <div style="color: #b45309; font-weight: bold; font-size: 13px; text-align: center;">🔍 自提订单进度查询</div>
                 
@@ -201,7 +214,7 @@
                     <button onclick="searchOrders()" class="btn-primary" style="padding: 8px 14px;">查询</button>
                 </div>
 
-                <div id="query-results-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; max-height: 50vh;">
+                <div id="query-results-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; max-height: 55vh;">
                     <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">请输入手机号查询</div>
                 </div>
             </div>
@@ -262,7 +275,10 @@
                 const data = await res.json();
                 if (data.record) {
                     cloudStocks = data.record.stocks || {};
-                    storeControl = data.record.control || { start: '08:00', end: '21:00' };
+                    // 适配和保护营业时间字段
+                    if (data.record.control) {
+                        storeControl = data.record.control;
+                    }
                 }
                 checkStoreTime();
                 renderMenu();
@@ -277,18 +293,19 @@
             const currentHourMin = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
             
             const noticeEl = document.getElementById('status-notice');
-            if (storeControl.start && storeControl.end) {
-                if (currentHourMin < storeControl.start || currentHourMin > storeControl.end) {
-                    isStoreOpen = false;
-                    noticeEl.innerHTML = `🔴 <strong>本店已打烊</strong> (营业时间: ${storeControl.start} ~ ${storeControl.end})，当前无法下单！`;
-                    noticeEl.style.backgroundColor = '#fee2e2';
-                    noticeEl.style.color = '#991b1b';
-                } else {
-                    isStoreOpen = true;
-                    noticeEl.innerHTML = `📢 提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>⏰ 营业时间：${storeControl.start} ~ ${storeControl.end}`;
-                    noticeEl.style.backgroundColor = '#fef3c7';
-                    noticeEl.style.color = '#78350f';
-                }
+            const startTime = storeControl.start || '08:00';
+            const endTime = storeControl.end || '21:00';
+
+            if (currentHourMin < startTime || currentHourMin > endTime) {
+                isStoreOpen = false;
+                noticeEl.innerHTML = `🔴 <strong>本店已打烊</strong> (营业时间: ${startTime} ~ ${endTime})，当前无法下单！`;
+                noticeEl.style.backgroundColor = '#fee2e2';
+                noticeEl.style.color = '#991b1b';
+            } else {
+                isStoreOpen = true;
+                noticeEl.innerHTML = `📢 提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>⏰ 营业时间：${startTime} ~ ${endTime}`;
+                noticeEl.style.backgroundColor = '#fef3c7';
+                noticeEl.style.color = '#78350f';
             }
         }
 
@@ -648,18 +665,44 @@
                 }
 
                 container.innerHTML = matched.map(order => {
-                    let statusColor = '#b45309';
-                    if (order.status === '已核销完成') statusColor = '#2563eb';
-                    if (order.status === '已出餐') statusColor = '#059669';
+                    const status = order.status || '待核销';
+                    
+                    let step1Class = 'completed', step2Class = '', step3Class = '';
+                    if (status === '待核销') {
+                        step1Class = 'active';
+                    } else if (status === '已核销完成') {
+                        step1Class = 'completed';
+                        step2Class = 'active';
+                    } else if (status === '已出餐') {
+                        step1Class = 'completed';
+                        step2Class = 'completed';
+                        step3Class = 'completed';
+                    }
 
                     return `
-                    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px; background: #f9fafb; font-size: 11px; display: flex; flex-direction: column; gap: 4px;">
-                        <div style="display: flex; justify-content: space-between; font-weight: bold; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px;">
+                    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #f9fafb; font-size: 11px; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; font-weight: bold; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px;">
                             <span>单号: ${order.id}</span>
-                            <span style="color: ${statusColor}; font-weight: bold;">进度: ${order.status || '待核销'}</span>
+                            <span style="color: #b45309;">尾号: ${order.phone}</span>
                         </div>
-                        <div style="color: #6b7280;">时间：${order.time} | 尾号：${order.phone}</div>
-                        <div style="border-top: 1px solid #e5e7eb; padding-top: 4px;">
+
+                        <div class="step-container">
+                            <div class="step-line"></div>
+                            <div class="step-item ${step1Class}">
+                                <div class="step-circle">${step1Class === 'completed' ? '✓' : '1'}</div>
+                                <div class="step-text">已下单</div>
+                            </div>
+                            <div class="step-item ${step2Class}">
+                                <div class="step-circle">${step2Class === 'completed' ? '✓' : '2'}</div>
+                                <div class="step-text">已核销</div>
+                            </div>
+                            <div class="step-item ${step3Class}">
+                                <div class="step-circle">${step3Class === 'completed' ? '✓' : '3'}</div>
+                                <div class="step-text">已出餐</div>
+                            </div>
+                        </div>
+
+                        <div style="border-top: 1px solid #e5e7eb; padding-top: 6px;">
                             ${order.items.map(i => `
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
                                     <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
@@ -670,8 +713,9 @@
                                 <span>自提打包费</span><span>￥1.00</span>
                             </div>
                         </div>
-                        <div style="text-align: right; font-weight: bold; color: #b45309; border-top: 1px solid #e5e7eb; padding-top: 4px; font-size: 12px;">
-                            实付总额：￥${order.total}
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e5e7eb; padding-top: 6px; font-size: 12px;">
+                            <span style="color: #6b7280;">下单时间: ${order.time}</span>
+                            <span style="font-weight: bold; color: #b45309;">实付: ￥${order.total}</span>
                         </div>
                     </div>
                 `;}).join('');
