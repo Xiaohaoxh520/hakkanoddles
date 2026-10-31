@@ -13,6 +13,8 @@
         @media (min-width: 1024px) {
             #app { max-width: 1440px; border-radius: 12px; margin: 16px auto; min-height: calc(100vh - 32px); }
             .pc-workspace { display: grid; grid-template-columns: 300px 1fr 340px; gap: 16px; padding: 16px; flex: 1; align-items: start; height: calc(100vh - 110px); overflow: hidden; }
+            .pc-dinein-workspace { display: grid; grid-template-columns: 1.4fr 1fr 340px; gap: 16px; padding: 16px; flex: 1; align-items: start; height: calc(100vh - 110px); overflow: hidden; }
+            
             .pc-col-left, .pc-col-middle, .pc-col-right { height: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-right: 4px; }
             .pc-col-middle { grid-column: 2; }
             #orders-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -41,7 +43,8 @@
         .footer-copyright { text-align: center; font-size: 12px; color: #9ca3af; padding: 12px 0; border-top: 1px solid #f3f4f6; }
 
         .dinein-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 8px; }
-        .dinein-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; }
+        .dinein-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; cursor: pointer; transition: all 0.2s; }
+        .dinein-item:hover { border-color: #16a34a; background: #f0fdf4; }
 
         #print-ticket { display: none; }
         @media print {
@@ -54,6 +57,7 @@
 </head>
 <body>
     <div id="app">
+        <!-- 登录弹窗 -->
         <div id="login-modal" class="modal-mask">
             <div style="background: #fff; width: 100%; max-width: 320px; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px;">
                 <h2 style="font-size: 16px; font-weight: bold; text-align: center;">商家后台登录</h2>
@@ -132,17 +136,13 @@
         </div>
 
         <!-- 2. 堂食柜台点单页面 -->
-        <div id="panel-dinein" class="content-box" style="display: none; background: #fff; flex: 1; max-width: 900px; margin: 0 auto; width: 100%;">
-            <div class="card" style="background: #f0fdf4; border-color: #bbf7d0;">
-                <h3 style="border-left-color: #16a34a; color: #166534;">堂食柜台点单收银台 (0-999循环取餐号，免打包费/手机号)</h3>
-                <p style="font-size: 12px; color: #15803d; margin-top: 4px;">点餐后系统将自动生成 3-4 位以内醒目取餐号，并直接双联打印小票。</p>
-            </div>
-
-            <div class="card">
-                <h3>点餐菜单与快速结算</h3>
-                <div style="display: flex; flex-direction: column; gap: 14px;">
-                    <div>
-                        <label style="font-size: 12px; font-weight: bold; color: #374151;">选择系列菜品：</label>
+        <div id="panel-dinein" class="pc-dinein-workspace content-box" style="display: none; background: #f3f4f6; padding: 0;">
+            
+            <div class="pc-col-left content-box" style="padding: 16px; background: #fff; height: 100%;">
+                <div class="card" style="margin: 0;">
+                    <h3>堂食点单菜品选择</h3>
+                    <div style="margin-top: 8px;">
+                        <label style="font-size: 11px; color: #6b7280; font-weight: bold;">切换菜品系列：</label>
                         <select id="dinein-category-select" class="input-box" onchange="renderDineInItems()">
                             <option value="combos">营养套餐系列 (可选粉面)</option>
                             <option value="staples">主食系列</option>
@@ -150,29 +150,39 @@
                             <option value="noodlessoups">汤粉汤面系列</option>
                         </select>
                     </div>
-                    
-                    <div id="dinein-items-grid" class="dinein-grid"></div>
+                </div>
+                <div class="card" style="margin: 0; flex: 1; display: flex; flex-direction: column;">
+                    <h3>点击菜品直接加入清单</h3>
+                    <div id="dinein-items-grid" class="dinein-grid" style="grid-template-columns: repeat(1, 1fr); overflow-y: auto; max-height: 50vh;"></div>
                 </div>
             </div>
 
-            <div class="card">
-                <h3>当前堂食订单明细</h3>
-                <div id="dinein-cart-list" style="display: flex; flex-direction: column; gap: 8px; min-height: 60px; max-height: 25vh; overflow-y: auto; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">
-                    <div style="color: #9ca3af; font-size: 12px; text-align: center; padding: 10px;">暂未选择菜品</div>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 15px; font-weight: bold;">
-                    <span>堂食应付总计: <span id="dinein-total" style="color: #16a34a; font-size: 18px;">￥0</span></span>
-                    <button onclick="submitDineInOrder()" class="btn-primary" style="background: #16a34a; width: auto; padding: 10px 24px;">提交堂食订单并打印双联小票</button>
+            <div class="pc-col-middle content-box" style="padding: 16px; background: #fff; height: 100%; display: flex; flex-direction: column;">
+                <div class="card" style="margin: 0; flex: 1; display: flex; flex-direction: column;">
+                    <h3>当前堂食订单明细 (免打包费 / 免手机号)</h3>
+                    <div id="dinein-cart-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; margin-top: 8px; min-height: 200px;">
+                        <div style="color: #9ca3af; font-size: 13px; text-align: center; padding: 40px;">暂未选择菜品，请从左侧点选</div>
+                    </div>
+                    <div style="padding-top: 12px; display: flex; flex-direction: column; gap: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: bold;">
+                            <span>堂食应付总计:</span>
+                            <span id="dinein-total" style="color: #16a34a; font-size: 22px;">￥0</span>
+                        </div>
+                        <button onclick="submitDineInOrder()" class="btn-primary" style="background: #16a34a; padding: 14px; font-size: 15px;">提交堂食订单并打印双联小票</button>
+                    </div>
                 </div>
             </div>
 
-            <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <h3>堂食柜台今日流水账单</h3>
-                    <span id="dinein-stats-text" style="font-size: 12px; color: #166534; font-weight: bold;">今日堂食营业额: ￥0</span>
+            <div class="pc-col-right content-box" style="padding: 16px; background: #fff; height: 100%;">
+                <div class="card" style="margin: 0; height: 100%; display: flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h3>今日堂食流水与出餐管理</h3>
+                        <span id="dinein-stats-text" style="font-size: 11px; color: #166534; font-weight: bold;">总额: ￥0</span>
+                    </div>
+                    <div id="dinein-orders-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
                 </div>
-                <div id="dinein-orders-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 35vh; overflow-y: auto;"></div>
             </div>
+
         </div>
 
         <!-- 3. 营业与库存控制面板 -->
@@ -361,7 +371,7 @@
             document.getElementById('tab-control').className = `tab-item ${tab === 'control' ? 'active' : ''}`;
             
             document.getElementById('panel-orders').style.display = tab === 'orders' ? (window.innerWidth >= 1024 ? 'grid' : 'flex') : 'none';
-            document.getElementById('panel-dinein').style.display = tab === 'dinein' ? 'flex' : 'none';
+            document.getElementById('panel-dinein').style.display = tab === 'dinein' ? (window.innerWidth >= 1024 ? 'grid' : 'flex') : 'none';
             document.getElementById('panel-control').style.display = tab === 'control' ? 'flex' : 'none';
 
             if (tab === 'dinein') {
@@ -501,12 +511,12 @@
                 const isSoup = category === 'soups';
                 const priceDisplay = isSoup ? `￥${item.price}` : `小￥${item.priceSmall}/大￥${item.priceBig}`;
                 return `
-                <div class="dinein-item">
+                <div class="dinein-item" onclick="openDineInSpec('${category}', ${idx})">
                     <div>
-                        <div style="font-weight: bold; font-size: 13px;">${item.name}</div>
-                        <div style="color: #b45309; font-size: 12px; margin-top: 2px; font-weight: bold;">${priceDisplay}</div>
+                        <div style="font-weight: bold; font-size: 14px; color: #111827;">${item.name}</div>
+                        <div style="color: #b45309; font-size: 13px; margin-top: 4px; font-weight: bold;">${priceDisplay}</div>
                     </div>
-                    <button onclick="openDineInSpec('${category}', ${idx})" class="btn-primary" style="padding: 6px; font-size: 11px;">+ 选购</button>
+                    <div style="text-align: right; font-size: 12px; color: #16a34a; font-weight: bold;">+ 点击点餐</div>
                 </div>
                 `;
             }).join('');
@@ -589,17 +599,17 @@
             document.getElementById('dinein-total').innerText = '￥' + total;
 
             if (dineInCart.length === 0) {
-                container.innerHTML = `<div style="color: #9ca3af; font-size: 12px; text-align: center; padding: 10px;">暂未选择菜品</div>`;
+                container.innerHTML = `<div style="color: #9ca3af; font-size: 13px; text-align: center; padding: 40px;">暂未选择菜品，请从左侧点选</div>`;
                 return;
             }
 
             container.innerHTML = dineInCart.map((item, idx) => `
-                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; background: #f9fafb; padding: 6px 10px; border-radius: 6px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; background: #f9fafb; padding: 8px 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
                     <div><strong>${item.name}</strong> <span style="color: #b45309;">${item.spec}</span> (￥${item.price})</div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
                         <span>x${item.count}</span>
-                        <button onclick="changeDineInCount(${idx}, -1)" style="background: #e5e7eb; border: none; width: 20px; height: 20px; border-radius: 50%; font-weight: bold; cursor: pointer;">-</button>
-                        <button onclick="changeDineInCount(${idx}, 1)" style="background: #16a34a; color: #fff; border: none; width: 20px; height: 20px; border-radius: 50%; font-weight: bold; cursor: pointer;">+</button>
+                        <button onclick="changeDineInCount(${idx}, -1)" style="background: #e5e7eb; border: none; width: 22px; height: 22px; border-radius: 50%; font-weight: bold; cursor: pointer;">-</button>
+                        <button onclick="changeDineInCount(${idx}, 1)" style="background: #16a34a; color: #fff; border: none; width: 22px; height: 22px; border-radius: 50%; font-weight: bold; cursor: pointer;">+</button>
                     </div>
                 </div>
             `).join('');
@@ -613,7 +623,6 @@
             renderDineInCart();
         }
 
-        // 提交堂食订单 (取餐号限制在 0-999，循环递增)
         async function submitDineInOrder() {
             if (dineInCart.length === 0) {
                 alert('请先选择堂食菜品！');
@@ -641,7 +650,6 @@
 
                 const totalAmount = dineInCart.reduce((s, i) => s + i.price * i.count, 0);
 
-                // 取餐号限制在 0-999 (000 ~ 999 循环)
                 let seqNumber = 0;
                 if (remoteDineInOrders.length > 0) {
                     let lastNo = parseInt(remoteDineInOrders[0].mealNo) || 0;
@@ -654,7 +662,7 @@
                     mealNo: mealNoStr,
                     items: [...dineInCart],
                     total: totalAmount,
-                    status: '已出餐',
+                    status: '待出餐', // 堂食新下单默认为待出餐
                     time: new Date().toLocaleTimeString(),
                     type: '堂食柜台'
                 };
@@ -687,6 +695,45 @@
             } catch (e) {
                 console.error(e);
                 alert('提交堂食订单失败，请检查网络');
+            }
+        }
+
+        // 更新堂食订单出餐状态
+        async function updateDineInStatus(orderId, newStatus) {
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': MASTER_KEY }
+                });
+                const data = await res.json();
+                let remoteDineInOrders = (data.record && data.record.dineInOrders) ? data.record.dineInOrders : [];
+                let remoteOrders = (data.record && data.record.orders) ? data.record.orders : [];
+                let remoteStocks = (data.record && data.record.stocks) ? data.record.stocks : {};
+                let remoteControl = (data.record && data.record.control) ? data.record.control : cloudData.control;
+
+                const target = remoteDineInOrders.find(o => o.id === orderId);
+                if (target) {
+                    target.status = newStatus;
+                }
+
+                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': MASTER_KEY
+                    },
+                    body: JSON.stringify({
+                        orders: remoteOrders,
+                        dineInOrders: remoteDineInOrders,
+                        stocks: remoteStocks,
+                        control: remoteControl
+                    })
+                });
+
+                cloudData.dineInOrders = remoteDineInOrders;
+                renderDineInOrders();
+            } catch (e) {
+                console.error(e);
+                alert('更新状态失败');
             }
         }
 
@@ -733,26 +780,33 @@
             const todayOrders = orders.filter(o => o.time.includes(todayStr) || (o.id && o.id.includes(todayStr)));
             const todayRev = todayOrders.reduce((s, o) => s + o.total, 0);
 
-            document.getElementById('dinein-stats-text').innerText = `今日堂食营业额: ￥${todayRev} (${todayOrders.length}单)`;
+            document.getElementById('dinein-stats-text').innerText = `总额: ￥${todayRev} (${todayOrders.length}单)`;
 
             const container = document.getElementById('dinein-orders-list');
             if (orders.length === 0) {
-                container.innerHTML = `<div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">暂无堂食柜台订单流水</div>`;
+                container.innerHTML = `<div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">暂无堂食柜台订单</div>`;
                 return;
             }
 
-            container.innerHTML = orders.map(order => `
-                <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; background: #fff; font-size: 12px; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div style="font-weight: bold; font-size: 14px; color: #16a34a;">取餐号: #${order.mealNo} <span style="font-size: 11px; color: #6b7280; font-weight: normal;">(${order.time})</span></div>
-                        <div style="color: #374151; margin-top: 2px;">${order.items.map(i => `${i.name}(${i.spec || '标配'})x${i.count}`).join('; ')}</div>
+            container.innerHTML = orders.map(order => {
+                const status = order.status || '待出餐';
+                const isFinished = status === '已出餐';
+                return `
+                <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; background: #fff; font-size: 12px; display: flex; flex-direction: column; gap: 6px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: bold; font-size: 16px; color: #16a34a;">取餐号: #${order.mealNo}</span>
+                        <span style="font-weight: bold; color: ${isFinished ? '#059669' : '#b45309'};">${status}</span>
                     </div>
-                    <div style="text-align: right;">
-                        <div style="font-weight: bold; color: #16a34a; font-size: 14px;">￥${order.total}</div>
-                        <button onclick="printDineInTicket({mealNo:'${order.mealNo}', id:'${order.id}', time:'${order.time}', items:${JSON.stringify(order.items).replace(/"/g, '&quot;')}, total:${order.total}})" style="background:#4b5563; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:10px; margin-top:4px;">补打双联小票</button>
+                    <div style="color: #374151;">${order.items.map(i => `${i.name}(${i.spec || '标配'})x${i.count}`).join('; ')}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f3f4f6; padding-top: 6px;">
+                        <span style="font-weight: bold; color: #16a34a; font-size: 14px;">￥${order.total}</span>
+                        <div style="display: flex; gap: 6px;">
+                            ${!isFinished ? `<button onclick="updateDineInStatus('${order.id}', '已出餐')" style="background:#059669; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:11px; font-weight:bold;">标记已出餐</button>` : '<span style="color:#059669; font-weight:bold;">已完成</span>'}
+                            <button onclick="printDineInTicket({mealNo:'${order.mealNo}', id:'${order.id}', time:'${order.time}', items:${JSON.stringify(order.items).replace(/"/g, '&quot;')}, total:${order.total}})" style="background:#4b5563; color:#fff; border:none; padding:5px 8px; border-radius:4px; cursor:pointer; font-size:11px;">补打双联</button>
+                        </div>
                     </div>
                 </div>
-            `).join('');
+            `;}).join('');
         }
 
         function renderOrders() {
