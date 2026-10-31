@@ -73,7 +73,6 @@
             <button onclick="openQueryModal()" class="query-btn">查询订单进度</button>
         </header>
 
-        <!-- 提示横幅、休息标签与实时排队繁忙度显示 -->
         <div id="status-notice" class="notice">
             <div class="notice-top-row">
                 <div id="notice-text">提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>营业时间：加载中...</div>
@@ -275,6 +274,7 @@
         let cloudStocks = {};
         let storeControl = { start: '08:00', end: '21:00', manualClosed: false };
         let cloudOrders = [];
+        let dineInOrders = [];
         let cart = [];
         let currentActiveItem = null;
         let currentSpecType = 'small';
@@ -291,6 +291,7 @@
                 if (data.record) {
                     cloudStocks = data.record.stocks || {};
                     cloudOrders = data.record.orders || [];
+                    dineInOrders = data.record.dineInOrders || [];
                     if (data.record.control) {
                         storeControl = data.record.control;
                     }
@@ -332,25 +333,27 @@
             noticeTextEl.innerHTML = textInfo;
         }
 
-        // 计算待完成的实时单及繁忙度（预约单不计入）
+        // 繁忙度计算：合并“线上未完成实时单”与“堂食未完成单”
         function updateQueueStats() {
-            // 过滤未完成（状态不是“已出餐”）的订单，并且必须是“实时单”（pickupTime 为 尽快取餐 或 不存在）
-            const pendingAsapOrders = cloudOrders.filter(o => {
+            const pendingOnlineAsap = cloudOrders.filter(o => {
                 const isNotFinished = o.status !== '已出餐';
                 const isReserve = o.pickupTime && o.pickupTime !== '尽快取餐';
                 return isNotFinished && !isReserve;
             });
 
-            const count = pendingAsapOrders.length;
-            document.getElementById('pending-orders-count').innerText = count;
+            // 堂食未完成单（状态不是“已出餐”的堂食订单）
+            const pendingDineIn = dineInOrders.filter(o => o.status !== '已出餐');
+
+            const totalPending = pendingOnlineAsap.length + pendingDineIn.length;
+            document.getElementById('pending-orders-count').innerText = totalPending;
 
             const badge = document.getElementById('busyness-badge');
-            if (count < 5) {
+            if (totalPending < 5) {
                 badge.innerText = '畅通';
-                badge.style.background = '#10b981'; // 绿色
+                badge.style.background = '#10b981';
             } else {
                 badge.innerText = '繁忙';
-                badge.style.background = '#ea580c'; // 橙红色
+                badge.style.background = '#ea580c';
             }
         }
 
@@ -690,6 +693,7 @@
                 });
                 const data = await res.json();
                 let remoteOrders = (data.record && data.record.orders) ? data.record.orders : [];
+                let remoteDineInOrders = (data.record && data.record.dineInOrders) ? data.record.dineInOrders : [];
                 let remoteStocks = (data.record && data.record.stocks) ? data.record.stocks : {};
                 let remoteControl = (data.record && data.record.control) ? data.record.control : storeControl;
 
@@ -726,6 +730,7 @@
                     },
                     body: JSON.stringify({
                         orders: remoteOrders,
+                        dineInOrders: remoteDineInOrders,
                         stocks: remoteStocks,
                         control: remoteControl
                     })
