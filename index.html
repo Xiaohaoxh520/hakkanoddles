@@ -13,22 +13,32 @@
         .header-logo { height: 28px; width: auto; object-fit: contain; display: block; }
         .query-btn { background-color: #78350f; color: #ffffff; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; }
         
-        .notice { background-color: #fef3c7; color: #78350f; font-size: 12px; padding: 10px 16px; border-bottom: 1px solid #fde68a; font-weight: 500; line-height: 1.4; display: flex; flex-direction: column; gap: 4px; }
+        /* 提示栏吸顶置顶 */
+        .notice { background-color: #fef3c7; color: #78350f; font-size: 12px; padding: 10px 16px; border-bottom: 1px solid #fde68a; font-weight: 500; line-height: 1.4; display: flex; flex-direction: column; gap: 6px; position: sticky; top: 48px; z-index: 25; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .notice-top-row { display: flex; justify-content: space-between; align-items: center; }
         .store-status-tag { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #fff; }
-        .queue-info-box { font-size: 11px; color: #92400e; font-weight: bold; border-top: 1px dashed #fde68a; padding-top: 4px; margin-top: 2px; }
+        
+        /* 胶囊视图 */
+        .capsule-queue-box { display: inline-flex; align-items: center; background-color: #e5e7eb; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; color: #374151; width: fit-content; gap: 6px; }
+        .capsule-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        
+        /* 弹窗刷新按钮 */
+        .refresh-queue-btn { background: #059669; color: #fff; border: none; padding: 6px 14px; border-radius: 16px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .refresh-queue-btn:disabled { background: #d1d5db; color: #9ca3af; cursor: not-allowed; }
         
         .menu-container { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 20px; }
         .section-title { font-size: 14px; font-weight: bold; color: #111827; margin-bottom: 12px; border-left: 4px solid #b45309; padding-left: 8px; display: flex; align-items: center; justify-content: space-between; }
         .section-desc { font-size: 11px; font-weight: normal; color: #4b5563; }
         
-        .item-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 10px; }
-        .item-info h3 { font-size: 14px; font-weight: bold; color: #111827; }
+        .item-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 10px; position: relative; }
+        .item-info h3 { font-size: 14px; font-weight: bold; color: #111827; display: flex; align-items: center; gap: 6px; }
         .item-info p { font-size: 11px; color: #6b7280; margin-top: 4px; }
         
         .item-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .grid-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .grid-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: relative; }
         
+        .badge-signature { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; font-size: 9px; padding: 1px 5px; border-radius: 4px; font-weight: bold; }
+
         .btn-primary { background-color: #b45309; color: #ffffff; border: none; padding: 7px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; }
         .btn-primary:active { background-color: #92400e; }
         .btn-soldout { background-color: #9ca3af !important; color: #ffffff !important; cursor: not-allowed !important; }
@@ -55,11 +65,11 @@
         .input-box { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px; font-size: 12px; outline: none; background: #fff; }
         .input-box:focus { border-color: #b45309; box-shadow: 0 0 0 2px rgba(180,83,9,0.15); }
 
-        .step-container { display: flex; justify-content: space-between; align-items: center; margin: 10px 0 6px 0; position: relative; padding: 0 10px; }
+        .step-container { display: flex; justify-content: space-between; align-items: center; margin: 14px 0 8px 0; position: relative; padding: 0 10px; }
         .step-item { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; flex: 1; }
-        .step-circle { width: 22px; height: 22px; border-radius: 50%; background: #e5e7eb; color: #9ca3af; font-size: 10px; font-weight: bold; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; border: 2px solid #fff; }
-        .step-text { font-size: 10px; color: #9ca3af; text-align: center; font-weight: 500; }
-        .step-line { position: absolute; top: 11px; left: 20%; right: 20%; height: 2px; background: #e5e7eb; z-index: 1; }
+        .step-circle { width: 24px; height: 24px; border-radius: 50%; background: #e5e7eb; color: #9ca3af; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; border: 2px solid #fff; }
+        .step-text { font-size: 11px; color: #9ca3af; text-align: center; font-weight: 500; }
+        .step-line { position: absolute; top: 12px; left: 20%; right: 20%; height: 2px; background: #e5e7eb; z-index: 1; }
         .step-item.active .step-circle { background: #b45309; color: #fff; box-shadow: 0 0 0 3px rgba(180,83,9,0.15); }
         .step-item.active .step-text { color: #b45309; font-weight: bold; }
         .step-item.completed .step-circle { background: #059669; color: #fff; }
@@ -78,8 +88,10 @@
                 <div id="notice-text">提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>营业时间：加载中...</div>
                 <div id="store-status-tag" class="store-status-tag" style="background: #10b981;">营业中</div>
             </div>
-            <div id="queue-info-box" class="queue-info-box">
-                当前前方还有 <strong id="pending-orders-count">0</strong> 单未完成 | 门店繁忙度: <span id="busyness-badge" style="padding: 1px 6px; border-radius: 4px; background: #10b981; color: #fff;">畅通</span>
+            <!-- 胶囊视图 -->
+            <div id="capsule-queue-container" class="capsule-queue-box">
+                <span id="capsule-dot" class="capsule-dot" style="background: #10b981;"></span>
+                <span>当前前方还有 <strong id="pending-orders-count" style="color: #10b981;">0</strong> 单制作中</span>
             </div>
         </div>
 
@@ -152,7 +164,7 @@
 
         <!-- 购物车抽屉弹窗 -->
         <div id="cart-modal" class="modal-mask" style="align-items: flex-end; padding: 0;" onclick="if(event.target === this) toggleCartModal()">
-            <div class="modal-bottom">
+            <div class="modal-bottom" style="background: #fff; width: 100%; max-width: 480px; margin: 0 auto; border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">
                     <span style="font-weight: bold; font-size: 14px;">购物车明细 (到店自提)</span>
                     <button onclick="toggleCartModal()" class="close-x" style="position: static;">✕</button>
@@ -175,7 +187,7 @@
             </div>
         </div>
 
-        <!-- 支付弹窗 (已加入显著强调提示) -->
+        <!-- 支付弹窗 -->
         <div id="pay-modal" class="modal-mask">
             <div class="modal-box" style="text-align: center;">
                 <button onclick="closePayModal()" class="close-x">✕</button>
@@ -183,7 +195,6 @@
                 <div style="color: #b45309; font-weight: bold; font-size: 13px;">客家腌面 · 微信收银台</div>
                 <div id="pay-amount" style="font-size: 22px; font-weight: black; color: #111827;">￥1.00</div>
 
-                <!-- 显著提示框：要求先付款、备注尾号、否则订单无效 -->
                 <div style="background: #fff5f5; border: 1.5px solid #dc2626; padding: 10px; border-radius: 8px; text-align: left; font-size: 11px; color: #991b1b; line-height: 1.5;">
                     <div style="font-weight: bold; font-size: 12px; margin-bottom: 2px; color: #dc2626;">⚠️ 务必先付款后提交！</div>
                     付款时<strong>必须备注您的手机尾号</strong>！手机尾号是订单<strong>唯一核对凭证</strong>，不备注尾号或未付款的订单一律无效！
@@ -220,11 +231,20 @@
             </div>
         </div>
 
-        <!-- 订单进度查询弹窗 -->
+        <!-- 独立弹窗 1：下单成功后的状态/凭证页 -->
+        <div id="success-detail-modal" class="modal-mask">
+            <div class="modal-box" style="max-height: 85vh;">
+                <button onclick="closeSuccessDetailModal()" class="close-x">✕</button>
+                <div id="success-modal-title" style="color: #b45309; font-weight: bold; font-size: 15px; text-align: center;">⏳ 下单成功，等待商家核验接单</div>
+                <div id="success-detail-content" style="display: flex; flex-direction: column; gap: 10px;"></div>
+            </div>
+        </div>
+
+        <!-- 独立弹窗 2：导航栏的【查询订单进度页】 -->
         <div id="query-modal" class="modal-mask">
             <div class="modal-box" style="max-height: 85vh;">
                 <button onclick="closeQueryModal()" class="close-x">✕</button>
-                <div style="color: #b45309; font-weight: bold; font-size: 13px; text-align: center;">自提订单进度查询</div>
+                <div style="color: #b45309; font-weight: bold; font-size: 14px; text-align: center; margin-bottom: 4px;">自提订单进度查询</div>
                 
                 <div style="display: flex; gap: 8px;">
                     <input id="search-phone-input" type="text" placeholder="请输入手机尾号查询进度" class="input-box" style="flex: 1;">
@@ -246,8 +266,8 @@
             combos: [
                 { name: '紫菜蛋花汤套餐', priceSmall: 11, priceBig: 13, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
                 { name: '番茄蛋花汤套餐', priceSmall: 11, priceBig: 13, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
-                { name: '枸杞叶三及第汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
-                { name: '枸杞叶瘦肉汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
+                { name: '枸杞叶三及第汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'], signature: true },
+                { name: '枸杞叶瘦肉汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'], signature: true },
                 { name: '酸菜瘦肉汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
                 { name: '枸杞叶猪肉丸汤套餐', priceSmall: 15, priceBig: 17, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
                 { name: '枸杞叶牛肉丸汤套餐', priceSmall: 15, priceBig: 17, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
@@ -286,6 +306,8 @@
         let currentOption = '';
         let isStoreOpen = true;
         let orderMode = 'asap';
+        let lastRefreshTime = 0; // 弹窗手动刷新限频（1分钟1次）
+        let currentActiveOrder = null; // 缓存当前弹窗订单
 
         async function fetchCloudConfig() {
             try {
@@ -304,10 +326,46 @@
                 checkStoreTime();
                 updateQueueStats();
                 renderMenu();
+
+                // 如果凭证弹窗开着，实时静默检测状态
+                if (currentActiveOrder && document.getElementById('success-detail-modal').style.display === 'flex') {
+                    const latestMatch = cloudOrders.find(o => o.id === currentActiveOrder.id);
+                    if (latestMatch) {
+                        currentActiveOrder = latestMatch;
+                        showSuccessDetailModal(currentActiveOrder, true);
+                    }
+                }
             } catch (e) {
                 console.error('加载云端配置失败', e);
                 renderMenu();
             }
+        }
+
+        // 弹窗内的手动刷新按钮（1分钟限制1次）
+        function manualRefreshDetail() {
+            const now = Date.now();
+            const cooldown = 60 * 1000;
+            if (now - lastRefreshTime < cooldown) {
+                const remainSecs = Math.ceil((cooldown - (now - lastRefreshTime)) / 1000);
+                alert(`刷新过于频繁，请在 ${remainSecs} 秒后再试！`);
+                return;
+            }
+            lastRefreshTime = now;
+
+            const btn = document.getElementById('modal-refresh-btn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = '刷新中...';
+            }
+
+            fetchCloudConfig().then(() => {
+                setTimeout(() => {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerText = '🔄 手动刷新';
+                    }
+                }, 1000);
+            });
         }
 
         function checkStoreTime() {
@@ -348,15 +406,19 @@
             const pendingDineIn = dineInOrders.filter(o => o.status !== '已出餐');
             const totalPending = pendingOnlineAsap.length + pendingDineIn.length;
 
-            document.getElementById('pending-orders-count').innerText = totalPending;
+            const countEl = document.getElementById('pending-orders-count');
+            const dotEl = document.getElementById('capsule-dot');
+            countEl.innerText = totalPending;
 
-            const badge = document.getElementById('busyness-badge');
-            if (totalPending < 5) {
-                badge.innerText = '畅通';
-                badge.style.background = '#10b981';
+            if (totalPending <= 5) {
+                dotEl.style.background = '#10b981';
+                countEl.style.color = '#10b981';
+            } else if (totalPending <= 10) {
+                dotEl.style.background = '#f59e0b';
+                countEl.style.color = '#f59e0b';
             } else {
-                badge.innerText = '繁忙';
-                badge.style.background = '#ea580c';
+                dotEl.style.background = '#dc2626';
+                countEl.style.color = '#dc2626';
             }
         }
 
@@ -423,10 +485,11 @@
             document.getElementById('combos-list').innerHTML = menuData.combos.map((item, idx) => {
                 const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 50;
                 const isSoldOut = stock <= 0 || !isStoreOpen;
+                const sigTag = item.signature ? `<span class="badge-signature">🔥 招牌</span>` : '';
                 return `
                 <div class="item-card">
                     <div class="item-info">
-                        <h3>${item.name}</h3>
+                        <h3>${item.name} ${sigTag}</h3>
                         <p>粉面：${item.options.join('/')} | <span style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">库存: ${stock}</span></p>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 6px;">
@@ -645,13 +708,9 @@
                 cart.splice(index, 1);
             }
             updateCartUI();
-            if (cart.length === 0) {
-                toggleCartModal();
-            }
         }
 
         function toggleCartModal() {
-            if (cart.length === 0) return;
             const modal = document.getElementById('cart-modal');
             modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
         }
@@ -739,16 +798,159 @@
                     })
                 });
 
-                alert('订单已提交成功！请确保已转账并备注手机尾号。');
                 cart = [];
                 document.getElementById('customer-phone-input').value = '';
                 closePayModal();
                 updateCartUI();
                 fetchCloudConfig();
+
+                currentActiveOrder = newOrder;
+                showSuccessDetailModal(currentActiveOrder);
+
             } catch (e) {
                 console.error(e);
                 alert('网络异常，请重试！');
             }
+        }
+
+        // 下单成功弹窗：未接单时显示核验中，接单后转为取餐凭证
+        async function showSuccessDetailModal(order, isSilent = false) {
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': MASTER_KEY }
+                });
+                const data = await res.json();
+                let allOnline = (data.record && data.record.orders) ? data.record.orders : [];
+                let allDineIn = (data.record && data.record.dineInOrders) ? data.record.dineInOrders : [];
+                
+                const pendingOnlineAsap = allOnline.filter(o => o.status !== '已出餐' && (!o.pickupTime || o.pickupTime === '尽快取餐'));
+                const pendingDineIn = allDineIn.filter(o => o.status !== '已出餐');
+                const totalPending = pendingOnlineAsap.length + pendingDineIn.length;
+
+                const status = order.status || '待接单';
+                const isAccepted = status === '已接单' || status === '已出餐';
+                const isReserve = order.pickupTime && order.pickupTime !== '尽快取餐';
+
+                const modalTitleEl = document.getElementById('success-modal-title');
+                if (!isAccepted) {
+                    modalTitleEl.innerHTML = `⏳ 下单成功，等待商家核验接单`;
+                    modalTitleEl.style.color = `#b45309`;
+                } else {
+                    modalTitleEl.innerHTML = `🎉 商家已接单！取餐凭证`;
+                    modalTitleEl.style.color = `#059669`;
+                }
+
+                let step1Class = 'completed', step2Class = '', step3Class = '';
+                if (status === '待接单') {
+                    step1Class = 'active';
+                } else if (status === '已接单') {
+                    step1Class = 'completed';
+                    step2Class = 'active';
+                } else if (status === '已出餐') {
+                    step1Class = 'completed';
+                    step2Class = 'completed';
+                    step3Class = 'completed';
+                }
+
+                let contentHtml = '';
+
+                if (!isAccepted) {
+                    // 阶段一：等待商家核验中（不突显取餐号/尾号）
+                    contentHtml = `
+                        <div style="border: 2px solid #f59e0b; border-radius: 12px; padding: 14px; background: #fffbeb; font-size: 12px; display: flex; flex-direction: column; gap: 10px;">
+                            <div style="text-align: center; border-bottom: 1px dashed #fde68a; padding-bottom: 8px;">
+                                <div style="font-size: 13px; color: #b45309; font-weight: bold; margin-bottom: 4px;">⌛ 请稍候，商家正在核验付款并准备接单...</div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; padding: 0 4px;">
+                                    <span style="font-size: 11px; color: #78350f;">实时检测中...</span>
+                                    <button id="modal-refresh-btn" onclick="manualRefreshDetail()" class="refresh-queue-btn">🔄 手动刷新状态</button>
+                                </div>
+                            </div>
+
+                            <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #fde68a;">
+                                <div style="font-weight: bold; margin-bottom: 4px; color: #78350f;">流水单号: ${order.id} | 登记尾号: ${order.phone}</div>
+                                ${order.items.map(i => `
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                                        <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
+                                        <span>￥${i.price * i.count}</span>
+                                    </div>
+                                `).join('')}
+                                <div style="display: flex; justify-content: space-between; color: #6b7280; margin-top: 4px; border-top: 1px dashed #e5e7eb; padding-top: 4px;">
+                                    <span>自提打包费</span><span>￥1.00</span>
+                                </div>
+                            </div>
+                            <div style="text-align: center; color: #92400e; font-size: 11px;">
+                                商家接单后将自动为您生成取餐凭证
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // 阶段二：商家已接单，展示完整取餐凭证
+                    contentHtml = `
+                        <div style="border: 2px solid #059669; border-radius: 12px; padding: 14px; background: #ecfdf5; font-size: 12px; display: flex; flex-direction: column; gap: 10px;">
+                            <div style="text-align: center; border-bottom: 1px dashed #a7f3d0; padding-bottom: 8px;">
+                                ${isReserve ? 
+                                    `<div style="font-size: 13px; color: #b45309; font-weight: bold; margin-bottom: 4px;">⏰ 预约取餐时间：${order.pickupTime}</div>` : 
+                                    `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; padding: 0 4px;">
+                                        <span style="font-size: 12px; color: #065f46; font-weight: bold;">前方还有 <strong style="font-size: 14px; color: #dc2626;">${totalPending}</strong> 单制作中</span>
+                                        <button id="modal-refresh-btn" onclick="manualRefreshDetail()" class="refresh-queue-btn">🔄 手动刷新</button>
+                                     </div>`
+                                }
+                                <div style="font-size: 11px; color: #047857;">[ 订单状态: <span style="font-weight: bold; font-size: 13px; color: #047857;">${status}</span> ]</div>
+                                <div style="font-size: 24px; font-weight: 900; color: #065f46; margin-top: 4px; letter-spacing: 1px;">取餐手机尾号: <span style="text-decoration: underline; color: #b45309;">${order.phone}</span></div>
+                            </div>
+
+                            <div style="background: #fff; padding: 8px 10px; border-radius: 6px; border: 1px solid #a7f3d0; color: #065f46; font-weight: bold; font-size: 11px;">
+                                📍 取餐地址：广东白云学院北校区四季轩食堂负一层客家腌面档
+                            </div>
+
+                            <div class="step-container">
+                                <div class="step-line"></div>
+                                <div class="step-item ${step1Class}">
+                                    <div class="step-circle">${step1Class === 'completed' ? '✓' : '1'}</div>
+                                    <div class="step-text">已下单</div>
+                                </div>
+                                <div class="step-item ${step2Class}">
+                                    <div class="step-circle">${step2Class === 'completed' ? '✓' : '2'}</div>
+                                    <div class="step-text">已接单</div>
+                                </div>
+                                <div class="step-item ${step3Class}">
+                                    <div class="step-circle">${step3Class === 'completed' ? '✓' : '3'}</div>
+                                    <div class="step-text">已出餐</div>
+                                </div>
+                            </div>
+
+                            <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #a7f3d0;">
+                                <div style="font-weight: bold; margin-bottom: 4px; color: #065f46;">流水单号: ${order.id} | 取餐方式：${order.pickupTime || '尽快取餐'}</div>
+                                ${order.items.map(i => `
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                                        <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
+                                        <span>￥${i.price * i.count}</span>
+                                    </div>
+                                `).join('')}
+                                <div style="display: flex; justify-content: space-between; color: #6b7280; margin-top: 4px; border-top: 1px dashed #e5e7eb; padding-top: 4px;">
+                                    <span>自提打包费</span><span>￥1.00</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold;">
+                                <span style="color: #065f46;">核心核对凭证: 尾号 ${order.phone}</span>
+                                <span style="color: #b45309; font-size: 16px;">实付: ￥${order.total}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('success-detail-content').innerHTML = contentHtml;
+                if (!isSilent) {
+                    document.getElementById('success-detail-modal').style.display = 'flex';
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function closeSuccessDetailModal() {
+            currentActiveOrder = null;
+            document.getElementById('success-detail-modal').style.display = 'none';
         }
 
         function openQueryModal() {
@@ -759,6 +961,7 @@
             document.getElementById('query-modal').style.display = 'none';
         }
 
+        // 导航栏独立的进度查询逻辑（未接单时不突显尾号，接单后转为完整凭证）
         async function searchOrders() {
             const keyword = document.getElementById('search-phone-input').value.trim();
             if (!keyword) {
@@ -786,6 +989,8 @@
 
                 container.innerHTML = matched.map(order => {
                     const status = order.status || '待接单';
+                    const isAccepted = status === '已接单' || status === '已出餐';
+                    const isReserve = order.pickupTime && order.pickupTime !== '尽快取餐';
                     
                     let step1Class = 'completed', step2Class = '', step3Class = '';
                     if (status === '待接单') {
@@ -799,46 +1004,81 @@
                         step3Class = 'completed';
                     }
 
-                    return `
-                    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #f9fafb; font-size: 11px; display: flex; flex-direction: column; gap: 8px;">
-                        <div style="display: flex; justify-content: space-between; font-weight: bold; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px;">
-                            <span>单号: ${order.id}</span>
-                            <span style="color: #b45309;">取餐: ${order.pickupTime || '尽快取餐'}</span>
-                        </div>
-
-                        <div class="step-container">
-                            <div class="step-line"></div>
-                            <div class="step-item ${step1Class}">
-                                <div class="step-circle">${step1Class === 'completed' ? '✓' : '1'}</div>
-                                <div class="step-text">已下单</div>
+                    if (!isAccepted) {
+                        // 待接单状态：不突显取餐号/尾号
+                        return `
+                        <div style="border: 2px solid #f59e0b; border-radius: 12px; padding: 14px; background: #fffbeb; font-size: 12px; display: flex; flex-direction: column; gap: 10px;">
+                            <div style="text-align: center; border-bottom: 1px dashed #fde68a; padding-bottom: 8px;">
+                                <div style="font-size: 11px; color: #78350f; font-weight: bold;">[ 订单状态: <span style="color: #b45309; font-size: 14px;">${status} (等待商家核验)</span> ]</div>
+                                <div style="font-size: 15px; font-weight: bold; color: #b45309; margin-top: 4px;">流水单号: ${order.id}</div>
                             </div>
-                            <div class="step-item ${step2Class}">
-                                <div class="step-circle">${step2Class === 'completed' ? '✓' : '2'}</div>
-                                <div class="step-text">已接单</div>
-                            </div>
-                            <div class="step-item ${step3Class}">
-                                <div class="step-circle">${step3Class === 'completed' ? '✓' : '3'}</div>
-                                <div class="step-text">已出餐</div>
-                            </div>
-                        </div>
-
-                        <div style="border-top: 1px solid #e5e7eb; padding-top: 6px;">
-                            ${order.items.map(i => `
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-                                    <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
-                                    <span>￥${i.price * i.count}</span>
+                            <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #fde68a;">
+                                <div style="font-weight: bold; margin-bottom: 4px; color: #78350f;">登记尾号: ${order.phone}</div>
+                                ${order.items.map(i => `
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                                        <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
+                                        <span>￥${i.price * i.count}</span>
+                                    </div>
+                                `).join('')}
+                                <div style="display: flex; justify-content: space-between; color: #6b7280; margin-top: 4px; border-top: 1px dashed #e5e7eb; padding-top: 4px;">
+                                    <span>自提打包费</span><span>￥1.00</span>
                                 </div>
-                            `).join('')}
-                            <div style="display: flex; justify-content: space-between; color: #9ca3af;">
-                                <span>自提打包费</span><span>￥1.00</span>
+                            </div>
+                            <div style="text-align: center; color: #92400e; font-size: 11px;">
+                                商家核验接单后将显示完整取餐凭证
                             </div>
                         </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e5e7eb; padding-top: 6px; font-size: 12px;">
-                            <span style="color: #6b7280;">尾号: ${order.phone}</span>
-                            <span style="font-weight: bold; color: #b45309;">实付: ￥${order.total}</span>
+                        `;
+                    } else {
+                        // 已接单/已出餐状态：展示完整凭证并突显尾号
+                        return `
+                        <div style="border: 2px solid #b45309; border-radius: 12px; padding: 14px; background: #fffbeb; font-size: 12px; display: flex; flex-direction: column; gap: 10px;">
+                            <div style="text-align: center; border-bottom: 1px dashed #f59e0b; padding-bottom: 8px;">
+                                ${isReserve ? `<div style="font-size: 12px; color: #b45309; font-weight: bold; margin-bottom: 2px;">⏰ 预约时间：${order.pickupTime}</div>` : ''}
+                                <div style="font-size: 11px; color: #78350f; font-weight: bold;">[ 订单状态: <span style="color: #b45309; font-size: 14px;">${status}</span> ]</div>
+                                <div style="font-size: 24px; font-weight: 900; color: #b45309; margin-top: 4px; letter-spacing: 1px;">取餐手机尾号: <span style="text-decoration: underline;">${order.phone}</span></div>
+                            </div>
+
+                            <div style="background: #fff; padding: 8px 10px; border-radius: 6px; border: 1px solid #fde68a; color: #78350f; font-weight: bold; font-size: 11px;">
+                                📍 取餐地址：广东白云学院北校区四季轩食堂负一层客家腌面档
+                            </div>
+
+                            <div class="step-container">
+                                <div class="step-line"></div>
+                                <div class="step-item ${step1Class}">
+                                    <div class="step-circle">${step1Class === 'completed' ? '✓' : '1'}</div>
+                                    <div class="step-text">已下单</div>
+                                </div>
+                                <div class="step-item ${step2Class}">
+                                    <div class="step-circle">${step2Class === 'completed' ? '✓' : '2'}</div>
+                                    <div class="step-text">已接单</div>
+                                </div>
+                                <div class="step-item ${step3Class}">
+                                    <div class="step-circle">${step3Class === 'completed' ? '✓' : '3'}</div>
+                                    <div class="step-text">已出餐</div>
+                                </div>
+                            </div>
+
+                            <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #fde68a;">
+                                <div style="font-weight: bold; margin-bottom: 4px; color: #78350f;">流水单号: ${order.id} | 取餐方式：${order.pickupTime || '尽快取餐'}</div>
+                                ${order.items.map(i => `
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                                        <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
+                                        <span>￥${i.price * i.count}</span>
+                                    </div>
+                                `).join('')}
+                                <div style="display: flex; justify-content: space-between; color: #6b7280; margin-top: 4px; border-top: 1px dashed #e5e7eb; padding-top: 4px;">
+                                    <span>自提打包费</span><span>￥1.00</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold;">
+                                <span style="color: #78350f;">核心核对凭证: 尾号 ${order.phone}</span>
+                                <span style="color: #b45309; font-size: 16px;">实付: ￥${order.total}</span>
+                            </div>
                         </div>
-                    </div>
-                `;}).join('');
+                        `;
+                    }
+                }).join('');
 
             } catch (e) {
                 console.error(e);
