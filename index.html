@@ -11,8 +11,15 @@
         
         header { background-color: #b45309; color: #ffffff; padding: 10px 16px; position: sticky; top: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .header-logo { height: 28px; width: auto; object-fit: contain; display: block; }
-        .query-btn { background-color: #78350f; color: #ffffff; border: none; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; line-height: 1.2; }
+        .header-right-btns { display: flex; gap: 8px; align-items: center; }
+        .query-btn { background-color: #78350f; color: #ffffff; border: none; padding: 6px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; line-height: 1.2; }
         
+        /* 开关式切换按钮样式 (Switch Toggle) */
+        .switch-container { display: flex; align-items: center; background: #78350f; padding: 2px 6px; border-radius: 20px; cursor: pointer; font-size: 10px; font-weight: bold; color: #fff; gap: 4px; border: 1px solid #fde68a; }
+        .switch-slider { width: 26px; height: 14px; background: #b45309; border-radius: 10px; position: relative; transition: 0.3s; }
+        .switch-dot { width: 10px; height: 10px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.3s; }
+        .switch-container.checked .switch-dot { left: 14px; }
+
         .notice { background-color: #fef3c7; color: #78350f; font-size: 11px; padding: 10px 16px; border-bottom: 1px solid #fde68a; font-weight: 500; line-height: 1.4; display: flex; flex-direction: column; gap: 6px; position: sticky; top: 48px; z-index: 25; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .notice-top-row { display: flex; justify-content: space-between; align-items: center; }
         .store-status-tag { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; color: #fff; }
@@ -70,14 +77,22 @@
         .step-item.active .step-circle { background: #b45309; color: #fff; box-shadow: 0 0 0 3px rgba(180,83,9,0.15); }
         .step-item.active .step-text { color: #b45309; font-weight: bold; }
         .step-item.completed .step-circle { background: #059669; color: #fff; }
-        .step-item.completed .step-text { color: #059669; }
+        .step-item.completed .step-text { background: #059669; color: #fff; }
     </style>
 </head>
 <body>
     <div id="app">
         <header>
             <img src="https://i.imgs.ovh/2026/10/31/bb2fabef06a8d6f0c5870e2c7d0be375.png" alt="客家腌面 Logo" class="header-logo">
-            <button onclick="openQueryModal()" class="query-btn">查询订单进度<br><span style="font-size:9px; opacity:0.85;">Check Order</span></button>
+            <div class="header-right-btns">
+                <!-- 开关式简繁切换按钮 -->
+                <div id="lang-switch-btn" onclick="toggleLang()" class="switch-container">
+                    <span id="lang-label-zh" style="opacity: 1;">简</span>
+                    <div class="switch-slider"><div class="switch-dot"></div></div>
+                    <span id="lang-label-tc" style="opacity: 0.6;">繁</span>
+                </div>
+                <button onclick="openQueryModal()" class="query-btn"><span id="txt-nav-query">查询订单进度</span><br><span style="font-size:9px; opacity:0.85;">Check Order</span></button>
+            </div>
         </header>
 
         <div id="status-notice" class="notice">
@@ -87,33 +102,33 @@
             </div>
             <div id="capsule-queue-container" class="capsule-queue-box">
                 <span id="capsule-dot" class="capsule-dot" style="background: #10b981;"></span>
-                <span>当前前方还有 <strong id="pending-orders-count" style="color: #10b981;">0</strong> 单制作中 / Orders in queue</span>
+                <span id="txt-queue-status">当前前方还有 <strong id="pending-orders-count" style="color: #10b981;">0</strong> 单制作中 / Orders in queue</span>
             </div>
         </div>
 
         <div class="menu-container">
             <div>
                 <div class="section-title">
-                    <span>营养套餐系列 <span style="font-size:10px; color:#4b5563; font-weight:normal;">/ Combo Meals</span></span>
-                    <span class="section-desc">(可选面/粉/河粉/珍珠粉)</span>
+                    <span><span id="txt-cat-combos">营养套餐系列</span> <span style="font-size:10px; color:#4b5563; font-weight:normal;">/ Combo Meals</span></span>
+                    <span class="section-desc" id="txt-sub-combos">(可选面/粉/河粉/珍珠粉)</span>
                 </div>
                 <div id="combos-list"></div>
             </div>
 
             <div>
-                <div class="section-title"><span>主食系列 <span style="font-size:10px; color:#4b5563; font-weight:normal;">/ Staples</span></span></div>
+                <div class="section-title"><span id="txt-cat-staples">主食系列</span> <span style="font-size:10px; color:#4b5563; font-weight:normal;">/ Staples</span></div>
                 <div id="staples-list" class="item-grid-2"></div>
             </div>
 
             <div>
-                <div class="section-title"><span>靓汤系列 <span style="font-size:10px; color:#4b5563; font-weight:normal;">/ Soups</span></span></div>
+                <div class="section-title"><span id="txt-cat-soups">靓汤系列</span> <span style="font-size:10px; color:#4b5563; font-weight:normal;">/ Soups</span></div>
                 <div id="soups-list" class="item-grid-2"></div>
             </div>
 
             <div>
                 <div class="section-title">
-                    <span>汤粉汤面系列 <span style="font-size:10px; color:#4b5563; font-weight:normal;">/ Noodle Soups</span></span>
-                    <span class="section-desc">(面/米粉/河粉/珍珠粉)</span>
+                    <span><span id="txt-cat-noodlessoups">汤粉汤面系列</span> <span style="font-size:10px; color:#4b5563; font-weight:normal;">/ Noodle Soups</span></span>
+                    <span class="section-desc" id="txt-sub-noodlessoups">(面/米粉/河粉/珍珠粉)</span>
                 </div>
                 <div id="noodlessoups-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
             </div>
@@ -126,8 +141,8 @@
                     <span id="cart-badge" class="cart-badge">0</span>
                 </div>
                 <div>
-                    <div class="cart-total-text">合计 Total: <span id="cart-total">￥0</span></div>
-                    <div class="cart-sub-text">含打包费 Packing Fee: ￥1.00</div>
+                    <div class="cart-total-text"><span id="txt-total-label">合计 Total:</span> <span id="cart-total">￥0</span></div>
+                    <div class="cart-sub-text" id="txt-packing-fee-label">含打包费 Packing Fee: ￥1.00</div>
                 </div>
             </div>
             <button id="checkout-btn" onclick="checkout()" class="checkout-btn" disabled>
@@ -142,18 +157,18 @@
                 <h3 id="spec-title" style="font-size: 14px; font-weight: bold; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;"></h3>
                 
                 <div id="spec-options-container">
-                    <label style="font-size: 11px; font-weight: bold; color: #374151; display: block; margin-bottom: 4px;">选择粉面规格 / Select Noodle Type：</label>
+                    <label id="txt-spec-label" style="font-size: 11px; font-weight: bold; color: #374151; display: block; margin-bottom: 4px;">选择粉面规格 / Select Noodle Type：</label>
                     <div id="spec-options-grid" class="option-grid"></div>
                 </div>
 
                 <div style="font-size: 11px; color: #4b5563; background: #f9fafb; padding: 10px; border-radius: 8px; border: 1px solid #e5e7eb;">
-                    已选规格 Selected: <span id="spec-selected-name" style="color: #b45309; font-weight: bold;"></span><br>
-                    价格 Price: <span id="spec-selected-price" style="color: #b45309; font-weight: bold; font-size: 13px;"></span>
+                    <span id="txt-spec-selected">已选规格 Selected:</span> <span id="spec-selected-name" style="color: #b45309; font-weight: bold;"></span><br>
+                    <span id="txt-spec-price">价格 Price:</span> <span id="spec-selected-price" style="color: #b45309; font-weight: bold; font-size: 13px;"></span>
                 </div>
 
                 <div style="display: flex; gap: 10px; margin-top: 4px;">
-                    <button onclick="closeSpecModal()" style="flex: 1; background: #e5e7eb; color: #374151; border: none; padding: 10px; border-radius: 10px; font-size: 11px; font-weight: bold; cursor: pointer;">取消 Cancel</button>
-                    <button onclick="confirmAddToCart()" class="btn-primary" style="flex: 1; padding: 10px;">加入购物车 Add to Cart</button>
+                    <button onclick="closeSpecModal()" id="txt-btn-cancel" style="flex: 1; background: #e5e7eb; color: #374151; border: none; padding: 10px; border-radius: 10px; font-size: 11px; font-weight: bold; cursor: pointer;">取消 Cancel</button>
+                    <button onclick="confirmAddToCart()" id="txt-btn-addcart" class="btn-primary" style="flex: 1; padding: 10px;">加入购物车 Add to Cart</button>
                 </div>
             </div>
         </div>
@@ -162,22 +177,22 @@
         <div id="cart-modal" class="modal-mask" style="align-items: flex-end; padding: 0;" onclick="if(event.target === this) toggleCartModal()">
             <div class="modal-bottom" style="background: #fff; width: 100%; max-width: 480px; margin: 0 auto; border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">
-                    <span style="font-weight: bold; font-size: 13px;">购物车明细 / Cart Details (到店自提 Pickup)</span>
+                    <span id="txt-cart-title" style="font-weight: bold; font-size: 13px;">购物车明细 / Cart Details (到店自提 Pickup)</span>
                     <button onclick="toggleCartModal()" class="close-x" style="position: static;">✕</button>
                 </div>
                 
                 <div id="cart-items-list" style="max-height: 40vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;"></div>
 
                 <div style="border-top: 1px solid #e5e7eb; padding-top: 10px; font-size: 11px; display: flex; flex-direction: column; gap: 4px;">
-                    <div style="display: flex; justify-content: space-between;"><span>商品金额 Subtotal:</span><span id="cart-goods-amount">￥0</span></div>
-                    <div style="display: flex; justify-content: space-between;"><span>打包费 Packing Fee:</span><span>￥1.00</span></div>
+                    <div style="display: flex; justify-content: space-between;"><span id="txt-cart-subtotal">商品金额 Subtotal:</span><span id="cart-goods-amount">￥0</span></div>
+                    <div style="display: flex; justify-content: space-between;"><span id="txt-cart-packfee">打包费 Packing Fee:</span><span>￥1.00</span></div>
                     <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; color: #111827; padding-top: 4px; border-top: 1px dashed #e5e7eb;">
-                        <span>应付总计 Total:</span>
+                        <span id="txt-cart-grandtotal">应付总计 Total:</span>
                         <span id="cart-final-amount" style="color: #b45309; font-size: 15px;">￥1.00</span>
                     </div>
                 </div>
 
-                <button onclick="checkout()" class="btn-primary" style="padding: 12px; font-size: 13px; border-radius: 12px; width: 100%;">
+                <button onclick="checkout()" id="txt-btn-checkout" class="btn-primary" style="padding: 12px; font-size: 13px; border-radius: 12px; width: 100%;">
                     去结算 Proceed to Checkout
                 </button>
             </div>
@@ -198,7 +213,7 @@
                 </div>
 
                 <div style="text-align: left; background: #fffbeb; padding: 8px 10px; border-radius: 8px; border: 1px solid #fde68a;">
-                    <label style="font-size: 10px; font-weight: bold; color: #78350f; display: block; margin-bottom: 4px;">选择取餐方式 / Select Pickup Mode：</label>
+                    <label id="txt-pay-pickupmode" style="font-size: 10px; font-weight: bold; color: #78350f; display: block; margin-bottom: 4px;">选择取餐方式 / Select Pickup Mode：</label>
                     <div style="display: flex; gap: 8px; margin-bottom: 6px;">
                         <button type="button" id="btn-asap" onclick="setOrderMode('asap')" style="flex: 1; padding: 6px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; border: 1px solid #b45309; background: #b45309; color: #fff;">尽快取餐 ASAP</button>
                         <button type="button" id="btn-reserve" onclick="setOrderMode('reserve')" style="flex: 1; padding: 6px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; border: 1px solid #d1d5db; background: #f3f4f6; color: #374151;">预约时间 Scheduled</button>
@@ -218,11 +233,11 @@
                 </div>
 
                 <div style="text-align: left;">
-                    <label style="font-size: 10px; font-weight: bold; color: #374151; display: block; margin-bottom: 2px;">填写取餐手机尾号 / Phone Suffix (for pickup verification)：</label>
+                    <label id="txt-pay-phonesuffix" style="font-size: 10px; font-weight: bold; color: #374151; display: block; margin-bottom: 2px;">填写取餐手机尾号 / Phone Suffix (for pickup verification)：</label>
                     <input id="customer-phone-input" type="text" placeholder="手机号后4位 Last 4 digits" class="input-box">
                 </div>
 
-                <button onclick="submitOrder()" class="btn-primary" style="padding: 10px; font-size: 12px; border-radius: 10px; width: 100%;">
+                <button onclick="submitOrder()" id="txt-btn-submitserver" class="btn-primary" style="padding: 10px; font-size: 12px; border-radius: 10px; width: 100%;">
                     我已付款并备注，提交订单 Submit Order
                 </button>
             </div>
@@ -241,11 +256,11 @@
         <div id="query-modal" class="modal-mask">
             <div class="modal-box" style="max-height: 85vh;">
                 <button onclick="closeQueryModal()" class="close-x">✕</button>
-                <div style="color: #b45309; font-weight: bold; font-size: 13px; text-align: center; margin-bottom: 4px;">自提订单进度查询 / Order Status Check</div>
+                <div id="txt-query-title" style="color: #b45309; font-weight: bold; font-size: 13px; text-align: center; margin-bottom: 4px;">自提订单进度查询 / Order Status Check</div>
                 
                 <div style="display: flex; gap: 8px;">
                     <input id="search-phone-input" type="text" placeholder="输入手机尾号 Enter Phone Suffix" class="input-box" style="flex: 1;">
-                    <button onclick="searchOrders()" class="btn-primary" style="padding: 8px 12px;">查询 Search</button>
+                    <button onclick="searchOrders()" id="txt-btn-search" class="btn-primary" style="padding: 8px 12px;">查询 Search</button>
                 </div>
 
                 <div id="query-results-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; max-height: 55vh;">
@@ -259,7 +274,183 @@
         const BIN_ID = '6ae586c8ffd5d160539a6da4';
         const MASTER_KEY = '$2a$10$lwmZR3vIjsFdZlgG4.WReOJzFNBqHERsLquMbL42GY/BNEBveQ896';
 
-        // 顾客端商品菜单中英文双语对照配置
+        // 默认语言：简体中文 ('zh')，繁体中文采用香港习惯 ('hk')
+        let currentLang = 'zh';
+
+        const i18n = {
+            zh: {
+                navQuery: "查询订单进度",
+                notice: "提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>Notice: 1 RMB packing fee applies to all pickup orders.<br>营业时间 / Hours: ",
+                storeOpen: "营业中 OPEN",
+                storeClosed: "休息中 CLOSED",
+                queueText: "当前前方还有 ",
+                queueSuffix: " 单制作中 / Orders in queue",
+                catCombos: "营养套餐系列",
+                catStaples: "主食系列",
+                catSoups: "靓汤系列",
+                catNoodleSoups: "汤粉汤面系列",
+                subNoodle: "(可选面/粉/河粉/珍珠粉)",
+                totalLabel: "合计 Total:",
+                packingFeeLabel: "含打包费 Packing Fee: ￥1.00",
+                checkoutBtn: "去结算 Checkout (￥1.00)",
+                specTitleSel: "选择粉面规格 / Select Noodle Type：",
+                specSel: "已选规格 Selected:",
+                specPrice: "价格 Price:",
+                btnCancel: "取消 Cancel",
+                btnAddCart: "加入购物车 Add to Cart",
+                cartTitle: "购物车明细 / Cart Details (到店自提 Pickup)",
+                cartSubtotal: "商品金额 Subtotal:",
+                cartPackFee: "打包费 Packing Fee:",
+                cartGrandTotal: "应付总计 Total:",
+                btnProceedCheckout: "去结算 Proceed to Checkout",
+                payTitle: "客家腌面 Hakka Noodles · 微信收银台 WeChat Pay",
+                payWarning: "⚠️ 请务必先付款后提交 / Pay before submit!",
+                payTip1: "付款时<strong>必须备注您的手机尾号</strong>！手机尾号是订单<strong>唯一核对凭证</strong>，不备注尾号或未付款的订单一律无效！",
+                payTip2: "Please note your <strong>phone number suffix</strong> when paying. It is the only voucher!",
+                payModeLabel: "选择取餐方式 / Select Pickup Mode：",
+                modeAsap: "尽快取餐 ASAP",
+                modeReserve: "预约时间 Scheduled",
+                scanTip: "长按扫描二维码转账 Scan QR to Pay",
+                scanTip2: "务必填写备注信息！Must add remarks!",
+                phoneInputLabel: "填写取餐手机尾号 / Phone Suffix (for pickup verification)：",
+                phonePlaceholder: "手机号后4位 Last 4 digits",
+                btnSubmitOrder: "我已付款并备注，提交订单 Submit Order",
+                queryTitle: "自提订单进度查询 / Order Status Check",
+                queryPlaceholder: "输入手机尾号 Enter Phone Suffix",
+                queryBtn: "查询 Search",
+                queryDefault: "请输入手机号查询 Enter phone suffix to check",
+                refreshBtn: "🔄 手动刷新 Refresh",
+                addrText: "📍 取餐地址 Pickup Address：<br>广东白云学院北校区四季轩食堂负一层客家腌面档<br>",
+                addrSubText: "Hakka Noodles Stall, B1, Sijixuan Canteen, North Campus, Guangdong Baiyun University",
+                step1: "已下单 Ordered",
+                step2: "已接单 Accepted",
+                step3: "已出餐 Served",
+                voucherTag: "核心核对凭证: 尾号",
+                actualPaid: "实付 Total:"
+            },
+            hk: {
+                navQuery: "查詢訂單進度",
+                notice: "提示：店內所有到店自提訂單預設加收 <strong>1蚊打包費</strong>。<br>Notice: 1 RMB packing fee applies to all pickup orders.<br>營業時間 / Hours: ",
+                storeOpen: "營業中 OPEN",
+                storeClosed: "休息中 CLOSED",
+                queueText: "目前前方仲有 ",
+                queueSuffix: " 單製作中 / Orders in queue",
+                catCombos: "營養套餐系列",
+                catStaples: "主食系列",
+                catSoups: "靚湯系列",
+                catNoodleSoups: "湯粉湯麵系列",
+                subNoodle: "(可選麵/粉/河粉/珍珠粉)",
+                totalLabel: "合計 Total:",
+                packingFeeLabel: "含打包費 Packing Fee: ￥1.00",
+                checkoutBtn: "去結算 Checkout (￥1.00)",
+                specTitleSel: "選擇粉麵規格 / Select Noodle Type：",
+                specSel: "已選規格 Selected:",
+                specPrice: "價格 Price:",
+                btnCancel: "取消 Cancel",
+                btnAddCart: "加入購物車 Add to Cart",
+                cartTitle: "購物車明細 / Cart Details (到店自提 Pickup)",
+                cartSubtotal: "商品金額 Subtotal:",
+                cartPackFee: "打包費 Packing Fee:",
+                cartGrandTotal: "應付總計 Total:",
+                btnProceedCheckout: "去結算 Proceed to Checkout",
+                payTitle: "客家醃麵 Hakka Noodles · 微信收銀台 WeChat Pay",
+                payWarning: "⚠️ 請務必先付款後提交 / Pay before submit!",
+                payTip1: "付款時<strong>必須備註您的手機尾號</strong>！手機尾號係訂單<strong>唯一核對憑證</strong>，唔備註尾號或未付款嘅訂單一律無效！",
+                payTip2: "Please note your <strong>phone number suffix</strong> when paying. It is the only voucher!",
+                payModeLabel: "選擇取餐方式 / Select Pickup Mode：",
+                modeAsap: "儘快取餐 ASAP",
+                modeReserve: "預約時間 Scheduled",
+                scanTip: "長按掃描二維碼轉賬 Scan QR to Pay",
+                scanTip2: "務必填寫備註信息！Must add remarks!",
+                phoneInputLabel: "填寫取餐手機尾號 / Phone Suffix (for pickup verification)：",
+                phonePlaceholder: "手機號後4位 Last 4 digits",
+                btnSubmitOrder: "我已付款並備註，提交訂單 Submit Order",
+                queryTitle: "自提訂單進度查詢 / Order Status Check",
+                queryPlaceholder: "輸入手機尾號 Enter Phone Suffix",
+                queryBtn: "查詢 Search",
+                queryDefault: "請輸入手機號查詢 Enter phone suffix to check",
+                refreshBtn: "🔄 手動刷新 Refresh",
+                addrText: "📍 取餐地址 Pickup Address：<br>廣東白雲學院北校區四季軒食堂負一層客家醃麵檔<br>",
+                addrSubText: "Hakka Noodles Stall, B1, Sijixuan Canteen, North Campus, Guangdong Baiyun University",
+                step1: "已落單 Ordered",
+                step2: "已接單 Accepted",
+                step3: "已出餐 Served",
+                voucherTag: "核心核對憑證: 尾號",
+                actualPaid: "實付 Total:"
+            }
+        };
+
+        // 香港繁体字习惯映射字典
+        const hkMap = {
+            "紫菜蛋花汤套餐": "紫菜蛋花湯套餐", "番茄蛋花汤套餐": "番茄蛋花湯套餐", "枸杞叶三及第汤套餐": "枸杞葉三及第湯套餐", "枸杞叶瘦肉汤套餐": "枸杞葉瘦肉湯套餐",
+            "酸菜瘦肉汤套餐": "酸菜瘦肉湯套餐", "枸杞叶猪肉丸汤套餐": "枸杞葉豬肉丸湯套餐", "枸杞叶牛肉丸汤套餐": "枸杞葉牛肉丸湯套餐", "酸菜牛肉丸汤套餐": "酸菜牛肉丸湯套餐",
+            "客家腌面": "客家醃麵", "客家腌米粉": "客家醃米粉", "客家腌河粉": "客家醃河粉", "客家腌珍珠粉": "客家醃珍珠粉",
+            "紫菜蛋花汤": "紫菜蛋花湯", "番茄蛋花汤": "番茄蛋花湯", "枸杞叶三及第汤": "枸杞葉三及第湯", "枸杞叶瘦肉汤": "枸杞葉瘦肉湯",
+            "酸菜瘦肉汤": "酸菜瘦肉湯", "枸杞叶猪肉丸汤": "枸杞葉豬肉丸湯", "枸杞叶牛肉丸汤": "枸杞葉牛肉丸湯", "酸菜牛肉丸汤": "酸菜牛肉丸湯",
+            "招牌猪杂汤粉面": "招牌豬雜湯粉麵", "猪肉丸瘦肉汤粉面": "豬肉丸瘦肉湯粉麵", "牛肉丸牛肉汤粉面": "牛肉丸牛肉湯粉麵",
+            "常规 Regular": "常規 Regular", "面条 Noodles": "麵條 Noodles", "米粉 Rice Noodles": "米粉 Rice Noodles", "河粉 Flat Noodles": "河粉 Flat Noodles", "珍珠粉 Pearl Noodles": "珍珠粉 Pearl Noodles",
+            "腌面 Hakka Noodles": "醃麵 Hakka Noodles", "腌米粉 Rice Noodles": "醃米粉 Rice Noodles", "腌河粉 Flat Rice Noodles": "醃河粉 Flat Rice Noodles", "腌珍珠粉 Pearl Noodles": "醃珍珠粉 Pearl Noodles",
+            "小份 Small": "小份 Small", "大份 Large": "大份 Large", "售罄 Sold Out": "售罄 Sold Out", "休息中 Closed": "休息中 Closed", "选规格 Spec": "選規格 Spec", "+ 选购 Add": "+ 選購 Add"
+        };
+
+        function t(key) {
+            return i18n[currentLang][key] || key;
+        }
+
+        function tMenu(str) {
+            if (currentLang === 'hk') {
+                return hkMap[str] || str;
+            }
+            return str;
+        }
+
+        function toggleLang() {
+            currentLang = currentLang === 'zh' ? 'hk' : 'zh';
+            const slider = document.getElementById('lang-switch-btn');
+            const lblZh = document.getElementById('lang-label-zh');
+            const lblTc = document.getElementById('lang-label-tc');
+
+            if (currentLang === 'hk') {
+                slider.classList.add('checked');
+                lblZh.style.opacity = '0.6';
+                lblTc.style.opacity = '1';
+            } else {
+                slider.classList.remove('checked');
+                lblZh.style.opacity = '1';
+                lblTc.style.opacity = '0.6';
+            }
+            
+            document.getElementById('txt-nav-query').innerText = t('navQuery');
+            document.getElementById('txt-cat-combos').innerText = t('catCombos');
+            document.getElementById('txt-cat-staples').innerText = t('catStaples');
+            document.getElementById('txt-cat-soups').innerText = t('catSoups');
+            document.getElementById('txt-cat-noodlessoups').innerText = t('catNoodleSoups');
+            document.getElementById('txt-sub-combos').innerText = t('subNoodle');
+            document.getElementById('txt-sub-noodlessoups').innerText = t('subNoodle');
+            document.getElementById('txt-total-label').innerText = t('totalLabel');
+            document.getElementById('txt-packing-fee-label').innerText = t('packingFeeLabel');
+            document.getElementById('txt-spec-label').innerText = t('specTitleSel');
+            document.getElementById('txt-spec-selected').innerText = t('specSel');
+            document.getElementById('txt-spec-price').innerText = t('specPrice');
+            document.getElementById('txt-btn-cancel').innerText = t('btnCancel');
+            document.getElementById('txt-btn-addcart').innerText = t('btnAddCart');
+            document.getElementById('txt-cart-title').innerText = t('cartTitle');
+            document.getElementById('txt-cart-subtotal').innerText = t('cartSubtotal');
+            document.getElementById('txt-cart-packfee').innerText = t('cartPackFee');
+            document.getElementById('txt-cart-grandtotal').innerText = t('cartGrandTotal');
+            document.getElementById('txt-btn-checkout').innerText = t('btnProceedCheckout');
+            document.getElementById('txt-pay-pickupmode').innerText = t('payModeLabel');
+            document.getElementById('txt-pay-phonesuffix').innerText = t('phoneInputLabel');
+            document.getElementById('txt-btn-submitserver').innerText = t('btnSubmitOrder');
+            document.getElementById('txt-query-title').innerText = t('queryTitle');
+            document.getElementById('search-phone-input').placeholder = t('queryPlaceholder');
+            document.getElementById('txt-btn-search').innerText = t('queryBtn');
+
+            checkStoreTime();
+            renderMenu();
+            updateCartUI();
+        }
+
         const menuData = {
             combos: [
                 { name: '紫菜蛋花汤套餐', nameEn: 'Seaweed Egg Soup Combo', priceSmall: 11, priceBig: 13, options: ['腌面 Hakka Noodles', '腌米粉 Rice Noodles', '腌河粉 Flat Rice Noodles', '腌珍珠粉 Pearl Noodles'] },
@@ -375,17 +566,17 @@
 
             if (storeControl.manualClosed || currentHourMin < startTime || currentHourMin > endTime) {
                 isStoreOpen = false;
-                statusTag.innerText = '休息中 CLOSED';
+                statusTag.innerText = t('storeClosed');
                 statusTag.style.background = '#d97706';
             } else {
                 isStoreOpen = true;
-                statusTag.innerText = '营业中 OPEN';
+                statusTag.innerText = t('storeOpen');
                 statusTag.style.background = '#10b981';
             }
 
-            let textInfo = `提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>Notice: 1 RMB packing fee applies to pickup.<br>营业时间 / Hours: ${startTime} ~ ${endTime}`;
+            let textInfo = t('notice') + `${startTime} ~ ${endTime}`;
             if (storeControl.manualClosed) {
-                textInfo = `<strong>[本店已休息 Store Closed]</strong> 当前无法下单！`;
+                textInfo = `<strong>[${t('storeClosed')}]</strong> 当前无法下单！`;
             } else if (!isStoreOpen) {
                 textInfo = `<strong>[不在营业时间内 Out of Hours]</strong> (${startTime} ~ ${endTime})`;
             }
@@ -405,6 +596,8 @@
             const countEl = document.getElementById('pending-orders-count');
             const dotEl = document.getElementById('capsule-dot');
             countEl.innerText = totalPending;
+            
+            document.getElementById('txt-queue-status').innerHTML = `${t('queueText')}<strong id="pending-orders-count" style="color: inherit;">${totalPending}</strong>${t('queueSuffix')}`;
 
             if (totalPending <= 5) {
                 dotEl.style.background = '#10b981';
@@ -482,16 +675,17 @@
                 const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 50;
                 const isSoldOut = stock <= 0 || !isStoreOpen;
                 const sigTag = item.signature ? `<span class="badge-signature">🔥 招牌 Signature</span>` : '';
+                const displayName = tMenu(item.name);
                 return `
                 <div class="item-card">
                     <div class="item-info">
-                        <h3>${item.name} ${sigTag}</h3>
+                        <h3>${displayName} ${sigTag}</h3>
                         <p style="font-size:10px; color:#4b5563;">${item.nameEn}</p>
                         <p>库存 Stock: <span style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">${stock}</span></p>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 6px;">
-                        <button onclick="openSpecModal('combos', ${idx}, 'small')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中 Closed' : (stock <= 0 ? '售罄 Sold Out' : '小份 Small ￥' + item.priceSmall)}</button>
-                        <button onclick="openSpecModal('combos', ${idx}, 'big')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中 Closed' : (stock <= 0 ? '售罄 Sold Out' : '大份 Large ￥' + item.priceBig)}</button>
+                        <button onclick="openSpecModal('combos', ${idx}, 'small')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? t('storeClosed') : (stock <= 0 ? '售罄' : '小份 Small ￥' + item.priceSmall)}</button>
+                        <button onclick="openSpecModal('combos', ${idx}, 'big')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? t('storeClosed') : (stock <= 0 ? '售罄' : '大份 Large ￥' + item.priceBig)}</button>
                     </div>
                 </div>
             `;}).join('');
@@ -499,10 +693,11 @@
             document.getElementById('staples-list').innerHTML = menuData.staples.map((item, idx) => {
                 const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 100;
                 const isSoldOut = stock <= 0 || !isStoreOpen;
+                const displayName = tMenu(item.name);
                 return `
                 <div class="grid-card">
                     <div class="item-info">
-                        <h3>${item.name}</h3>
+                        <h3>${displayName}</h3>
                         <p style="font-size:9px; color:#4b5563;">${item.nameEn}</p>
                         <p style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">库存 Stock: ${stock}</p>
                     </div>
@@ -516,10 +711,11 @@
             document.getElementById('soups-list').innerHTML = menuData.soups.map((item, idx) => {
                 const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 40;
                 const isSoldOut = stock <= 0 || !isStoreOpen;
+                const displayName = tMenu(item.name);
                 return `
                 <div class="grid-card">
                     <div class="item-info">
-                        <h3>${item.name}</h3>
+                        <h3>${displayName}</h3>
                         <p style="font-size:9px; color:#4b5563;">${item.nameEn}</p>
                         <p style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">库存 Stock: ${stock}</p>
                     </div>
@@ -533,16 +729,17 @@
             document.getElementById('noodlessoups-list').innerHTML = menuData.noodlessoups.map((item, idx) => {
                 const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 40;
                 const isSoldOut = stock <= 0 || !isStoreOpen;
+                const displayName = tMenu(item.name);
                 return `
                 <div class="item-card">
                     <div class="item-info">
-                        <h3>${item.name}</h3>
+                        <h3>${displayName}</h3>
                         <p style="font-size:10px; color:#4b5563;">${item.nameEn}</p>
                         <p>库存 Stock: <span style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">${stock}</span></p>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 6px;">
-                        <button onclick="openSpecModal('noodlessoups', ${idx}, 'small')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '小份 Small ￥' + item.priceSmall)}</button>
-                        <button onclick="openSpecModal('noodlessoups', ${idx}, 'big')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '大份 Large ￥' + item.priceBig)}</button>
+                        <button onclick="openSpecModal('noodlessoups', ${idx}, 'small')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? t('storeClosed') : (stock <= 0 ? '售罄' : '小份 Small ￥' + item.priceSmall)}</button>
+                        <button onclick="openSpecModal('noodlessoups', ${idx}, 'big')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? t('storeClosed') : (stock <= 0 ? '售罄' : '大份 Large ￥' + item.priceBig)}</button>
                     </div>
                 </div>
             `;}).join('');
@@ -562,13 +759,13 @@
             currentSpecType = specType;
             currentOption = currentActiveItem.options ? currentActiveItem.options[0] : '';
 
-            document.getElementById('spec-title').innerText = `${currentActiveItem.name} / ${currentActiveItem.nameEn}`;
+            document.getElementById('spec-title').innerText = `${tMenu(currentActiveItem.name)} / ${currentActiveItem.nameEn}`;
             
             const optionsContainer = document.getElementById('spec-options-container');
             if (currentActiveItem.options && currentActiveItem.options.length > 0) {
                 optionsContainer.style.display = 'block';
                 document.getElementById('spec-options-grid').innerHTML = currentActiveItem.options.map(opt => `
-                    <div onclick="selectOption('${opt}')" id="opt-${opt}" class="option-btn ${opt === currentOption ? 'active' : ''}">${opt}</div>
+                    <div onclick="selectOption('${opt}')" id="opt-${opt}" class="option-btn ${opt === currentOption ? 'active' : ''}">${tMenu(opt)}</div>
                 `).join('');
             } else {
                 optionsContainer.style.display = 'none';
@@ -590,7 +787,7 @@
         function updateSpecModalDisplay() {
             const price = currentSpecType === 'small' ? currentActiveItem.priceSmall : currentActiveItem.priceBig;
             const sizeName = currentSpecType === 'small' ? '小份 Small' : '大份 Large';
-            const fullName = currentOption ? `${sizeName} (${currentOption})` : sizeName;
+            const fullName = currentOption ? `${sizeName} (${tMenu(currentOption)})` : sizeName;
             
             document.getElementById('spec-selected-name').innerText = fullName;
             document.getElementById('spec-selected-price').innerText = '￥' + price;
@@ -604,7 +801,7 @@
             const stock = cloudStocks[currentActiveItem.name] !== undefined ? cloudStocks[currentActiveItem.name] : 50;
             const price = currentSpecType === 'small' ? currentActiveItem.priceSmall : currentActiveItem.priceBig;
             const sizeName = currentSpecType === 'small' ? '小份 Small' : '大份 Large';
-            const fullName = currentOption ? `${sizeName} (${currentOption})` : sizeName;
+            const fullName = currentOption ? `${sizeName} (${tMenu(currentOption)})` : sizeName;
 
             const existing = cart.find(i => i.name === currentActiveItem.name && i.spec === fullName);
             const currentCountInCart = existing ? existing.count : 0;
@@ -689,7 +886,7 @@
             document.getElementById('cart-items-list').innerHTML = cart.map((item, idx) => `
                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; border-bottom: 1px solid #f3f4f6; padding-bottom: 8px;">
                     <div>
-                        <div style="font-weight: bold;">${item.name} <span style="color: #b45309;">(${item.spec})</span></div>
+                        <div style="font-weight: bold;">${tMenu(item.name)} <span style="color: #b45309;">(${item.spec})</span></div>
                         <div style="color: #6b7280; font-size: 10px;">${item.nameEn} | ￥${item.price}</div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px;">
@@ -764,7 +961,7 @@
                 for (let item of cart) {
                     let stock = remoteStocks[item.name] !== undefined ? remoteStocks[item.name] : 50;
                     if (stock < item.count) {
-                        alert(`商品 [${item.name}] 库存不足！\nInsufficient stock.`);
+                        alert(`商品 [${tMenu(item.name)}] 库存不足！\nInsufficient stock.`);
                         return;
                     }
                     remoteStocks[item.name] = stock - item.count;
@@ -870,7 +1067,7 @@
                                 <div style="font-weight: bold; margin-bottom: 4px; color: #78350f;">流水单号 Order ID: ${order.id} | 登记尾号 Suffix: ${order.phone}</div>
                                 ${order.items.map(i => `
                                     <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
-                                        <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
+                                        <span>${tMenu(i.name)} (${i.spec || '标配'}) x${i.count}</span>
                                         <span>￥${i.price * i.count}</span>
                                     </div>
                                 `).join('')}
@@ -891,7 +1088,7 @@
                                     `<div style="font-size: 12px; color: #b45309; font-weight: bold; margin-bottom: 4px;">⏰ 预约取餐时间 Scheduled: ${order.pickupTime}</div>` : 
                                     `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; padding: 0 4px;">
                                         <span style="font-size: 11px; color: #065f46; font-weight: bold;">前方还有 <strong style="font-size: 13px; color: #dc2626;">${totalPending}</strong> 单制作中 / Queue</span>
-                                        <button id="modal-refresh-btn" onclick="manualRefreshDetail()" class="refresh-queue-btn">🔄 刷新 Refresh</button>
+                                        <button id="modal-refresh-btn" onclick="manualRefreshDetail()" class="refresh-queue-btn">🔄 刷新</button>
                                      </div>`
                                 }
                                 <div style="font-size: 10px; color: #047857;">[ 订单状态 Status: <span style="font-weight: bold; font-size: 12px; color: #047857;">${status}</span> ]</div>
@@ -899,23 +1096,22 @@
                             </div>
 
                             <div style="background: #fff; padding: 8px 10px; border-radius: 6px; border: 1px solid #a7f3d0; color: #065f46; font-weight: bold; font-size: 10px;">
-                                📍 取餐地址 Pickup Address：<br>广东白云学院北校区四季轩食堂负一层客家腌面档<br>
-                                <span style="font-size:9px; font-weight:normal; color:#047857;">Hakka Noodles Stall, B1, Sijixuan Canteen, North Campus, Guangdong Baiyun University</span>
+                                ${t('addrText')}<span style="font-size:9px; font-weight:normal; color:#047857;">${t('addrSubText')}</span>
                             </div>
 
                             <div class="step-container">
                                 <div class="step-line"></div>
                                 <div class="step-item ${step1Class}">
                                     <div class="step-circle">${step1Class === 'completed' ? '✓' : '1'}</div>
-                                    <div class="step-text">已下单 Ordered</div>
+                                    <div class="step-text">${t('step1')}</div>
                                 </div>
                                 <div class="step-item ${step2Class}">
                                     <div class="step-circle">${step2Class === 'completed' ? '✓' : '2'}</div>
-                                    <div class="step-text">已接单 Accepted</div>
+                                    <div class="step-text">${t('step2')}</div>
                                 </div>
                                 <div class="step-item ${step3Class}">
                                     <div class="step-circle">${step3Class === 'completed' ? '✓' : '3'}</div>
-                                    <div class="step-text">已出餐 Served</div>
+                                    <div class="step-text">${t('step3')}</div>
                                 </div>
                             </div>
 
@@ -923,7 +1119,7 @@
                                 <div style="font-weight: bold; margin-bottom: 4px; color: #065f46;">流水号 ID: ${order.id} | 类型 Type: ${order.pickupTime || '尽快取餐'}</div>
                                 ${order.items.map(i => `
                                     <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
-                                        <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
+                                        <span>${tMenu(i.name)} (${i.spec || '标配'}) x${i.count}</span>
                                         <span>￥${i.price * i.count}</span>
                                     </div>
                                 `).join('')}
@@ -932,8 +1128,8 @@
                                 </div>
                             </div>
                             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold;">
-                                <span style="color: #065f46;">凭证 Voucher: 尾号 ${order.phone}</span>
-                                <span style="color: #b45309; font-size: 15px;">实付 Total: ￥${order.total}</span>
+                                <span style="color: #065f46;">${t('voucherTag')} ${order.phone}</span>
+                                <span style="color: #b45309; font-size: 15px;">${t('actualPaid')} ￥${order.total}</span>
                             </div>
                         </div>
                     `;
@@ -1008,13 +1204,13 @@
                         <div style="border: 2px solid #f59e0b; border-radius: 12px; padding: 14px; background: #fffbeb; font-size: 11px; display: flex; flex-direction: column; gap: 10px;">
                             <div style="text-align: center; border-bottom: 1px dashed #fde68a; padding-bottom: 8px;">
                                 <div style="font-size: 10px; color: #78350f; font-weight: bold;">[ 订单状态 Status: <span style="color: #b45309; font-size: 13px;">${status} (等待商家核验 Pending)</span> ]</div>
-                                <div style="font-size: 14px; font-weight: bold; color: #b45309; margin-top: 4px;">流水号 Order ID: ${order.id}</div>
+                                <div style="font-size: 14px; font-weight: bold; color: #b45309; margin-top: 4px;">流水单号 Order ID: ${order.id}</div>
                             </div>
                             <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #fde68a;">
                                 <div style="font-weight: bold; margin-bottom: 4px; color: #78350f;">登记尾号 Suffix: ${order.phone}</div>
                                 ${order.items.map(i => `
                                     <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
-                                        <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
+                                        <span>${tMenu(i.name)} (${i.spec || '标配'}) x${i.count}</span>
                                         <span>￥${i.price * i.count}</span>
                                     </div>
                                 `).join('')}
@@ -1033,26 +1229,26 @@
                             <div style="text-align: center; border-bottom: 1px dashed #f59e0b; padding-bottom: 8px;">
                                 ${isReserve ? `<div style="font-size: 11px; color: #b45309; font-weight: bold; margin-bottom: 2px;">⏰ 预约时间 Scheduled: ${order.pickupTime}</div>` : ''}
                                 <div style="font-size: 10px; color: #78350f; font-weight: bold;">[ 订单状态 Status: <span style="color: #b45309; font-size: 13px;">${status}</span> ]</div>
-                                <div style="font-size: 22px; font-weight: 900; color: #b45309; margin-top: 4px; letter-spacing: 1px;">取餐手机尾号 Suffix: <span style="text-decoration: underline;">${order.phone}</span></div>
+                                <div style="font-size: 22px; font-weight: 900; color: #b45309; margin-top: 4px; letter-spacing: 1px;">取餐手机尾号 Phone Suffix: <span style="text-decoration: underline;">${order.phone}</span></div>
                             </div>
 
                             <div style="background: #fff; padding: 8px 10px; border-radius: 6px; border: 1px solid #fde68a; color: #78350f; font-weight: bold; font-size: 10px;">
-                                📍 取餐地址 Pickup Address：<br>广东白云学院北校区四季轩食堂负一层客家腌面档
+                                ${t('addrText')}<span style="font-size:9px; font-weight:normal; color:#78350f;">${t('addrSubText')}</span>
                             </div>
 
                             <div class="step-container">
                                 <div class="step-line"></div>
                                 <div class="step-item ${step1Class}">
                                     <div class="step-circle">${step1Class === 'completed' ? '✓' : '1'}</div>
-                                    <div class="step-text">已下单 Ordered</div>
+                                    <div class="step-text">${t('step1')}</div>
                                 </div>
                                 <div class="step-item ${step2Class}">
                                     <div class="step-circle">${step2Class === 'completed' ? '✓' : '2'}</div>
-                                    <div class="step-text">已接单 Accepted</div>
+                                    <div class="step-text">${t('step2')}</div>
                                 </div>
                                 <div class="step-item ${step3Class}">
                                     <div class="step-circle">${step3Class === 'completed' ? '✓' : '3'}</div>
-                                    <div class="step-text">已出餐 Served</div>
+                                    <div class="step-text">${t('step3')}</div>
                                 </div>
                             </div>
 
@@ -1060,7 +1256,7 @@
                                 <div style="font-weight: bold; margin-bottom: 4px; color: #78350f;">流水号 ID: ${order.id} | 类型 Type: ${order.pickupTime || '尽快取餐'}</div>
                                 ${order.items.map(i => `
                                     <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
-                                        <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
+                                        <span>${tMenu(i.name)} (${i.spec || '标配'}) x${i.count}</span>
                                         <span>￥${i.price * i.count}</span>
                                     </div>
                                 `).join('')}
@@ -1069,8 +1265,8 @@
                                 </div>
                             </div>
                             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold;">
-                                <span style="color: #78350f;">核对凭证 Voucher: 尾号 ${order.phone}</span>
-                                <span style="color: #b45309; font-size: 15px;">实付 Total: ￥${order.total}</span>
+                                <span style="color: #78350f;">${t('voucherTag')} ${order.phone}</span>
+                                <span style="color: #b45309; font-size: 15px;">${t('actualPaid')} ￥${order.total}</span>
                             </div>
                         </div>
                         `;
