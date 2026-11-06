@@ -6,8 +6,19 @@
     <title>客家腌面 - 商家后台与堂食点单系统</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background-color: #f3f4f6; color: #1f2937; min-height: 100vh; font-size: 14px; display: flex; justify-content: center; }
+        body { background-color: #f3f4f6; color: #1f2937; min-height: 100vh; font-size: 14px; display: flex; justify-content: center; transition: font-size 0.2s; }
         
+        body.font-level-1 { font-size: 14px !important; }
+        body.font-level-2 { font-size: 15.5px !important; }
+        body.font-level-3 { font-size: 17px !important; }
+        body.font-level-4 { font-size: 18.5px !important; }
+        body.font-level-5 { font-size: 20px !important; }
+
+        body[class*="font-level-"] .card h3 { font-size: calc(13px + (var(--font-lvl, 1) - 1) * 1.5px) !important; }
+        body[class*="font-level-"] .btn-primary, 
+        body[class*="font-level-"] .nav-btn, 
+        body[class*="font-level-"] .input-box { font-size: calc(12px + (var(--font-lvl, 1) - 1) * 1.2px) !important; }
+
         #app { width: 100%; max-width: 480px; background-color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; position: relative; padding-bottom: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
         @media (min-width: 1024px) {
@@ -24,7 +35,7 @@
         .header-logo { height: 32px; width: auto; object-fit: contain; display: block; }
         .header-title-text { font-size: 16px; font-weight: bold; color: #fff; }
 
-        .nav-buttons { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+        .nav-buttons { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
         .nav-btn { background: #78350f; color: #fff; border: none; padding: 7px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
         
         .tab-bar { display: flex; background: #fffbeb; border-bottom: 1px solid #fde68a; }
@@ -32,7 +43,7 @@
         .tab-item.active { border-bottom-color: #b45309; background: #fff; }
 
         .content-box { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-        .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .card h3 { font-size: 13px; font-weight: bold; color: #111827; margin-bottom: 4px; border-left: 3px solid #b45309; padding-left: 6px; }
 
         .input-box { width: 100%; border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px; font-size: 12px; outline: none; margin-top: 2px; }
@@ -41,21 +52,39 @@
         .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; }
         .footer-copyright { text-align: center; font-size: 12px; color: #9ca3af; padding: 10px 0; border-top: 1px solid #f3f4f6; }
 
-        /* 更加紧凑的卡片网格 */
         .dinein-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 4px; }
         .dinein-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 6px 8px; display: flex; flex-direction: column; justify-content: space-between; gap: 2px; cursor: pointer; transition: all 0.2s; }
         .dinein-item:hover { border-color: #16a34a; background: #f0fdf4; }
 
         #print-ticket { display: none; }
+        
         @media print {
-            body * { visibility: hidden; }
-            #print-ticket, #print-ticket * { visibility: visible; }
-            #print-ticket { position: absolute; left: 0; top: 0; width: 58mm; display: block !important; font-family: monospace; font-size: 12px; color: #000; padding: 4px; background: #fff; }
-            .page-break { page-break-after: always; break-after: page; }
+            body > *:not(#print-ticket) { display: none !important; }
+            #print-ticket {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 58mm !important;
+                margin: 0 !important;
+                padding: 2mm !important;
+                font-family: monospace !important;
+                font-size: 11px !important;
+                line-height: 1.2 !important;
+                color: #000 !important;
+                background: #fff !important;
+            }
+            .page-break {
+                page-break-after: always !important;
+                break-after: page !important;
+                margin-top: 10mm !important;
+                margin-bottom: 10mm !important;
+                border-top: 1px dashed #000 !important;
+            }
         }
     </style>
 </head>
-<body>
+<body class="font-level-1">
     <div id="app">
         <!-- 登录弹窗 -->
         <div id="login-modal" class="modal-mask">
@@ -79,6 +108,7 @@
                 <span class="header-title-text">订单管理系统</span>
             </div>
             <div class="nav-buttons">
+                <button id="font-scale-btn" onclick="cycleFontSize()" class="nav-btn" style="background:#d97706;">🔍 页面大小: 默认</button>
                 <button id="export-modal-btn" class="nav-btn" style="background:#059669;">导出流水</button>
                 <button id="save-btn" class="nav-btn">保存云端</button>
                 <button id="logout-btn" class="nav-btn" style="background:#dc2626;">退出</button>
@@ -135,10 +165,8 @@
             </div>
         </div>
 
-        <!-- 2. 堂食柜台点单页面 (卡片精简压缩，不再过长) -->
+        <!-- 2. 堂食柜台点单页面 -->
         <div id="panel-dinein" class="pc-dinein-workspace content-box" style="display: none; background: #f3f4f6; padding: 0;">
-            
-            <!-- 左侧列：极速点单面板 (高度紧凑) -->
             <div class="pc-col-left content-box" style="padding: 12px; background: #fff; height: 100%; display: flex; flex-direction: column; gap: 8px;">
                 <div class="card" style="margin: 0;">
                     <h3>堂食快速点单</h3>
@@ -169,9 +197,7 @@
                 </div>
             </div>
 
-            <!-- 右侧列：上下平分堂食流水与线上监控 -->
             <div class="pc-col-right content-box" style="padding: 12px; background: #fff; height: 100%; display: flex; flex-direction: column; gap: 10px;">
-                
                 <div class="card" style="margin: 0; flex: 1; display: flex; flex-direction: column; min-height: 0;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
                         <h3 style="border-left-color: #16a34a; margin-bottom: 0;">堂食柜台实时流水</h3>
@@ -187,9 +213,7 @@
                     </div>
                     <div id="dinein-side-online-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-top: 4px;"></div>
                 </div>
-
             </div>
-
         </div>
 
         <!-- 3. 营业与库存控制面板 -->
@@ -237,7 +261,7 @@
         </div>
     </div>
 
-    <!-- 堂食规格选择弹窗 (精简压缩，防止过长) -->
+    <!-- 堂食规格选择弹窗 -->
     <div id="dinein-spec-modal" class="modal-mask" style="display: none;">
         <div style="background: #fff; width: 100%; max-width: 300px; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px;">
             <h3 id="dinein-spec-title" style="font-size: 13px; font-weight: bold; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px;"></h3>
@@ -293,6 +317,7 @@
         </div>
     </div>
 
+    <!-- 票据打印专用容器 -->
     <div id="print-ticket"></div>
 
     <script>
@@ -345,6 +370,7 @@
         let currentDineInItem = null;
         let currentDineInSpec = 'small';
         let currentDineInOpt = '';
+        let currentFontLevel = 1;
 
         const defaultMenuStructure = [
             '紫菜蛋花汤套餐', '番茄蛋花汤套餐', '枸杞叶三及第汤套餐', '枸杞叶瘦肉汤套餐', 
@@ -354,6 +380,19 @@
             '枸杞叶猪肉丸汤', '枸杞叶牛肉丸汤', '酸菜牛肉丸汤',
             '猪杂汤', '猪肉丸瘦肉汤', '牛肉丸牛肉汤'
         ];
+
+        function cycleFontSize() {
+            const body = document.body;
+            const btn = document.getElementById('font-scale-btn');
+            body.classList.remove(`font-level-${currentFontLevel}`);
+            currentFontLevel = currentFontLevel >= 5 ? 1 : currentFontLevel + 1;
+            body.classList.add(`font-level-${currentFontLevel}`);
+            body.style.setProperty('--font-lvl', currentFontLevel);
+
+            const levelNames = ['默认', '中号', '大号', '超大', '特大'];
+            btn.innerText = `🔍 页面大小: ${levelNames[currentFontLevel - 1]}`;
+            localStorage.setItem('admin_font_level', currentFontLevel);
+        }
 
         function handleLogin() {
             const u = document.getElementById('login-user').value.trim();
@@ -632,6 +671,7 @@
             renderDineInCart();
         }
 
+        // 取餐号范围修改为 001-999 循环
         async function submitDineInOrder() {
             if (dineInCart.length === 0) {
                 alert('请先选择堂食菜品！');
@@ -659,10 +699,13 @@
 
                 const totalAmount = dineInCart.reduce((s, i) => s + i.price * i.count, 0);
 
-                let seqNumber = 0;
+                let seqNumber = 1; // 默认从001开始
                 if (remoteDineInOrders.length > 0) {
                     let lastNo = parseInt(remoteDineInOrders[0].mealNo) || 0;
-                    seqNumber = (lastNo + 1) % 1000;
+                    seqNumber = lastNo + 1;
+                    if (seqNumber > 999) {
+                        seqNumber = 1; // 超过999循环回到001
+                    }
                 }
                 const mealNoStr = String(seqNumber).padStart(3, '0');
 
@@ -693,7 +736,6 @@
                 });
 
                 cloudData.dineInOrders = remoteDineInOrders;
-                
                 printDineInTicket(newDineInOrder);
 
                 alert(`堂食订单下单成功！取餐号：【 ${mealNoStr} 】`);
@@ -745,40 +787,93 @@
             }
         }
 
+        // 堂食取餐小票（包含中英文对照）
         function printDineInTicket(order) {
-            const singleTicketHtml = (titleTag) => `
+            const singleTicketHtml = (titleTag, titleEn) => `
                 <div style="text-align:center; margin-bottom:4px;">
                     <img src="${LOGO_URL}" alt="Logo" style="width:28mm; height:auto; display:block; margin:0 auto 2px auto;" />
                 </div>
-                <div style="text-align:center; font-size:11px; font-weight:bold; margin-bottom:4px; border:1px solid #000; padding:2px 0;">[ 堂食点单凭证 - ${titleTag} ]</div>
+                <div style="text-align:center; font-size:11px; font-weight:bold; margin-bottom:4px; border:1px solid #000; padding:3px 0;">
+                    [ 堂食凭证 / DINE-IN ]<br>${titleTag} / ${titleEn}
+                </div>
                 
                 <div style="border: 3px solid #000; padding: 6px; margin-bottom: 6px; text-align: center;">
-                    <div style="font-size: 11px; font-weight: bold;">[ 柜台取餐号 ]</div>
-                    <div style="font-size: 36px; font-weight: 900; margin-top: 2px; letter-spacing: 3px;">${order.mealNo}</div>
+                    <div style="font-size: 10px; font-weight: bold;">[ 柜台取餐号 / COUNTER PICKUP NO. ]</div>
+                    <div style="font-size: 34px; font-weight: 900; margin-top: 2px; letter-spacing: 3px;">${order.mealNo}</div>
                 </div>
 
-                <div style="font-size:11px;">流水单号：${order.id}</div>
-                <div style="font-size:11px;">下单时间：${order.time}</div>
-                <div style="border-bottom:1px dashed #000; margin:6px 0; padding-bottom:2px;"></div>
-                <div style="font-weight:bold; font-size:11px;">菜品明细 (免打包费)：</div>
+                <div style="font-size:10px;">流水单号 / Order ID: ${order.id}</div>
+                <div style="font-size:10px;">下单时间 / Time: ${order.time}</div>
+                <div style="border-bottom:1px dashed #000; margin:5px 0; padding-bottom:2px;"></div>
+                <div style="font-weight:bold; font-size:10px;">菜品明细 / Item Details (免打包费)：</div>
                 ${order.items.map(i => `
-                    <div style="display:flex; justify-content:space-between; margin:3px 0; font-size:11px;">
+                    <div style="display:flex; justify-content:space-between; margin:3px 0; font-size:10px;">
                         <span>${i.name}(${i.spec || '标配'})</span>
                         <span>x${i.count} ￥${i.price * i.count}</span>
                     </div>
                 `).join('')}
-                <div style="border-bottom:1px dashed #000; margin:6px 0; padding-bottom:2px;"></div>
-                <div style="text-align:right; font-weight:bold; font-size:15px;">堂食应付总计：￥${order.total}</div>
-                <div style="text-align:center; font-size:10px; margin-top:10px; font-weight:bold;">*** 请凭 3 位数取餐号取餐 ***</div>
+                <div style="border-bottom:1px dashed #000; margin:5px 0; padding-bottom:2px;"></div>
+                <div style="text-align:right; font-weight:bold; font-size:14px;">总计 / Total: ￥${order.total}</div>
+                <div style="text-align:center; font-size:9px; margin-top:8px; font-weight:bold;">*** 请凭 3 位数取餐号取餐 ***<br>Please pick up with your number</div>
             `;
 
             const doubleTicketHtml = `
-                <div>${singleTicketHtml('1联 顾客取单联')}</div>
-                <div class="page-break" style="margin: 15px 0; border-top: 2px dashed #000;"></div>
-                <div>${singleTicketHtml('2联 商家留存联')}</div>
+                <div>${singleTicketHtml('顾客取单联', 'Customer Copy')}</div>
+                <div class="page-break"></div>
+                <div>${singleTicketHtml('商家留存联', 'Merchant Copy')}</div>
             `;
 
             document.getElementById('print-ticket').innerHTML = doubleTicketHtml;
+            window.print();
+        }
+
+        // 线上自提小票（包含中英文对照）
+        function printOnlineTicket(orderId) {
+            const order = cloudData.orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const isReserve = order.pickupTime && order.pickupTime !== '尽快取餐';
+
+            const ticketHtml = `
+                <div style="text-align:center; margin-bottom:4px;">
+                    <img src="${LOGO_URL}" alt="Logo" style="width:28mm; height:auto; display:block; margin:0 auto 2px auto;" />
+                </div>
+                <div style="text-align:center; font-size:11px; font-weight:bold; margin-bottom:6px; border:1px solid #000; padding:3px 0;">
+                    [ 到店自提凭证 / PICKUP VOUCHER ]
+                </div>
+                
+                ${isReserve ? `
+                <div style="border: 2px solid #000; padding: 4px; margin-bottom: 6px; text-align: center;">
+                    <div style="font-size: 10px; font-weight: bold;">[ 预约取餐时间 / Scheduled Time ]</div>
+                    <div style="font-size: 14px; font-weight: 900; margin-top: 2px;">${order.pickupTime}</div>
+                </div>
+                ` : `
+                <div style="text-align: center; font-weight: bold; font-size: 11px; margin-bottom: 6px; border-bottom: 1px dashed #000; padding-bottom: 4px;">
+                    取餐方式 / Type: 尽快取餐 (ASAP)
+                </div>
+                `}
+
+                <div style="font-size:10px;">订单编号 / Order ID: ${order.id}</div>
+                <div style="font-size:10px;">下单时间 / Time: ${order.time}</div>
+                <div style="font-size:12px; margin-top:4px; font-weight:bold;">取餐电话 / Phone: <span style="font-size:16px; text-decoration:underline;">尾号 ${order.phone}</span></div>
+                <div style="border-bottom:1px dashed #000; margin:5px 0; padding-bottom:2px;"></div>
+                <div style="font-weight:bold; font-size:10px;">菜品明细 / Item Details:</div>
+                ${order.items.map(i => `
+                    <div style="display:flex; justify-content:space-between; margin:3px 0; font-size:10px;">
+                        <span>${i.name}(${i.spec || '标配'})</span>
+                        <span>x${i.count} ￥${i.price * i.count}</span>
+                    </div>
+                `).join('')}
+                <div style="display:flex; justify-content:space-between; margin:3px 0; font-size:10px;">
+                    <span>打包费 / Packing Fee</span>
+                    <span>￥1.00</span>
+                </div>
+                <div style="border-bottom:1px dashed #000; margin:5px 0; padding-bottom:2px;"></div>
+                <div style="text-align:right; font-weight:bold; font-size:14px;">实收总计 / Total: ￥${order.total}</div>
+                <div style="text-align:center; font-size:9px; margin-top:10px; font-weight:bold;">*** 请核对无误后出餐 ***<br>Please verify before serving</div>
+            `;
+
+            document.getElementById('print-ticket').innerHTML = ticketHtml;
             window.print();
         }
 
@@ -810,7 +905,7 @@
                         <span style="font-weight: bold; color: #16a34a;">￥${order.total}</span>
                         <div style="display: flex; gap: 4px;">
                             ${!isFinished ? `<button onclick="updateDineInStatus('${order.id}', '已出餐')" style="background:#059669; color:#fff; border:none; padding:2px 6px; border-radius:3px; cursor:pointer; font-size:10px; font-weight:bold;">出餐</button>` : '<span style="color:#059669; font-weight:bold;">已完成</span>'}
-                            <button onclick="printDineInTicket({mealNo:'${order.mealNo}', id:'${order.id}', time:'${order.time}', items:${JSON.stringify(order.items).replace(/"/g, '&quot;')}, total:${order.total}})" style="background:#4b5563; color:#fff; border:none; padding:2px 6px; border-radius:3px; cursor:pointer; font-size:10px;">补打</button>
+                            <button onclick='printDineInTicket(${JSON.stringify(order)})' style="background:#4b5563; color:#fff; border:none; padding:2px 6px; border-radius:3px; cursor:pointer; font-size:10px;">补打</button>
                         </div>
                     </div>
                 </div>
@@ -900,7 +995,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid ${isReserve ? '#fde68a' : '#f3f4f6'}; padding-top: 8px;">
                         <span style="font-weight: 900; color: #b45309; font-size: 15px;">实收: ￥${order.total}</span>
                         <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
-                            <button onclick="printTicket('${order.id}')" style="background:#4b5563; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:bold;">打印小票</button>
+                            <button onclick="printOnlineTicket('${order.id}')" style="background:#4b5563; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:bold;">打印小票</button>
                             ${order.status === '待接单' ? `<button onclick="updateOrderStatus('${order.id}', '已接单')" style="background:#2563eb; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:bold;">确认接单</button>` : ''}
                             ${order.status !== '已出餐' ? `<button onclick="updateOrderStatus('${order.id}', '已出餐')" style="background:#059669; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:bold;">已出餐</button>` : '<span style="color:#059669; font-size:12px; font-weight:bold; line-height:24px;">已完成</span>'}
                         </div>
@@ -915,53 +1010,6 @@
                 order.status = newStatus;
                 await syncToCloud();
             }
-        }
-
-        function printTicket(orderId) {
-            const order = cloudData.orders.find(o => o.id === orderId);
-            if (!order) return;
-
-            const isReserve = order.pickupTime && order.pickupTime !== '尽快取餐';
-
-            const ticketHtml = `
-                <div style="text-align:center; margin-bottom:4px;">
-                    <img src="${LOGO_URL}" alt="Logo" style="width:28mm; height:auto; display:block; margin:0 auto 2px auto;" />
-                </div>
-                <div style="text-align:center; font-size:11px; font-weight:bold; margin-bottom:6px; border:1px solid #000; padding:2px 0;">[ 到店自提凭证 ]</div>
-                
-                ${isReserve ? `
-                <div style="border: 2px solid #000; padding: 4px; margin-bottom: 6px; text-align: center;">
-                    <div style="font-size: 11px; font-weight: bold;">[ 预约取餐时间 ]</div>
-                    <div style="font-size: 15px; font-weight: 900; margin-top: 2px;">${order.pickupTime}</div>
-                </div>
-                ` : `
-                <div style="text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 6px; border-bottom: 1px dashed #000; padding-bottom: 4px;">
-                    取餐方式：尽快取餐
-                </div>
-                `}
-
-                <div style="font-size:11px;">订单编号：${order.id}</div>
-                <div style="font-size:11px;">下单时间：${order.time}</div>
-                <div style="font-size:13px; margin-top:4px; font-weight:bold;">取餐电话：<span style="font-size:18px; text-decoration:underline;">尾号 ${order.phone}</span></div>
-                <div style="border-bottom:1px dashed #000; margin:6px 0; padding-bottom:2px;"></div>
-                <div style="font-weight:bold; font-size:11px;">菜品明细：</div>
-                ${order.items.map(i => `
-                    <div style="display:flex; justify-content:space-between; margin:3px 0; font-size:11px;">
-                        <span>${i.name}(${i.spec || '标配'})</span>
-                        <span>x${i.count} ￥${i.price * i.count}</span>
-                    </div>
-                `).join('')}
-                <div style="display:flex; justify-content:space-between; margin:3px 0; font-size:11px;">
-                    <span>自提打包费</span>
-                    <span>￥1.00</span>
-                </div>
-                <div style="border-bottom:1px dashed #000; margin:6px 0; padding-bottom:2px;"></div>
-                <div style="text-align:right; font-weight:bold; font-size:14px;">实收总计：￥${order.total}</div>
-                <div style="text-align:center; font-size:10px; margin-top:12px; font-weight:bold;">*** 请核对无误后出餐 ***</div>
-            `;
-
-            document.getElementById('print-ticket').innerHTML = ticketHtml;
-            window.print();
         }
 
         function openSettlementModal() {
@@ -1074,6 +1122,16 @@
             if (localStorage.getItem('admin_logged') === 'true') {
                 document.getElementById('login-modal').style.display = 'none';
                 loadCloudData();
+            }
+
+            const savedLevel = localStorage.getItem('admin_font_level');
+            if (savedLevel) {
+                currentFontLevel = parseInt(savedLevel);
+                document.body.className = `font-level-${currentFontLevel}`;
+                document.body.style.setProperty('--font-lvl', currentFontLevel);
+                const levelNames = ['默认', '中号', '大号', '超大', '特大'];
+                const btn = document.getElementById('font-scale-btn');
+                if (btn) btn.innerText = `🔍 页面大小: ${levelNames[currentFontLevel - 1]}`;
             }
 
             document.getElementById('login-btn').onclick = handleLogin;
