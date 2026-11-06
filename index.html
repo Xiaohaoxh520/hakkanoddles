@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>客家腌面 - 到店自提点单系统</title>
+    <title>客家腌面 Hakka Noodles - 到店自提点单系统 Pickup Ordering</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #f3f4f6; color: #1f2937; display: flex; justify-content: center; }
@@ -11,47 +11,44 @@
         
         header { background-color: #b45309; color: #ffffff; padding: 10px 16px; position: sticky; top: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .header-logo { height: 28px; width: auto; object-fit: contain; display: block; }
-        .query-btn { background-color: #78350f; color: #ffffff; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .query-btn { background-color: #78350f; color: #ffffff; border: none; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; line-height: 1.2; }
         
-        /* 提示栏吸顶置顶 */
-        .notice { background-color: #fef3c7; color: #78350f; font-size: 12px; padding: 10px 16px; border-bottom: 1px solid #fde68a; font-weight: 500; line-height: 1.4; display: flex; flex-direction: column; gap: 6px; position: sticky; top: 48px; z-index: 25; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .notice { background-color: #fef3c7; color: #78350f; font-size: 11px; padding: 10px 16px; border-bottom: 1px solid #fde68a; font-weight: 500; line-height: 1.4; display: flex; flex-direction: column; gap: 6px; position: sticky; top: 48px; z-index: 25; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .notice-top-row { display: flex; justify-content: space-between; align-items: center; }
-        .store-status-tag { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #fff; }
+        .store-status-tag { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; color: #fff; }
         
-        /* 胶囊视图 */
-        .capsule-queue-box { display: inline-flex; align-items: center; background-color: #e5e7eb; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; color: #374151; width: fit-content; gap: 6px; }
+        .capsule-queue-box { display: inline-flex; align-items: center; background-color: #e5e7eb; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; color: #374151; width: fit-content; gap: 6px; }
         .capsule-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
         
-        /* 弹窗刷新按钮 */
         .refresh-queue-btn { background: #059669; color: #fff; border: none; padding: 6px 14px; border-radius: 16px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .refresh-queue-btn:disabled { background: #d1d5db; color: #9ca3af; cursor: not-allowed; }
         
         .menu-container { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 20px; }
-        .section-title { font-size: 14px; font-weight: bold; color: #111827; margin-bottom: 12px; border-left: 4px solid #b45309; padding-left: 8px; display: flex; align-items: center; justify-content: space-between; }
-        .section-desc { font-size: 11px; font-weight: normal; color: #4b5563; }
+        .section-title { font-size: 13px; font-weight: bold; color: #111827; margin-bottom: 12px; border-left: 4px solid #b45309; padding-left: 8px; display: flex; align-items: center; justify-content: space-between; }
+        .section-desc { font-size: 10px; font-weight: normal; color: #4b5563; }
         
         .item-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 10px; position: relative; }
-        .item-info h3 { font-size: 14px; font-weight: bold; color: #111827; display: flex; align-items: center; gap: 6px; }
-        .item-info p { font-size: 11px; color: #6b7280; margin-top: 4px; }
+        .item-info h3 { font-size: 13px; font-weight: bold; color: #111827; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .item-info p { font-size: 10px; color: #6b7280; margin-top: 3px; }
         
         .item-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .grid-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: relative; }
         
-        .badge-signature { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; font-size: 9px; padding: 1px 5px; border-radius: 4px; font-weight: bold; }
+        .badge-signature { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; font-size: 8px; padding: 1px 4px; border-radius: 4px; font-weight: bold; }
 
-        .btn-primary { background-color: #b45309; color: #ffffff; border: none; padding: 7px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; }
+        .btn-primary { background-color: #b45309; color: #ffffff; border: none; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; }
         .btn-primary:active { background-color: #92400e; }
         .btn-soldout { background-color: #9ca3af !important; color: #ffffff !important; cursor: not-allowed !important; }
-        .btn-price { font-size: 13px; font-weight: bold; color: #b45309; }
+        .btn-price { font-size: 12px; font-weight: bold; color: #b45309; }
         
         .footer-cart { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: #ffffff; border-top: 1px solid #e5e7eb; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 20; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
         .cart-left { display: flex; align-items: center; gap: 12px; }
         .cart-icon-box { position: relative; background: #b45309; color: #ffffff; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; box-shadow: 0 2px 5px rgba(180,83,9,0.3); }
         .cart-badge { position: absolute; top: -4px; right: -4px; background: #dc2626; color: #ffffff; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; display: none; }
-        .cart-total-text { font-size: 13px; font-weight: bold; color: #111827; }
-        .cart-total-text span { color: #b45309; font-size: 15px; }
-        .cart-sub-text { font-size: 11px; color: #4b5563; }
-        .checkout-btn { background-color: #b45309; color: #ffffff; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .cart-total-text { font-size: 12px; font-weight: bold; color: #111827; }
+        .cart-total-text span { color: #b45309; font-size: 14px; }
+        .cart-sub-text { font-size: 10px; color: #4b5563; }
+        .checkout-btn { background-color: #b45309; color: #ffffff; border: none; padding: 10px 18px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .checkout-btn:disabled { background-color: #d1d5db; color: #9ca3af; cursor: not-allowed; }
 
         .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; display: none; align-items: center; justify-content: center; padding: 16px; }
@@ -59,16 +56,16 @@
         .close-x { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 16px; color: #6b7280; cursor: pointer; }
         
         .option-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 6px; }
-        .option-btn { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 8px; border-radius: 8px; font-size: 12px; text-align: center; cursor: pointer; font-weight: 500; }
+        .option-btn { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 8px; border-radius: 8px; font-size: 11px; text-align: center; cursor: pointer; font-weight: 500; }
         .option-btn.active { background: #b45309; color: #ffffff; border-color: #b45309; font-weight: bold; }
         
-        .input-box { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px; font-size: 12px; outline: none; background: #fff; }
+        .input-box { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px; font-size: 11px; outline: none; background: #fff; }
         .input-box:focus { border-color: #b45309; box-shadow: 0 0 0 2px rgba(180,83,9,0.15); }
 
         .step-container { display: flex; justify-content: space-between; align-items: center; margin: 14px 0 8px 0; position: relative; padding: 0 10px; }
         .step-item { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; flex: 1; }
-        .step-circle { width: 24px; height: 24px; border-radius: 50%; background: #e5e7eb; color: #9ca3af; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; border: 2px solid #fff; }
-        .step-text { font-size: 11px; color: #9ca3af; text-align: center; font-weight: 500; }
+        .step-circle { width: 24px; height: 24px; border-radius: 50%; background: #e5e7eb; color: #9ca3af; font-size: 10px; font-weight: bold; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; border: 2px solid #fff; }
+        .step-text { font-size: 10px; color: #9ca3af; text-align: center; font-weight: 500; }
         .step-line { position: absolute; top: 12px; left: 20%; right: 20%; height: 2px; background: #e5e7eb; z-index: 1; }
         .step-item.active .step-circle { background: #b45309; color: #fff; box-shadow: 0 0 0 3px rgba(180,83,9,0.15); }
         .step-item.active .step-text { color: #b45309; font-weight: bold; }
@@ -80,43 +77,42 @@
     <div id="app">
         <header>
             <img src="https://i.imgs.ovh/2026/10/31/bb2fabef06a8d6f0c5870e2c7d0be375.png" alt="客家腌面 Logo" class="header-logo">
-            <button onclick="openQueryModal()" class="query-btn">查询订单进度</button>
+            <button onclick="openQueryModal()" class="query-btn">查询订单进度<br><span style="font-size:9px; opacity:0.85;">Check Order</span></button>
         </header>
 
         <div id="status-notice" class="notice">
             <div class="notice-top-row">
-                <div id="notice-text">提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>营业时间：加载中...</div>
-                <div id="store-status-tag" class="store-status-tag" style="background: #10b981;">营业中</div>
+                <div id="notice-text">提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>Notice: 1 RMB packing fee applies to all pickup orders.<br>营业时间 / Hours: 加载中...</div>
+                <div id="store-status-tag" class="store-status-tag" style="background: #10b981;">营业中 OPEN</div>
             </div>
-            <!-- 胶囊视图 -->
             <div id="capsule-queue-container" class="capsule-queue-box">
                 <span id="capsule-dot" class="capsule-dot" style="background: #10b981;"></span>
-                <span>当前前方还有 <strong id="pending-orders-count" style="color: #10b981;">0</strong> 单制作中</span>
+                <span>当前前方还有 <strong id="pending-orders-count" style="color: #10b981;">0</strong> 单制作中 / Orders in queue</span>
             </div>
         </div>
 
         <div class="menu-container">
             <div>
                 <div class="section-title">
-                    <span>营养套餐系列</span>
-                    <span class="section-desc">(可选面/米粉/河粉/珍珠粉)</span>
+                    <span>营养套餐系列 <span style="font-size:10px; color:#4b5563; font-weight:normal;">/ Combo Meals</span></span>
+                    <span class="section-desc">(可选面/粉/河粉/珍珠粉)</span>
                 </div>
                 <div id="combos-list"></div>
             </div>
 
             <div>
-                <div class="section-title"><span>主食系列</span></div>
+                <div class="section-title"><span>主食系列 <span style="font-size:10px; color:#4b5563; font-weight:normal;">/ Staples</span></span></div>
                 <div id="staples-list" class="item-grid-2"></div>
             </div>
 
             <div>
-                <div class="section-title"><span>靓汤系列</span></div>
+                <div class="section-title"><span>靓汤系列 <span style="font-size:10px; color:#4b5563; font-weight:normal;">/ Soups</span></span></div>
                 <div id="soups-list" class="item-grid-2"></div>
             </div>
 
             <div>
                 <div class="section-title">
-                    <span>汤粉汤面系列</span>
+                    <span>汤粉汤面系列 <span style="font-size:10px; color:#4b5563; font-weight:normal;">/ Noodle Soups</span></span>
                     <span class="section-desc">(面/米粉/河粉/珍珠粉)</span>
                 </div>
                 <div id="noodlessoups-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
@@ -130,12 +126,12 @@
                     <span id="cart-badge" class="cart-badge">0</span>
                 </div>
                 <div>
-                    <div class="cart-total-text">合计: <span id="cart-total">￥0</span></div>
-                    <div class="cart-sub-text">含自提打包费: ￥1.00</div>
+                    <div class="cart-total-text">合计 Total: <span id="cart-total">￥0</span></div>
+                    <div class="cart-sub-text">含打包费 Packing Fee: ￥1.00</div>
                 </div>
             </div>
             <button id="checkout-btn" onclick="checkout()" class="checkout-btn" disabled>
-                去结算 (￥1.00)
+                去结算 Checkout (￥1.00)
             </button>
         </div>
 
@@ -143,21 +139,21 @@
         <div id="spec-modal" class="modal-mask">
             <div class="modal-box">
                 <button onclick="closeSpecModal()" class="close-x">✕</button>
-                <h3 id="spec-title" style="font-size: 15px; font-weight: bold; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;"></h3>
+                <h3 id="spec-title" style="font-size: 14px; font-weight: bold; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;"></h3>
                 
                 <div id="spec-options-container">
-                    <label style="font-size: 12px; font-weight: bold; color: #374151; display: block; margin-bottom: 4px;">选择粉面规格：</label>
+                    <label style="font-size: 11px; font-weight: bold; color: #374151; display: block; margin-bottom: 4px;">选择粉面规格 / Select Noodle Type：</label>
                     <div id="spec-options-grid" class="option-grid"></div>
                 </div>
 
-                <div style="font-size: 12px; color: #4b5563; background: #f9fafb; padding: 10px; border-radius: 8px; border: 1px solid #e5e7eb;">
-                    已选规格：<span id="spec-selected-name" style="color: #b45309; font-weight: bold;"></span><br>
-                    价格：<span id="spec-selected-price" style="color: #b45309; font-weight: bold; font-size: 14px;"></span>
+                <div style="font-size: 11px; color: #4b5563; background: #f9fafb; padding: 10px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                    已选规格 Selected: <span id="spec-selected-name" style="color: #b45309; font-weight: bold;"></span><br>
+                    价格 Price: <span id="spec-selected-price" style="color: #b45309; font-weight: bold; font-size: 13px;"></span>
                 </div>
 
                 <div style="display: flex; gap: 10px; margin-top: 4px;">
-                    <button onclick="closeSpecModal()" style="flex: 1; background: #e5e7eb; color: #374151; border: none; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">取消</button>
-                    <button onclick="confirmAddToCart()" class="btn-primary" style="flex: 1; padding: 10px;">加入购物车</button>
+                    <button onclick="closeSpecModal()" style="flex: 1; background: #e5e7eb; color: #374151; border: none; padding: 10px; border-radius: 10px; font-size: 11px; font-weight: bold; cursor: pointer;">取消 Cancel</button>
+                    <button onclick="confirmAddToCart()" class="btn-primary" style="flex: 1; padding: 10px;">加入购物车 Add to Cart</button>
                 </div>
             </div>
         </div>
@@ -166,23 +162,23 @@
         <div id="cart-modal" class="modal-mask" style="align-items: flex-end; padding: 0;" onclick="if(event.target === this) toggleCartModal()">
             <div class="modal-bottom" style="background: #fff; width: 100%; max-width: 480px; margin: 0 auto; border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">
-                    <span style="font-weight: bold; font-size: 14px;">购物车明细 (到店自提)</span>
+                    <span style="font-weight: bold; font-size: 13px;">购物车明细 / Cart Details (到店自提 Pickup)</span>
                     <button onclick="toggleCartModal()" class="close-x" style="position: static;">✕</button>
                 </div>
                 
                 <div id="cart-items-list" style="max-height: 40vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;"></div>
 
-                <div style="border-top: 1px solid #e5e7eb; padding-top: 10px; font-size: 12px; display: flex; flex-direction: column; gap: 4px;">
-                    <div style="display: flex; justify-content: space-between;"><span>商品金额:</span><span id="cart-goods-amount">￥0</span></div>
-                    <div style="display: flex; justify-content: space-between;"><span>打包费 (到店自提):</span><span>￥1.00</span></div>
-                    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; color: #111827; padding-top: 4px; border-top: 1px dashed #e5e7eb;">
-                        <span>应付总计:</span>
-                        <span id="cart-final-amount" style="color: #b45309; font-size: 16px;">￥1.00</span>
+                <div style="border-top: 1px solid #e5e7eb; padding-top: 10px; font-size: 11px; display: flex; flex-direction: column; gap: 4px;">
+                    <div style="display: flex; justify-content: space-between;"><span>商品金额 Subtotal:</span><span id="cart-goods-amount">￥0</span></div>
+                    <div style="display: flex; justify-content: space-between;"><span>打包费 Packing Fee:</span><span>￥1.00</span></div>
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; color: #111827; padding-top: 4px; border-top: 1px dashed #e5e7eb;">
+                        <span>应付总计 Total:</span>
+                        <span id="cart-final-amount" style="color: #b45309; font-size: 15px;">￥1.00</span>
                     </div>
                 </div>
 
-                <button onclick="checkout()" class="btn-primary" style="padding: 12px; font-size: 14px; border-radius: 12px; width: 100%;">
-                    去结算
+                <button onclick="checkout()" class="btn-primary" style="padding: 12px; font-size: 13px; border-radius: 12px; width: 100%;">
+                    去结算 Proceed to Checkout
                 </button>
             </div>
         </div>
@@ -192,19 +188,20 @@
             <div class="modal-box" style="text-align: center;">
                 <button onclick="closePayModal()" class="close-x">✕</button>
                 
-                <div style="color: #b45309; font-weight: bold; font-size: 13px;">客家腌面 · 微信收银台</div>
-                <div id="pay-amount" style="font-size: 22px; font-weight: black; color: #111827;">￥1.00</div>
+                <div style="color: #b45309; font-weight: bold; font-size: 12px;">客家腌面 Hakka Noodles · 微信收银台 WeChat Pay</div>
+                <div id="pay-amount" style="font-size: 20px; font-weight: 900; color: #111827;">￥1.00</div>
 
-                <div style="background: #fff5f5; border: 1.5px solid #dc2626; padding: 10px; border-radius: 8px; text-align: left; font-size: 11px; color: #991b1b; line-height: 1.5;">
-                    <div style="font-weight: bold; font-size: 12px; margin-bottom: 2px; color: #dc2626;">⚠️ 务必先付款后提交！</div>
-                    付款时<strong>必须备注您的手机尾号</strong>！手机尾号是订单<strong>唯一核对凭证</strong>，不备注尾号或未付款的订单一律无效！
+                <div style="background: #fff5f5; border: 1.5px solid #dc2626; padding: 10px; border-radius: 8px; text-align: left; font-size: 10px; color: #991b1b; line-height: 1.5;">
+                    <div style="font-weight: bold; font-size: 11px; margin-bottom: 2px; color: #dc2626;">⚠️ 请务必先付款后提交 / Pay before submit!</div>
+                    付款时<strong>必须备注您的手机尾号</strong>！手机尾号是订单<strong>唯一核对凭证</strong>，不备注尾号或未付款的订单一律无效！<br>
+                    Please note your <strong>phone number suffix</strong> when paying. It is the only voucher!
                 </div>
 
                 <div style="text-align: left; background: #fffbeb; padding: 8px 10px; border-radius: 8px; border: 1px solid #fde68a;">
-                    <label style="font-size: 11px; font-weight: bold; color: #78350f; display: block; margin-bottom: 4px;">选择取餐方式：</label>
+                    <label style="font-size: 10px; font-weight: bold; color: #78350f; display: block; margin-bottom: 4px;">选择取餐方式 / Select Pickup Mode：</label>
                     <div style="display: flex; gap: 8px; margin-bottom: 6px;">
-                        <button type="button" id="btn-asap" onclick="setOrderMode('asap')" style="flex: 1; padding: 6px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; border: 1px solid #b45309; background: #b45309; color: #fff;">默认尽快取餐</button>
-                        <button type="button" id="btn-reserve" onclick="setOrderMode('reserve')" style="flex: 1; padding: 6px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; border: 1px solid #d1d5db; background: #f3f4f6; color: #374151;">预约取餐时间</button>
+                        <button type="button" id="btn-asap" onclick="setOrderMode('asap')" style="flex: 1; padding: 6px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; border: 1px solid #b45309; background: #b45309; color: #fff;">尽快取餐 ASAP</button>
+                        <button type="button" id="btn-reserve" onclick="setOrderMode('reserve')" style="flex: 1; padding: 6px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; border: 1px solid #d1d5db; background: #f3f4f6; color: #374151;">预约时间 Scheduled</button>
                     </div>
 
                     <div id="reserve-time-box" style="display: none; margin-top: 4px;">
@@ -215,44 +212,44 @@
                 <div style="background: #f9fafb; padding: 8px; border-radius: 10px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; align-items: center;">
                     <img src="https://i.imgs.ovh/2026/10/31/a6be456b2a8b66f025967f7d2004f9b4.png" alt="微信收款码" style="width: 100px; height: 100px; object-fit: contain; background: #fff; padding: 4px; border-radius: 6px; border: 1px solid #e5e7eb; margin-bottom: 4px;">
                     <span style="font-size: 10px; color: #4b5563; line-height: 1.3;">
-                        长按扫描二维码转账 <strong style="color: #b45309;" id="pay-amount-tip">￥1.00</strong><br>
-                        <span style="color: #dc2626; font-weight: bold;">付款时请务必填写备注信息！</span>
+                        长按扫描二维码转账 Scan QR to Pay <strong style="color: #b45309;" id="pay-amount-tip">￥1.00</strong><br>
+                        <span style="color: #dc2626; font-weight: bold;">务必填写备注信息！Must add remarks!</span>
                     </span>
                 </div>
 
                 <div style="text-align: left;">
-                    <label style="font-size: 11px; font-weight: bold; color: #374151; display: block; margin-bottom: 2px;">填写取餐手机尾号：</label>
-                    <input id="customer-phone-input" type="text" placeholder="用于到店核对自提" class="input-box">
+                    <label style="font-size: 10px; font-weight: bold; color: #374151; display: block; margin-bottom: 2px;">填写取餐手机尾号 / Phone Suffix (for pickup verification)：</label>
+                    <input id="customer-phone-input" type="text" placeholder="手机号后4位 Last 4 digits" class="input-box">
                 </div>
 
-                <button onclick="submitOrder()" class="btn-primary" style="padding: 12px; font-size: 13px; border-radius: 10px; width: 100%;">
-                    我已付款并备注，提交订单
+                <button onclick="submitOrder()" class="btn-primary" style="padding: 10px; font-size: 12px; border-radius: 10px; width: 100%;">
+                    我已付款并备注，提交订单 Submit Order
                 </button>
             </div>
         </div>
 
-        <!-- 独立弹窗 1：下单成功后的状态/凭证页 -->
+        <!-- 下单成功凭证页 -->
         <div id="success-detail-modal" class="modal-mask">
             <div class="modal-box" style="max-height: 85vh;">
                 <button onclick="closeSuccessDetailModal()" class="close-x">✕</button>
-                <div id="success-modal-title" style="color: #b45309; font-weight: bold; font-size: 15px; text-align: center;">⏳ 下单成功，等待商家核验接单</div>
+                <div id="success-modal-title" style="color: #b45309; font-weight: bold; font-size: 14px; text-align: center;">⏳ 下单成功，等待商家核验接单 Waiting for Merchant</div>
                 <div id="success-detail-content" style="display: flex; flex-direction: column; gap: 10px;"></div>
             </div>
         </div>
 
-        <!-- 独立弹窗 2：导航栏的【查询订单进度页】 -->
+        <!-- 订单进度查询页 -->
         <div id="query-modal" class="modal-mask">
             <div class="modal-box" style="max-height: 85vh;">
                 <button onclick="closeQueryModal()" class="close-x">✕</button>
-                <div style="color: #b45309; font-weight: bold; font-size: 14px; text-align: center; margin-bottom: 4px;">自提订单进度查询</div>
+                <div style="color: #b45309; font-weight: bold; font-size: 13px; text-align: center; margin-bottom: 4px;">自提订单进度查询 / Order Status Check</div>
                 
                 <div style="display: flex; gap: 8px;">
-                    <input id="search-phone-input" type="text" placeholder="请输入手机尾号查询进度" class="input-box" style="flex: 1;">
-                    <button onclick="searchOrders()" class="btn-primary" style="padding: 8px 14px;">查询</button>
+                    <input id="search-phone-input" type="text" placeholder="输入手机尾号 Enter Phone Suffix" class="input-box" style="flex: 1;">
+                    <button onclick="searchOrders()" class="btn-primary" style="padding: 8px 12px;">查询 Search</button>
                 </div>
 
                 <div id="query-results-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; max-height: 55vh;">
-                    <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">请输入手机号查询</div>
+                    <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 11px;">请输入手机号查询 Enter phone suffix to check</div>
                 </div>
             </div>
         </div>
@@ -262,37 +259,38 @@
         const BIN_ID = '6ae586c8ffd5d160539a6da4';
         const MASTER_KEY = '$2a$10$lwmZR3vIjsFdZlgG4.WReOJzFNBqHERsLquMbL42GY/BNEBveQ896';
 
+        // 顾客端商品菜单中英文双语对照配置
         const menuData = {
             combos: [
-                { name: '紫菜蛋花汤套餐', priceSmall: 11, priceBig: 13, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
-                { name: '番茄蛋花汤套餐', priceSmall: 11, priceBig: 13, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
-                { name: '枸杞叶三及第汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'], signature: true },
-                { name: '枸杞叶瘦肉汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'], signature: true },
-                { name: '酸菜瘦肉汤套餐', priceSmall: 13, priceBig: 15, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
-                { name: '枸杞叶猪肉丸汤套餐', priceSmall: 15, priceBig: 17, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
-                { name: '枸杞叶牛肉丸汤套餐', priceSmall: 15, priceBig: 17, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] },
-                { name: '酸菜牛肉丸汤套餐', priceSmall: 15, priceBig: 17, options: ['腌面', '腌米粉', '腌河粉', '腌珍珠粉'] }
+                { name: '紫菜蛋花汤套餐', nameEn: 'Seaweed Egg Soup Combo', priceSmall: 11, priceBig: 13, options: ['腌面 Hakka Noodles', '腌米粉 Rice Noodles', '腌河粉 Flat Rice Noodles', '腌珍珠粉 Pearl Noodles'] },
+                { name: '番茄蛋花汤套餐', nameEn: 'Tomato Egg Soup Combo', priceSmall: 11, priceBig: 13, options: ['腌面 Hakka Noodles', '腌米粉 Rice Noodles', '腌河粉 Flat Rice Noodles', '腌珍珠粉 Pearl Noodles'] },
+                { name: '枸杞叶三及第汤套餐', nameEn: 'Goji Leaf 3-Fresh Soup Combo', priceSmall: 13, priceBig: 15, options: ['腌面 Hakka Noodles', '腌米粉 Rice Noodles', '腌河粉 Flat Rice Noodles', '腌珍珠粉 Pearl Noodles'], signature: true },
+                { name: '枸杞叶瘦肉汤套餐', nameEn: 'Goji Leaf Lean Pork Soup Combo', priceSmall: 13, priceBig: 15, options: ['腌面 Hakka Noodles', '腌米粉 Rice Noodles', '腌河粉 Flat Rice Noodles', '腌珍珠粉 Pearl Noodles'], signature: true },
+                { name: '酸菜瘦肉汤套餐', nameEn: 'Pickled Cabbage Lean Pork Soup Combo', priceSmall: 13, priceBig: 15, options: ['腌面 Hakka Noodles', '腌米粉 Rice Noodles', '腌河粉 Flat Rice Noodles', '腌珍珠粉 Pearl Noodles'] },
+                { name: '枸杞叶猪肉丸汤套餐', nameEn: 'Goji Leaf Pork Ball Soup Combo', priceSmall: 15, priceBig: 17, options: ['腌面 Hakka Noodles', '腌米粉 Rice Noodles', '腌河粉 Flat Rice Noodles', '腌珍珠粉 Pearl Noodles'] },
+                { name: '枸杞叶牛肉丸汤套餐', nameEn: 'Goji Leaf Beef Ball Soup Combo', priceSmall: 15, priceBig: 17, options: ['腌面 Hakka Noodles', '腌米粉 Rice Noodles', '腌河粉 Flat Rice Noodles', '腌珍珠粉 Pearl Noodles'] },
+                { name: '酸菜牛肉丸汤套餐', nameEn: 'Pickled Cabbage Beef Ball Soup Combo', priceSmall: 15, priceBig: 17, options: ['腌面 Hakka Noodles', '腌米粉 Rice Noodles', '腌河粉 Flat Rice Noodles', '腌珍珠粉 Pearl Noodles'] }
             ],
             staples: [
-                { name: '腌面', priceSmall: 8, priceBig: 10, options: ['常规'] },
-                { name: '腌米粉', priceSmall: 8, priceBig: 10, options: ['常规'] },
-                { name: '腌河粉', priceSmall: 8, priceBig: 10, options: ['常规'] },
-                { name: '腌珍珠粉', priceSmall: 8, priceBig: 10, options: ['常规'] }
+                { name: '客家腌面', nameEn: 'Hakka Dried Noodles', priceSmall: 8, priceBig: 10, options: ['常规 Regular'] },
+                { name: '客家腌米粉', nameEn: 'Hakka Dried Rice Noodles', priceSmall: 8, priceBig: 10, options: ['常规 Regular'] },
+                { name: '客家腌河粉', nameEn: 'Hakka Dried Flat Noodles', priceSmall: 8, priceBig: 10, options: ['常规 Regular'] },
+                { name: '客家腌珍珠粉', nameEn: 'Hakka Pearl Noodles', priceSmall: 8, priceBig: 10, options: ['常规 Regular'] }
             ],
             soups: [
-                { name: '紫菜蛋花汤', price: 5 },
-                { name: '番茄蛋花汤', price: 5 },
-                { name: '枸杞叶三及第汤', price: 7 },
-                { name: '枸杞叶瘦肉汤', price: 7 },
-                { name: '酸菜瘦肉汤', price: 7 },
-                { name: '枸杞叶猪肉丸汤', price: 9 },
-                { name: '枸杞叶牛肉丸汤', price: 9 },
-                { name: '酸菜牛肉丸汤', price: 9 }
+                { name: '紫菜蛋花汤', nameEn: 'Seaweed Egg Drop Soup', price: 5 },
+                { name: '番茄蛋花汤', nameEn: 'Tomato Egg Drop Soup', price: 5 },
+                { name: '枸杞叶三及第汤', nameEn: 'Goji Leaf 3-Fresh Soup', price: 7 },
+                { name: '枸杞叶瘦肉汤', nameEn: 'Goji Leaf Lean Pork Soup', price: 7 },
+                { name: '酸菜瘦肉汤', nameEn: 'Pickled Cabbage Lean Pork Soup', price: 7 },
+                { name: '枸杞叶猪肉丸汤', nameEn: 'Goji Leaf Pork Ball Soup', price: 9 },
+                { name: '枸杞叶牛肉丸汤', nameEn: 'Goji Leaf Beef Ball Soup', price: 9 },
+                { name: '酸菜牛肉丸汤', nameEn: 'Pickled Cabbage Beef Ball Soup', price: 9 }
             ],
             noodlessoups: [
-                { name: '猪杂汤', priceSmall: 13, priceBig: 15, options: ['面条', '米粉', '河粉', '珍珠粉'] },
-                { name: '猪肉丸瘦肉汤', priceSmall: 15, priceBig: 17, options: ['面条', '米粉', '河粉', '珍珠粉'] },
-                { name: '牛肉丸牛肉汤', priceSmall: 17, priceBig: 19, options: ['面条', '米粉', '河粉', '珍珠粉'] }
+                { name: '招牌猪杂汤粉面', nameEn: 'Signature Mixed Pork Noodle Soup', priceSmall: 13, priceBig: 15, options: ['面条 Noodles', '米粉 Rice Noodles', '河粉 Flat Noodles', '珍珠粉 Pearl Noodles'] },
+                { name: '猪肉丸瘦肉汤粉面', nameEn: 'Pork Ball & Lean Pork Noodle Soup', priceSmall: 15, priceBig: 17, options: ['面条 Noodles', '米粉 Rice Noodles', '河粉 Flat Noodles', '珍珠粉 Pearl Noodles'] },
+                { name: '牛肉丸牛肉汤粉面', nameEn: 'Beef Ball & Beef Noodle Soup', priceSmall: 17, priceBig: 19, options: ['面条 Noodles', '米粉 Rice Noodles', '河粉 Flat Noodles', '珍珠粉 Pearl Noodles'] }
             ]
         };
 
@@ -306,8 +304,8 @@
         let currentOption = '';
         let isStoreOpen = true;
         let orderMode = 'asap';
-        let lastRefreshTime = 0; // 弹窗手动刷新限频（1分钟1次）
-        let currentActiveOrder = null; // 缓存当前弹窗订单
+        let lastRefreshTime = 0;
+        let currentActiveOrder = null;
 
         async function fetchCloudConfig() {
             try {
@@ -327,7 +325,6 @@
                 updateQueueStats();
                 renderMenu();
 
-                // 如果凭证弹窗开着，实时静默检测状态
                 if (currentActiveOrder && document.getElementById('success-detail-modal').style.display === 'flex') {
                     const latestMatch = cloudOrders.find(o => o.id === currentActiveOrder.id);
                     if (latestMatch) {
@@ -341,13 +338,12 @@
             }
         }
 
-        // 弹窗内的手动刷新按钮（1分钟限制1次）
         function manualRefreshDetail() {
             const now = Date.now();
             const cooldown = 60 * 1000;
             if (now - lastRefreshTime < cooldown) {
                 const remainSecs = Math.ceil((cooldown - (now - lastRefreshTime)) / 1000);
-                alert(`刷新过于频繁，请在 ${remainSecs} 秒后再试！`);
+                alert(`刷新过于频繁，请在 ${remainSecs} 秒后再试！\nToo frequent, please wait ${remainSecs}s.`);
                 return;
             }
             lastRefreshTime = now;
@@ -355,14 +351,14 @@
             const btn = document.getElementById('modal-refresh-btn');
             if (btn) {
                 btn.disabled = true;
-                btn.innerText = '刷新中...';
+                btn.innerText = '刷新中... Refreshing';
             }
 
             fetchCloudConfig().then(() => {
                 setTimeout(() => {
                     if (btn) {
                         btn.disabled = false;
-                        btn.innerText = '🔄 手动刷新';
+                        btn.innerText = '🔄 手动刷新 Refresh';
                     }
                 }, 1000);
             });
@@ -379,19 +375,19 @@
 
             if (storeControl.manualClosed || currentHourMin < startTime || currentHourMin > endTime) {
                 isStoreOpen = false;
-                statusTag.innerText = '休息中';
+                statusTag.innerText = '休息中 CLOSED';
                 statusTag.style.background = '#d97706';
             } else {
                 isStoreOpen = true;
-                statusTag.innerText = '营业中';
+                statusTag.innerText = '营业中 OPEN';
                 statusTag.style.background = '#10b981';
             }
 
-            let textInfo = `提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>营业时间：${startTime} ~ ${endTime}`;
+            let textInfo = `提示：店内所有到店自提订单默认加收 <strong>1元打包费</strong>。<br>Notice: 1 RMB packing fee applies to pickup.<br>营业时间 / Hours: ${startTime} ~ ${endTime}`;
             if (storeControl.manualClosed) {
-                textInfo = `<strong>[本店已休息]</strong> 当前无法下单！`;
+                textInfo = `<strong>[本店已休息 Store Closed]</strong> 当前无法下单！`;
             } else if (!isStoreOpen) {
-                textInfo = `<strong>[不在营业时间内]</strong> (营业时间: ${startTime} ~ ${endTime})`;
+                textInfo = `<strong>[不在营业时间内 Out of Hours]</strong> (${startTime} ~ ${endTime})`;
             }
             noticeTextEl.innerHTML = textInfo;
         }
@@ -472,7 +468,7 @@
                 if (h > endH || (h === endH && m > endM)) break;
 
                 let timeStr = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
-                optionsHtml += `<option value="${timeStr}">预约 ${timeStr} 取餐</option>`;
+                optionsHtml += `<option value="${timeStr}">预约 Scheduled ${timeStr}</option>`;
 
                 tempDate.setMinutes(tempDate.getMinutes() + 15);
                 if (tempDate.getHours() > endH + 2) break;
@@ -485,16 +481,17 @@
             document.getElementById('combos-list').innerHTML = menuData.combos.map((item, idx) => {
                 const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 50;
                 const isSoldOut = stock <= 0 || !isStoreOpen;
-                const sigTag = item.signature ? `<span class="badge-signature">🔥 招牌</span>` : '';
+                const sigTag = item.signature ? `<span class="badge-signature">🔥 招牌 Signature</span>` : '';
                 return `
                 <div class="item-card">
                     <div class="item-info">
                         <h3>${item.name} ${sigTag}</h3>
-                        <p>粉面：${item.options.join('/')} | <span style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">库存: ${stock}</span></p>
+                        <p style="font-size:10px; color:#4b5563;">${item.nameEn}</p>
+                        <p>库存 Stock: <span style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">${stock}</span></p>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 6px;">
-                        <button onclick="openSpecModal('combos', ${idx}, 'small')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '小份 ￥' + item.priceSmall)}</button>
-                        <button onclick="openSpecModal('combos', ${idx}, 'big')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '大份 ￥' + item.priceBig)}</button>
+                        <button onclick="openSpecModal('combos', ${idx}, 'small')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中 Closed' : (stock <= 0 ? '售罄 Sold Out' : '小份 Small ￥' + item.priceSmall)}</button>
+                        <button onclick="openSpecModal('combos', ${idx}, 'big')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中 Closed' : (stock <= 0 ? '售罄 Sold Out' : '大份 Large ￥' + item.priceBig)}</button>
                     </div>
                 </div>
             `;}).join('');
@@ -506,11 +503,12 @@
                 <div class="grid-card">
                     <div class="item-info">
                         <h3>${item.name}</h3>
-                        <p style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">库存: ${stock}</p>
+                        <p style="font-size:9px; color:#4b5563;">${item.nameEn}</p>
+                        <p style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">库存 Stock: ${stock}</p>
                     </div>
-                    <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between;">
-                        <span style="font-size: 11px; color: #6b7280; font-weight: 600;">小${item.priceSmall}/大${item.priceBig}</span>
-                        <button onclick="openSpecModal('staples', ${idx}, 'small')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" style="padding: 5px 10px;" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '选规格')}</button>
+                    <div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-size: 10px; color: #6b7280; font-weight: 600;">小S${item.priceSmall}/大L${item.priceBig}</span>
+                        <button onclick="openSpecModal('staples', ${idx}, 'small')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" style="padding: 4px 8px;" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '选规格 Spec')}</button>
                     </div>
                 </div>
             `;}).join('');
@@ -522,11 +520,12 @@
                 <div class="grid-card">
                     <div class="item-info">
                         <h3>${item.name}</h3>
-                        <p style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">库存: ${stock}</p>
+                        <p style="font-size:9px; color:#4b5563;">${item.nameEn}</p>
+                        <p style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">库存 Stock: ${stock}</p>
                     </div>
-                    <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between;">
                         <span class="btn-price">￥${item.price}</span>
-                        <button onclick="addToCartDirect(${idx})" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" style="padding: 5px 10px;" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '+ 选购')}</button>
+                        <button onclick="addToCartDirect(${idx})" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" style="padding: 4px 8px;" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '+ 选购 Add')}</button>
                     </div>
                 </div>
             `;}).join('');
@@ -538,11 +537,12 @@
                 <div class="item-card">
                     <div class="item-info">
                         <h3>${item.name}</h3>
-                        <p>可选：${item.options.join('/')} | <span style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">库存: ${stock}</span></p>
+                        <p style="font-size:10px; color:#4b5563;">${item.nameEn}</p>
+                        <p>库存 Stock: <span style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">${stock}</span></p>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 6px;">
-                        <button onclick="openSpecModal('noodlessoups', ${idx}, 'small')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '小份 ￥' + item.priceSmall)}</button>
-                        <button onclick="openSpecModal('noodlessoups', ${idx}, 'big')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '大份 ￥' + item.priceBig)}</button>
+                        <button onclick="openSpecModal('noodlessoups', ${idx}, 'small')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '小份 Small ￥' + item.priceSmall)}</button>
+                        <button onclick="openSpecModal('noodlessoups', ${idx}, 'big')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '大份 Large ￥' + item.priceBig)}</button>
                     </div>
                 </div>
             `;}).join('');
@@ -550,19 +550,19 @@
 
         function openSpecModal(category, index, specType) {
             if (!isStoreOpen) {
-                alert('当前本店已休息，无法下单！');
+                alert('当前本店已休息，无法下单！\nStore is currently closed.');
                 return;
             }
             currentActiveItem = menuData[category][index];
             const stock = cloudStocks[currentActiveItem.name] !== undefined ? cloudStocks[currentActiveItem.name] : 50;
             if (stock <= 0) {
-                alert('该商品已售罄！');
+                alert('该商品已售罄！\nThis item is sold out.');
                 return;
             }
             currentSpecType = specType;
             currentOption = currentActiveItem.options ? currentActiveItem.options[0] : '';
 
-            document.getElementById('spec-title').innerText = currentActiveItem.name;
+            document.getElementById('spec-title').innerText = `${currentActiveItem.name} / ${currentActiveItem.nameEn}`;
             
             const optionsContainer = document.getElementById('spec-options-container');
             if (currentActiveItem.options && currentActiveItem.options.length > 0) {
@@ -589,7 +589,7 @@
 
         function updateSpecModalDisplay() {
             const price = currentSpecType === 'small' ? currentActiveItem.priceSmall : currentActiveItem.priceBig;
-            const sizeName = currentSpecType === 'small' ? '小份' : '大份';
+            const sizeName = currentSpecType === 'small' ? '小份 Small' : '大份 Large';
             const fullName = currentOption ? `${sizeName} (${currentOption})` : sizeName;
             
             document.getElementById('spec-selected-name').innerText = fullName;
@@ -603,14 +603,14 @@
         function confirmAddToCart() {
             const stock = cloudStocks[currentActiveItem.name] !== undefined ? cloudStocks[currentActiveItem.name] : 50;
             const price = currentSpecType === 'small' ? currentActiveItem.priceSmall : currentActiveItem.priceBig;
-            const sizeName = currentSpecType === 'small' ? '小份' : '大份';
+            const sizeName = currentSpecType === 'small' ? '小份 Small' : '大份 Large';
             const fullName = currentOption ? `${sizeName} (${currentOption})` : sizeName;
 
             const existing = cart.find(i => i.name === currentActiveItem.name && i.spec === fullName);
             const currentCountInCart = existing ? existing.count : 0;
 
             if (currentCountInCart + 1 > stock) {
-                alert('库存不足！');
+                alert('库存不足！\nInsufficient stock.');
                 return;
             }
 
@@ -619,6 +619,7 @@
             } else {
                 cart.push({
                     name: currentActiveItem.name,
+                    nameEn: currentActiveItem.nameEn,
                     spec: fullName,
                     price: price,
                     count: 1
@@ -630,13 +631,13 @@
 
         function addToCartDirect(index) {
             if (!isStoreOpen) {
-                alert('当前本店已休息！');
+                alert('当前本店已休息！\nStore is closed.');
                 return;
             }
             const item = menuData.soups[index];
             const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 40;
             if (stock <= 0) {
-                alert('已售罄！');
+                alert('已售罄！\nSold out.');
                 return;
             }
 
@@ -644,7 +645,7 @@
             const currentCountInCart = existing ? existing.count : 0;
 
             if (currentCountInCart + 1 > stock) {
-                alert('库存不足！');
+                alert('库存不足！\nInsufficient stock.');
                 return;
             }
 
@@ -653,6 +654,7 @@
             } else {
                 cart.push({
                     name: item.name,
+                    nameEn: item.nameEn,
                     spec: '',
                     price: item.price,
                     count: 1
@@ -678,22 +680,22 @@
             const checkoutBtn = document.getElementById('checkout-btn');
             if (goodsAmount > 0) {
                 checkoutBtn.disabled = false;
-                checkoutBtn.innerText = `去结算 (￥${finalAmount.toFixed(2)})`;
+                checkoutBtn.innerText = `去结算 Checkout (￥${finalAmount.toFixed(2)})`;
             } else {
                 checkoutBtn.disabled = true;
-                checkoutBtn.innerText = '去结算 (￥1.00)';
+                checkoutBtn.innerText = '去结算 Checkout (￥1.00)';
             }
 
             document.getElementById('cart-items-list').innerHTML = cart.map((item, idx) => `
-                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; border-bottom: 1px solid #f3f4f6; padding-bottom: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; border-bottom: 1px solid #f3f4f6; padding-bottom: 8px;">
                     <div>
                         <div style="font-weight: bold;">${item.name} <span style="color: #b45309;">(${item.spec})</span></div>
-                        <div style="color: #6b7280; margin-top: 2px;">￥${item.price}</div>
+                        <div style="color: #6b7280; font-size: 10px;">${item.nameEn} | ￥${item.price}</div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <button onclick="changeCount(${idx}, -1)" style="width: 26px; height: 26px; background: #e5e7eb; border: none; border-radius: 50%; font-weight: bold; cursor: pointer;">-</button>
+                        <button onclick="changeCount(${idx}, -1)" style="width: 24px; height: 24px; background: #e5e7eb; border: none; border-radius: 50%; font-weight: bold; cursor: pointer;">-</button>
                         <span style="font-weight: bold; width: 16px; text-align: center;">${item.count}</span>
-                        <button onclick="changeCount(${idx}, 1)" class="btn-primary" style="width: 26px; height: 26px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center;">+</button>
+                        <button onclick="changeCount(${idx}, 1)" class="btn-primary" style="width: 24px; height: 24px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center;">+</button>
                     </div>
                 </div>
             `).join('');
@@ -717,7 +719,7 @@
 
         function checkout() {
             if (!isStoreOpen) {
-                alert('当前本店已休息！');
+                alert('当前本店已休息！\nStore is closed.');
                 return;
             }
             if (cart.length === 0) return;
@@ -740,11 +742,11 @@
         async function submitOrder() {
             const phone = document.getElementById('customer-phone-input').value.trim();
             if (!phone) {
-                alert('请填写取餐手机尾号！');
+                alert('请填写取餐手机尾号！\nPlease enter your phone suffix.');
                 return;
             }
 
-            let pickupTime = '尽快取餐';
+            let pickupTime = '尽快取餐 ASAP';
             if (orderMode === 'reserve') {
                 pickupTime = document.getElementById('pickup-time-select').value;
             }
@@ -762,7 +764,7 @@
                 for (let item of cart) {
                     let stock = remoteStocks[item.name] !== undefined ? remoteStocks[item.name] : 50;
                     if (stock < item.count) {
-                        alert(`商品 [${item.name}] 库存不足，下单失败！`);
+                        alert(`商品 [${item.name}] 库存不足！\nInsufficient stock.`);
                         return;
                     }
                     remoteStocks[item.name] = stock - item.count;
@@ -809,11 +811,10 @@
 
             } catch (e) {
                 console.error(e);
-                alert('网络异常，请重试！');
+                alert('网络异常，请重试！\nNetwork error, please retry.');
             }
         }
 
-        // 下单成功弹窗：未接单时显示核验中，接单后转为取餐凭证
         async function showSuccessDetailModal(order, isSilent = false) {
             try {
                 const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
@@ -823,20 +824,20 @@
                 let allOnline = (data.record && data.record.orders) ? data.record.orders : [];
                 let allDineIn = (data.record && data.record.dineInOrders) ? data.record.dineInOrders : [];
                 
-                const pendingOnlineAsap = allOnline.filter(o => o.status !== '已出餐' && (!o.pickupTime || o.pickupTime === '尽快取餐'));
+                const pendingOnlineAsap = allOnline.filter(o => o.status !== '已出餐' && (!o.pickupTime || o.pickupTime.includes('尽快')));
                 const pendingDineIn = allDineIn.filter(o => o.status !== '已出餐');
                 const totalPending = pendingOnlineAsap.length + pendingDineIn.length;
 
                 const status = order.status || '待接单';
                 const isAccepted = status === '已接单' || status === '已出餐';
-                const isReserve = order.pickupTime && order.pickupTime !== '尽快取餐';
+                const isReserve = order.pickupTime && !order.pickupTime.includes('尽快');
 
                 const modalTitleEl = document.getElementById('success-modal-title');
                 if (!isAccepted) {
-                    modalTitleEl.innerHTML = `⏳ 下单成功，等待商家核验接单`;
+                    modalTitleEl.innerHTML = `⏳ 下单成功，等待商家核验接单<br><span style="font-size:11px; font-weight:normal;">Waiting for merchant verification</span>`;
                     modalTitleEl.style.color = `#b45309`;
                 } else {
-                    modalTitleEl.innerHTML = `🎉 商家已接单！取餐凭证`;
+                    modalTitleEl.innerHTML = `🎉 商家已接单！取餐凭证<br><span style="font-size:11px; font-weight:normal;">Order Accepted! Pickup Voucher</span>`;
                     modalTitleEl.style.color = `#059669`;
                 }
 
@@ -855,19 +856,18 @@
                 let contentHtml = '';
 
                 if (!isAccepted) {
-                    // 阶段一：等待商家核验中（不突显取餐号/尾号）
                     contentHtml = `
-                        <div style="border: 2px solid #f59e0b; border-radius: 12px; padding: 14px; background: #fffbeb; font-size: 12px; display: flex; flex-direction: column; gap: 10px;">
+                        <div style="border: 2px solid #f59e0b; border-radius: 12px; padding: 14px; background: #fffbeb; font-size: 11px; display: flex; flex-direction: column; gap: 10px;">
                             <div style="text-align: center; border-bottom: 1px dashed #fde68a; padding-bottom: 8px;">
-                                <div style="font-size: 13px; color: #b45309; font-weight: bold; margin-bottom: 4px;">⌛ 请稍候，商家正在核验付款并准备接单...</div>
+                                <div style="font-size: 12px; color: #b45309; font-weight: bold; margin-bottom: 4px;">⌛ 请稍候，商家正在核验付款并准备接单...<br><span style="font-size:10px; font-weight:normal;">Please wait while we verify your payment...</span></div>
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; padding: 0 4px;">
-                                    <span style="font-size: 11px; color: #78350f;">实时检测中...</span>
-                                    <button id="modal-refresh-btn" onclick="manualRefreshDetail()" class="refresh-queue-btn">🔄 手动刷新状态</button>
+                                    <span style="font-size: 10px; color: #78350f;">实时检测中 Checking...</span>
+                                    <button id="modal-refresh-btn" onclick="manualRefreshDetail()" class="refresh-queue-btn">🔄 手动刷新 Refresh</button>
                                 </div>
                             </div>
 
                             <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #fde68a;">
-                                <div style="font-weight: bold; margin-bottom: 4px; color: #78350f;">流水单号: ${order.id} | 登记尾号: ${order.phone}</div>
+                                <div style="font-weight: bold; margin-bottom: 4px; color: #78350f;">流水单号 Order ID: ${order.id} | 登记尾号 Suffix: ${order.phone}</div>
                                 ${order.items.map(i => `
                                     <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
                                         <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
@@ -875,52 +875,52 @@
                                     </div>
                                 `).join('')}
                                 <div style="display: flex; justify-content: space-between; color: #6b7280; margin-top: 4px; border-top: 1px dashed #e5e7eb; padding-top: 4px;">
-                                    <span>自提打包费</span><span>￥1.00</span>
+                                    <span>自提打包费 Packing Fee</span><span>￥1.00</span>
                                 </div>
                             </div>
-                            <div style="text-align: center; color: #92400e; font-size: 11px;">
-                                商家接单后将自动为您生成取餐凭证
+                            <div style="text-align: center; color: #92400e; font-size: 10px;">
+                                商家接单后将自动为您生成取餐凭证<br>Voucher will show after acceptance.
                             </div>
                         </div>
                     `;
                 } else {
-                    // 阶段二：商家已接单，展示完整取餐凭证
                     contentHtml = `
-                        <div style="border: 2px solid #059669; border-radius: 12px; padding: 14px; background: #ecfdf5; font-size: 12px; display: flex; flex-direction: column; gap: 10px;">
+                        <div style="border: 2px solid #059669; border-radius: 12px; padding: 14px; background: #ecfdf5; font-size: 11px; display: flex; flex-direction: column; gap: 10px;">
                             <div style="text-align: center; border-bottom: 1px dashed #a7f3d0; padding-bottom: 8px;">
                                 ${isReserve ? 
-                                    `<div style="font-size: 13px; color: #b45309; font-weight: bold; margin-bottom: 4px;">⏰ 预约取餐时间：${order.pickupTime}</div>` : 
+                                    `<div style="font-size: 12px; color: #b45309; font-weight: bold; margin-bottom: 4px;">⏰ 预约取餐时间 Scheduled: ${order.pickupTime}</div>` : 
                                     `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; padding: 0 4px;">
-                                        <span style="font-size: 12px; color: #065f46; font-weight: bold;">前方还有 <strong style="font-size: 14px; color: #dc2626;">${totalPending}</strong> 单制作中</span>
-                                        <button id="modal-refresh-btn" onclick="manualRefreshDetail()" class="refresh-queue-btn">🔄 手动刷新</button>
+                                        <span style="font-size: 11px; color: #065f46; font-weight: bold;">前方还有 <strong style="font-size: 13px; color: #dc2626;">${totalPending}</strong> 单制作中 / Queue</span>
+                                        <button id="modal-refresh-btn" onclick="manualRefreshDetail()" class="refresh-queue-btn">🔄 刷新 Refresh</button>
                                      </div>`
                                 }
-                                <div style="font-size: 11px; color: #047857;">[ 订单状态: <span style="font-weight: bold; font-size: 13px; color: #047857;">${status}</span> ]</div>
-                                <div style="font-size: 24px; font-weight: 900; color: #065f46; margin-top: 4px; letter-spacing: 1px;">取餐手机尾号: <span style="text-decoration: underline; color: #b45309;">${order.phone}</span></div>
+                                <div style="font-size: 10px; color: #047857;">[ 订单状态 Status: <span style="font-weight: bold; font-size: 12px; color: #047857;">${status}</span> ]</div>
+                                <div style="font-size: 22px; font-weight: 900; color: #065f46; margin-top: 4px; letter-spacing: 1px;">取餐手机尾号 Phone Suffix: <span style="text-decoration: underline; color: #b45309;">${order.phone}</span></div>
                             </div>
 
-                            <div style="background: #fff; padding: 8px 10px; border-radius: 6px; border: 1px solid #a7f3d0; color: #065f46; font-weight: bold; font-size: 11px;">
-                                📍 取餐地址：广东白云学院北校区四季轩食堂负一层客家腌面档
+                            <div style="background: #fff; padding: 8px 10px; border-radius: 6px; border: 1px solid #a7f3d0; color: #065f46; font-weight: bold; font-size: 10px;">
+                                📍 取餐地址 Pickup Address：<br>广东白云学院北校区四季轩食堂负一层客家腌面档<br>
+                                <span style="font-size:9px; font-weight:normal; color:#047857;">Hakka Noodles Stall, B1, Sijixuan Canteen, North Campus, Guangdong Baiyun University</span>
                             </div>
 
                             <div class="step-container">
                                 <div class="step-line"></div>
                                 <div class="step-item ${step1Class}">
                                     <div class="step-circle">${step1Class === 'completed' ? '✓' : '1'}</div>
-                                    <div class="step-text">已下单</div>
+                                    <div class="step-text">已下单 Ordered</div>
                                 </div>
                                 <div class="step-item ${step2Class}">
                                     <div class="step-circle">${step2Class === 'completed' ? '✓' : '2'}</div>
-                                    <div class="step-text">已接单</div>
+                                    <div class="step-text">已接单 Accepted</div>
                                 </div>
                                 <div class="step-item ${step3Class}">
                                     <div class="step-circle">${step3Class === 'completed' ? '✓' : '3'}</div>
-                                    <div class="step-text">已出餐</div>
+                                    <div class="step-text">已出餐 Served</div>
                                 </div>
                             </div>
 
                             <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #a7f3d0;">
-                                <div style="font-weight: bold; margin-bottom: 4px; color: #065f46;">流水单号: ${order.id} | 取餐方式：${order.pickupTime || '尽快取餐'}</div>
+                                <div style="font-weight: bold; margin-bottom: 4px; color: #065f46;">流水号 ID: ${order.id} | 类型 Type: ${order.pickupTime || '尽快取餐'}</div>
                                 ${order.items.map(i => `
                                     <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
                                         <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
@@ -928,12 +928,12 @@
                                     </div>
                                 `).join('')}
                                 <div style="display: flex; justify-content: space-between; color: #6b7280; margin-top: 4px; border-top: 1px dashed #e5e7eb; padding-top: 4px;">
-                                    <span>自提打包费</span><span>￥1.00</span>
+                                    <span>自提打包费 Packing Fee</span><span>￥1.00</span>
                                 </div>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold;">
-                                <span style="color: #065f46;">核心核对凭证: 尾号 ${order.phone}</span>
-                                <span style="color: #b45309; font-size: 16px;">实付: ￥${order.total}</span>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold;">
+                                <span style="color: #065f46;">凭证 Voucher: 尾号 ${order.phone}</span>
+                                <span style="color: #b45309; font-size: 15px;">实付 Total: ￥${order.total}</span>
                             </div>
                         </div>
                     `;
@@ -961,11 +961,10 @@
             document.getElementById('query-modal').style.display = 'none';
         }
 
-        // 导航栏独立的进度查询逻辑（未接单时不突显尾号，接单后转为完整凭证）
         async function searchOrders() {
             const keyword = document.getElementById('search-phone-input').value.trim();
             if (!keyword) {
-                alert('请输入手机号或尾号');
+                alert('请输入手机号或尾号\nPlease enter phone suffix.');
                 return;
             }
 
@@ -983,14 +982,14 @@
                 const container = document.getElementById('query-results-container');
 
                 if (matched.length === 0) {
-                    container.innerHTML = `<div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">没有找到该手机号相关的订单</div>`;
+                    container.innerHTML = `<div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 11px;">没有找到该手机号相关的订单<br>No orders found.</div>`;
                     return;
                 }
 
                 container.innerHTML = matched.map(order => {
                     const status = order.status || '待接单';
                     const isAccepted = status === '已接单' || status === '已出餐';
-                    const isReserve = order.pickupTime && order.pickupTime !== '尽快取餐';
+                    const isReserve = order.pickupTime && !order.pickupTime.includes('尽快');
                     
                     let step1Class = 'completed', step2Class = '', step3Class = '';
                     if (status === '待接单') {
@@ -1005,15 +1004,14 @@
                     }
 
                     if (!isAccepted) {
-                        // 待接单状态：不突显取餐号/尾号
                         return `
-                        <div style="border: 2px solid #f59e0b; border-radius: 12px; padding: 14px; background: #fffbeb; font-size: 12px; display: flex; flex-direction: column; gap: 10px;">
+                        <div style="border: 2px solid #f59e0b; border-radius: 12px; padding: 14px; background: #fffbeb; font-size: 11px; display: flex; flex-direction: column; gap: 10px;">
                             <div style="text-align: center; border-bottom: 1px dashed #fde68a; padding-bottom: 8px;">
-                                <div style="font-size: 11px; color: #78350f; font-weight: bold;">[ 订单状态: <span style="color: #b45309; font-size: 14px;">${status} (等待商家核验)</span> ]</div>
-                                <div style="font-size: 15px; font-weight: bold; color: #b45309; margin-top: 4px;">流水单号: ${order.id}</div>
+                                <div style="font-size: 10px; color: #78350f; font-weight: bold;">[ 订单状态 Status: <span style="color: #b45309; font-size: 13px;">${status} (等待商家核验 Pending)</span> ]</div>
+                                <div style="font-size: 14px; font-weight: bold; color: #b45309; margin-top: 4px;">流水号 Order ID: ${order.id}</div>
                             </div>
                             <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #fde68a;">
-                                <div style="font-weight: bold; margin-bottom: 4px; color: #78350f;">登记尾号: ${order.phone}</div>
+                                <div style="font-weight: bold; margin-bottom: 4px; color: #78350f;">登记尾号 Suffix: ${order.phone}</div>
                                 ${order.items.map(i => `
                                     <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
                                         <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
@@ -1021,46 +1019,45 @@
                                     </div>
                                 `).join('')}
                                 <div style="display: flex; justify-content: space-between; color: #6b7280; margin-top: 4px; border-top: 1px dashed #e5e7eb; padding-top: 4px;">
-                                    <span>自提打包费</span><span>￥1.00</span>
+                                    <span>自提打包费 Packing Fee</span><span>￥1.00</span>
                                 </div>
                             </div>
-                            <div style="text-align: center; color: #92400e; font-size: 11px;">
-                                商家核验接单后将显示完整取餐凭证
+                            <div style="text-align: center; color: #92400e; font-size: 10px;">
+                                商家核验接单后将显示完整取餐凭证<br>Voucher will show after merchant acceptance.
                             </div>
                         </div>
                         `;
                     } else {
-                        // 已接单/已出餐状态：展示完整凭证并突显尾号
                         return `
-                        <div style="border: 2px solid #b45309; border-radius: 12px; padding: 14px; background: #fffbeb; font-size: 12px; display: flex; flex-direction: column; gap: 10px;">
+                        <div style="border: 2px solid #b45309; border-radius: 12px; padding: 14px; background: #fffbeb; font-size: 11px; display: flex; flex-direction: column; gap: 10px;">
                             <div style="text-align: center; border-bottom: 1px dashed #f59e0b; padding-bottom: 8px;">
-                                ${isReserve ? `<div style="font-size: 12px; color: #b45309; font-weight: bold; margin-bottom: 2px;">⏰ 预约时间：${order.pickupTime}</div>` : ''}
-                                <div style="font-size: 11px; color: #78350f; font-weight: bold;">[ 订单状态: <span style="color: #b45309; font-size: 14px;">${status}</span> ]</div>
-                                <div style="font-size: 24px; font-weight: 900; color: #b45309; margin-top: 4px; letter-spacing: 1px;">取餐手机尾号: <span style="text-decoration: underline;">${order.phone}</span></div>
+                                ${isReserve ? `<div style="font-size: 11px; color: #b45309; font-weight: bold; margin-bottom: 2px;">⏰ 预约时间 Scheduled: ${order.pickupTime}</div>` : ''}
+                                <div style="font-size: 10px; color: #78350f; font-weight: bold;">[ 订单状态 Status: <span style="color: #b45309; font-size: 13px;">${status}</span> ]</div>
+                                <div style="font-size: 22px; font-weight: 900; color: #b45309; margin-top: 4px; letter-spacing: 1px;">取餐手机尾号 Suffix: <span style="text-decoration: underline;">${order.phone}</span></div>
                             </div>
 
-                            <div style="background: #fff; padding: 8px 10px; border-radius: 6px; border: 1px solid #fde68a; color: #78350f; font-weight: bold; font-size: 11px;">
-                                📍 取餐地址：广东白云学院北校区四季轩食堂负一层客家腌面档
+                            <div style="background: #fff; padding: 8px 10px; border-radius: 6px; border: 1px solid #fde68a; color: #78350f; font-weight: bold; font-size: 10px;">
+                                📍 取餐地址 Pickup Address：<br>广东白云学院北校区四季轩食堂负一层客家腌面档
                             </div>
 
                             <div class="step-container">
                                 <div class="step-line"></div>
                                 <div class="step-item ${step1Class}">
                                     <div class="step-circle">${step1Class === 'completed' ? '✓' : '1'}</div>
-                                    <div class="step-text">已下单</div>
+                                    <div class="step-text">已下单 Ordered</div>
                                 </div>
                                 <div class="step-item ${step2Class}">
                                     <div class="step-circle">${step2Class === 'completed' ? '✓' : '2'}</div>
-                                    <div class="step-text">已接单</div>
+                                    <div class="step-text">已接单 Accepted</div>
                                 </div>
                                 <div class="step-item ${step3Class}">
                                     <div class="step-circle">${step3Class === 'completed' ? '✓' : '3'}</div>
-                                    <div class="step-text">已出餐</div>
+                                    <div class="step-text">已出餐 Served</div>
                                 </div>
                             </div>
 
                             <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #fde68a;">
-                                <div style="font-weight: bold; margin-bottom: 4px; color: #78350f;">流水单号: ${order.id} | 取餐方式：${order.pickupTime || '尽快取餐'}</div>
+                                <div style="font-weight: bold; margin-bottom: 4px; color: #78350f;">流水号 ID: ${order.id} | 类型 Type: ${order.pickupTime || '尽快取餐'}</div>
                                 ${order.items.map(i => `
                                     <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
                                         <span>${i.name} (${i.spec || '标配'}) x${i.count}</span>
@@ -1068,12 +1065,12 @@
                                     </div>
                                 `).join('')}
                                 <div style="display: flex; justify-content: space-between; color: #6b7280; margin-top: 4px; border-top: 1px dashed #e5e7eb; padding-top: 4px;">
-                                    <span>自提打包费</span><span>￥1.00</span>
+                                    <span>自提打包费 Packing Fee</span><span>￥1.00</span>
                                 </div>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold;">
-                                <span style="color: #78350f;">核心核对凭证: 尾号 ${order.phone}</span>
-                                <span style="color: #b45309; font-size: 16px;">实付: ￥${order.total}</span>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold;">
+                                <span style="color: #78350f;">核对凭证 Voucher: 尾号 ${order.phone}</span>
+                                <span style="color: #b45309; font-size: 15px;">实付 Total: ￥${order.total}</span>
                             </div>
                         </div>
                         `;
@@ -1082,7 +1079,7 @@
 
             } catch (e) {
                 console.error(e);
-                alert('查询失败，请检查网络');
+                alert('查询失败，请检查网络\nQuery failed.');
             }
         }
 
