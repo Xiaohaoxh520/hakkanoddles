@@ -38,15 +38,11 @@
         .item-info h3 { font-size: 13px; font-weight: bold; color: #111827; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
         .item-info p { font-size: 10px; color: #6b7280; margin-top: 3px; }
         
-        .item-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .grid-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: relative; }
-        
         .badge-signature { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; font-size: 8px; padding: 1px 4px; border-radius: 4px; font-weight: bold; }
 
         .btn-primary { background-color: #b45309; color: #ffffff; border: none; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; }
         .btn-primary:active { background-color: #92400e; }
         .btn-soldout { background-color: #9ca3af !important; color: #ffffff !important; cursor: not-allowed !important; }
-        .btn-price { font-size: 12px; font-weight: bold; color: #b45309; }
         
         .footer-cart { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: #ffffff; border-top: 1px solid #e5e7eb; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 20; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
         .cart-left { display: flex; align-items: center; gap: 12px; }
@@ -85,7 +81,6 @@
         <header>
             <img src="https://i.imgs.ovh/2026/10/31/bb2fabef06a8d6f0c5870e2c7d0be375.png" alt="客家腌面 Logo" class="header-logo">
             <div class="header-right-btns">
-                <!-- 开关式简繁切换按钮 -->
                 <div id="lang-switch-btn" onclick="toggleLang()" class="switch-container">
                     <span id="lang-label-zh" style="opacity: 1;">简</span>
                     <div class="switch-slider"><div class="switch-dot"></div></div>
@@ -117,7 +112,7 @@
 
             <div>
                 <div class="section-title"><span id="txt-cat-staples">主食系列</span> <span style="font-size:10px; color:#4b5563; font-weight:normal;">/ Staples</span></div>
-                <div id="staples-list" class="item-grid-2"></div>
+                <div id="staples-list"></div>
             </div>
 
             <div>
@@ -274,7 +269,6 @@
         const BIN_ID = '6ae586c8ffd5d160539a6da4';
         const MASTER_KEY = '$2a$10$lwmZR3vIjsFdZlgG4.WReOJzFNBqHERsLquMbL42GY/BNEBveQ896';
 
-        // 默认语言：简体中文 ('zh')，繁体中文采用香港习惯 ('hk')
         let currentLang = 'zh';
 
         const i18n = {
@@ -380,7 +374,6 @@
             }
         };
 
-        // 香港繁体字习惯映射字典
         const hkMap = {
             "紫菜蛋花汤套餐": "紫菜蛋花湯套餐", "番茄蛋花汤套餐": "番茄蛋花湯套餐", "枸杞叶三及第汤套餐": "枸杞葉三及第湯套餐", "枸杞叶瘦肉汤套餐": "枸杞葉瘦肉湯套餐",
             "酸菜瘦肉汤套餐": "酸菜瘦肉湯套餐", "枸杞叶猪肉丸汤套餐": "枸杞葉豬肉丸湯套餐", "枸杞叶牛肉丸汤套餐": "枸杞葉牛肉丸湯套餐", "酸菜牛肉丸汤套餐": "酸菜牛肉丸湯套餐",
@@ -451,6 +444,7 @@
             updateCartUI();
         }
 
+        // 主食系列已增加小份和大份选项
         const menuData = {
             combos: [
                 { name: '紫菜蛋花汤套餐', nameEn: 'Seaweed Egg Soup Combo', priceSmall: 11, priceBig: 13, options: ['腌面 Hakka Noodles', '腌米粉 Rice Noodles', '腌河粉 Flat Rice Noodles', '腌珍珠粉 Pearl Noodles'] },
@@ -671,6 +665,7 @@
         }
 
         function renderMenu() {
+            // 1. 套餐系列
             document.getElementById('combos-list').innerHTML = menuData.combos.map((item, idx) => {
                 const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 50;
                 const isSoldOut = stock <= 0 || !isStoreOpen;
@@ -690,24 +685,26 @@
                 </div>
             `;}).join('');
 
+            // 2. 主食系列（已增加小份和大份选项）
             document.getElementById('staples-list').innerHTML = menuData.staples.map((item, idx) => {
                 const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 100;
                 const isSoldOut = stock <= 0 || !isStoreOpen;
                 const displayName = tMenu(item.name);
                 return `
-                <div class="grid-card">
+                <div class="item-card">
                     <div class="item-info">
                         <h3>${displayName}</h3>
-                        <p style="font-size:9px; color:#4b5563;">${item.nameEn}</p>
-                        <p style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">库存 Stock: ${stock}</p>
+                        <p style="font-size:10px; color:#4b5563;">${item.nameEn}</p>
+                        <p>库存 Stock: <span style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">${stock}</span></p>
                     </div>
-                    <div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between;">
-                        <span style="font-size: 10px; color: #6b7280; font-weight: 600;">小S${item.priceSmall}/大L${item.priceBig}</span>
-                        <button onclick="openSpecModal('staples', ${idx}, 'small')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" style="padding: 4px 8px;" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? '休息中' : (stock <= 0 ? '售罄' : '选规格 Spec')}</button>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <button onclick="openSpecModal('staples', ${idx}, 'small')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? t('storeClosed') : (stock <= 0 ? '售罄' : '小份 Small ￥' + item.priceSmall)}</button>
+                        <button onclick="openSpecModal('staples', ${idx}, 'big')" class="btn-primary ${isSoldOut ? 'btn-soldout' : ''}" ${isSoldOut ? 'disabled' : ''}>${!isStoreOpen ? t('storeClosed') : (stock <= 0 ? '售罄' : '大份 Large ￥' + item.priceBig)}</button>
                     </div>
                 </div>
             `;}).join('');
 
+            // 3. 靓汤系列
             document.getElementById('soups-list').innerHTML = menuData.soups.map((item, idx) => {
                 const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 40;
                 const isSoldOut = stock <= 0 || !isStoreOpen;
@@ -726,6 +723,7 @@
                 </div>
             `;}).join('');
 
+            // 4. 汤粉汤面系列
             document.getElementById('noodlessoups-list').innerHTML = menuData.noodlessoups.map((item, idx) => {
                 const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 40;
                 const isSoldOut = stock <= 0 || !isStoreOpen;
@@ -877,10 +875,10 @@
             const checkoutBtn = document.getElementById('checkout-btn');
             if (goodsAmount > 0) {
                 checkoutBtn.disabled = false;
-                checkoutBtn.innerText = `去结算 Checkout (￥${finalAmount.toFixed(2)})`;
+                checkoutBtn.innerText = currentLang === 'hk' ? `去結算 Checkout (￥${finalAmount.toFixed(2)})` : `去结算 Checkout (￥${finalAmount.toFixed(2)})`;
             } else {
                 checkoutBtn.disabled = true;
-                checkoutBtn.innerText = '去结算 Checkout (￥1.00)';
+                checkoutBtn.innerText = currentLang === 'hk' ? '去結算 Checkout (￥1.00)' : '去结算 Checkout (￥1.00)';
             }
 
             document.getElementById('cart-items-list').innerHTML = cart.map((item, idx) => `
@@ -1031,10 +1029,10 @@
 
                 const modalTitleEl = document.getElementById('success-modal-title');
                 if (!isAccepted) {
-                    modalTitleEl.innerHTML = `⏳ 下单成功，等待商家核验接单<br><span style="font-size:11px; font-weight:normal;">Waiting for merchant verification</span>`;
+                    modalTitleEl.innerHTML = currentLang === 'hk' ? `⏳ 下單成功，等待商家核驗接單<br><span style="font-size:11px; font-weight:normal;">Waiting for merchant verification</span>` : `⏳ 下单成功，等待商家核验接单<br><span style="font-size:11px; font-weight:normal;">Waiting for merchant verification</span>`;
                     modalTitleEl.style.color = `#b45309`;
                 } else {
-                    modalTitleEl.innerHTML = `🎉 商家已接单！取餐凭证<br><span style="font-size:11px; font-weight:normal;">Order Accepted! Pickup Voucher</span>`;
+                    modalTitleEl.innerHTML = currentLang === 'hk' ? `🎉 商家已接單！取餐憑證<br><span style="font-size:11px; font-weight:normal;">Order Accepted! Pickup Voucher</span>` : `🎉 商家已接单！取餐凭证<br><span style="font-size:11px; font-weight:normal;">Order Accepted! Pickup Voucher</span>`;
                     modalTitleEl.style.color = `#059669`;
                 }
 
@@ -1059,7 +1057,7 @@
                                 <div style="font-size: 12px; color: #b45309; font-weight: bold; margin-bottom: 4px;">⌛ 请稍候，商家正在核验付款并准备接单...<br><span style="font-size:10px; font-weight:normal;">Please wait while we verify your payment...</span></div>
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; padding: 0 4px;">
                                     <span style="font-size: 10px; color: #78350f;">实时检测中 Checking...</span>
-                                    <button id="modal-refresh-btn" onclick="manualRefreshDetail()" class="refresh-queue-btn">🔄 手动刷新 Refresh</button>
+                                    <button id="modal-refresh-btn" onclick="manualRefreshDetail()" class="refresh-queue-btn">🔄 ${currentLang === 'hk' ? '手動刷新 Refresh' : '手动刷新 Refresh'}</button>
                                 </div>
                             </div>
 
