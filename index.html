@@ -445,7 +445,8 @@
         }
 
         // 主食系列已增加小份和大份选项
-        const menuData = {
+        // 默认菜单只在云端还没有 menu 时兜底；接了商家端「商品管理」后，实际用的是云端 menu
+        const DEFAULT_MENU = {
             combos: [
                 { name: '紫菜蛋花汤套餐', nameEn: 'Seaweed Egg Soup Combo', priceSmall: 11, priceBig: 13, options: ['腌面 Hakka Noodles', '腌米粉 Rice Noodles', '腌河粉 Flat Rice Noodles', '腌珍珠粉 Pearl Noodles'] },
                 { name: '番茄蛋花汤套餐', nameEn: 'Tomato Egg Soup Combo', priceSmall: 11, priceBig: 13, options: ['腌面 Hakka Noodles', '腌米粉 Rice Noodles', '腌河粉 Flat Rice Noodles', '腌珍珠粉 Pearl Noodles'] },
@@ -479,6 +480,42 @@
             ]
         };
 
+        // 实际渲染用的菜单：云端 menu 覆盖默认（商家端改价/新增/下架后，这里刷新即可同步）
+        let menuData = JSON.parse(JSON.stringify(DEFAULT_MENU));
+
+        function escText(s) {
+            return String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, c => (
+                { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+            ));
+        }
+
+        function normalizeMenu(raw) {            if (!raw || typeof raw !== 'object') return null;
+            const cats = ['combos', 'staples', 'soups', 'noodlessoups'];
+            const out = {};
+            let total = 0;
+            cats.forEach(cat => {
+                const arr = Array.isArray(raw[cat]) ? raw[cat] : [];
+                out[cat] = arr.filter(x => x && typeof x.name === 'string' && x.name.trim()).map(x => {
+                    const it = { name: x.name.trim() };
+                    if (x.nameEn) it.nameEn = String(x.nameEn);
+                    if (Number.isFinite(Number(x.price))) it.price = Number(x.price);
+                    if (Number.isFinite(Number(x.priceSmall))) it.priceSmall = Number(x.priceSmall);
+                    if (Number.isFinite(Number(x.priceBig))) it.priceBig = Number(x.priceBig);
+                    if (Array.isArray(x.options)) it.options = x.options.filter(Boolean).map(String);
+                    if (x.signature) it.signature = true;
+                    if (x.available === false) it.available = false;
+                    return it;
+                });
+                total += out[cat].length;
+            });
+            return total > 0 ? out : null;
+        }
+
+        // 下架商品不上架：过滤掉 available === false
+        function viewItems(cat) {
+            return (menuData[cat] || []).filter(i => i.available !== false);
+        }
+
         let cloudStocks = {};
         let storeControl = { start: '08:00', end: '21:00', manualClosed: false };
         let cloudOrders = [];
@@ -505,6 +542,8 @@
                     if (data.record.control) {
                         storeControl = data.record.control;
                     }
+                    const remoteMenu = normalizeMenu(data.record.menu);
+                    if (remoteMenu) menuData = remoteMenu;
                 }
                 checkStoreTime();
                 updateQueueStats();
@@ -666,7 +705,7 @@
 
         function renderMenu() {
             // 1. 套餐系列
-            document.getElementById('combos-list').innerHTML = menuData.combos.map((item, idx) => {
+            document.getElementById('combos-list').innerHTML = viewItems('combos').map((item, idx) => {
                 const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 50;
                 const isSoldOut = stock <= 0 || !isStoreOpen;
                 const sigTag = item.signature ? `<span class="badge-signature">🔥 招牌 Signature</span>` : '';
@@ -674,8 +713,8 @@
                 return `
                 <div class="item-card">
                     <div class="item-info">
-                        <h3>${displayName} ${sigTag}</h3>
-                        <p style="font-size:10px; color:#4b5563;">${item.nameEn}</p>
+                        <h3>${escText(displayName)} ${sigTag}</h3>
+                        <p style="font-size:10px; color:#4b5563;">${escText(item.nameEn || '')}</p>
                         <p>库存 Stock: <span style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">${stock}</span></p>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 6px;">
@@ -686,15 +725,15 @@
             `;}).join('');
 
             // 2. 主食系列（已增加小份和大份选项）
-            document.getElementById('staples-list').innerHTML = menuData.staples.map((item, idx) => {
+            document.getElementById('staples-list').innerHTML = viewItems('staples').map((item, idx) => {
                 const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 100;
                 const isSoldOut = stock <= 0 || !isStoreOpen;
                 const displayName = tMenu(item.name);
                 return `
                 <div class="item-card">
                     <div class="item-info">
-                        <h3>${displayName}</h3>
-                        <p style="font-size:10px; color:#4b5563;">${item.nameEn}</p>
+                        <h3>${escText(displayName)}</h3>
+                        <p style="font-size:10px; color:#4b5563;">${escText(item.nameEn || '')}</p>
                         <p>库存 Stock: <span style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">${stock}</span></p>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 6px;">
@@ -705,15 +744,15 @@
             `;}).join('');
 
             // 3. 靓汤系列
-            document.getElementById('soups-list').innerHTML = menuData.soups.map((item, idx) => {
+            document.getElementById('soups-list').innerHTML = viewItems('soups').map((item, idx) => {
                 const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 40;
                 const isSoldOut = stock <= 0 || !isStoreOpen;
                 const displayName = tMenu(item.name);
                 return `
                 <div class="grid-card">
                     <div class="item-info">
-                        <h3>${displayName}</h3>
-                        <p style="font-size:9px; color:#4b5563;">${item.nameEn}</p>
+                        <h3>${escText(displayName)}</h3>
+                        <p style="font-size:9px; color:#4b5563;">${escText(item.nameEn || '')}</p>
                         <p style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">库存 Stock: ${stock}</p>
                     </div>
                     <div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between;">
@@ -724,15 +763,15 @@
             `;}).join('');
 
             // 4. 汤粉汤面系列
-            document.getElementById('noodlessoups-list').innerHTML = menuData.noodlessoups.map((item, idx) => {
+            document.getElementById('noodlessoups-list').innerHTML = viewItems('noodlessoups').map((item, idx) => {
                 const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 40;
                 const isSoldOut = stock <= 0 || !isStoreOpen;
                 const displayName = tMenu(item.name);
                 return `
                 <div class="item-card">
                     <div class="item-info">
-                        <h3>${displayName}</h3>
-                        <p style="font-size:10px; color:#4b5563;">${item.nameEn}</p>
+                        <h3>${escText(displayName)}</h3>
+                        <p style="font-size:10px; color:#4b5563;">${escText(item.nameEn || '')}</p>
                         <p>库存 Stock: <span style="color: ${stock <= 0 ? '#dc2626' : '#059669'};">${stock}</span></p>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 6px;">
@@ -741,6 +780,14 @@
                     </div>
                 </div>
             `;}).join('');
+
+            // 分类全下架时给个提示，避免看起来像页面坏了
+            [['combos-list', 'combos'], ['staples-list', 'staples'], ['soups-list', 'soups'], ['noodlessoups-list', 'noodlessoups']].forEach(([id, cat]) => {
+                const el = document.getElementById(id);
+                if (el && !el.innerHTML.trim()) {
+                    el.innerHTML = `<div style="font-size: 12px; color: #9ca3af; padding: 10px;">本店暂无该类商品 / No items in this category</div>`;
+                }
+            });
         }
 
         function openSpecModal(category, index, specType) {
@@ -748,7 +795,7 @@
                 alert('当前本店已休息，无法下单！\nStore is currently closed.');
                 return;
             }
-            currentActiveItem = menuData[category][index];
+            currentActiveItem = viewItems(category)[index];
             const stock = cloudStocks[currentActiveItem.name] !== undefined ? cloudStocks[currentActiveItem.name] : 50;
             if (stock <= 0) {
                 alert('该商品已售罄！\nThis item is sold out.');
@@ -757,7 +804,7 @@
             currentSpecType = specType;
             currentOption = currentActiveItem.options ? currentActiveItem.options[0] : '';
 
-            document.getElementById('spec-title').innerText = `${tMenu(currentActiveItem.name)} / ${currentActiveItem.nameEn}`;
+            document.getElementById('spec-title').innerText = `${tMenu(currentActiveItem.name)}${currentActiveItem.nameEn ? ' / ' + currentActiveItem.nameEn : ''}`;
             
             const optionsContainer = document.getElementById('spec-options-container');
             if (currentActiveItem.options && currentActiveItem.options.length > 0) {
@@ -829,7 +876,7 @@
                 alert('当前本店已休息！\nStore is closed.');
                 return;
             }
-            const item = menuData.soups[index];
+            const item = viewItems('soups')[index];
             const stock = cloudStocks[item.name] !== undefined ? cloudStocks[item.name] : 40;
             if (stock <= 0) {
                 alert('已售罄！\nSold out.');
@@ -991,7 +1038,8 @@
                         orders: remoteOrders,
                         dineInOrders: remoteDineInOrders,
                         stocks: remoteStocks,
-                        control: remoteControl
+                        control: remoteControl,
+                        menu: (data.record && data.record.menu) || menuData
                     })
                 });
 
